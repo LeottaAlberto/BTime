@@ -1,0 +1,45 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "BTime: Fullstack",
+            "type": "chrome",
+            "request": "launch",
+            "url": "http://localhost:4200",
+            "webRoot": "${workspaceFolder}/frontend/btime",
+            "preLaunchTask": "start-frontend",
+            "sourceMaps": true
+        },
+        {
+            "name": ".NET Core Launch",
+            "type": "coreclr",
+            "request": "launch",
+            "program": "${workspaceFolder}/backend/BTime.Api/bin/Debug/net10.0/BTime.Api.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/backend/BTime.Api",
+            "stopAtEntry": false,
+            "preLaunchTask": "start-backend",
+            "serverReadyAction": {
+                "action": "openExternally",
+                "pattern": "\\bNow listening on:\\s+(https?://\\S+)",
+                "uriFormat": "%s/swagger"
+            },
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Development"
+            },
+            "sourceFileMap": {
+                "/Views": "${workspaceFolder}/Views"
+            }
+        }
+    ],
+    "compounds": [
+        {
+            "name": "🚀 Avvia BTime (Fullstack + Browser)",
+            "configurations": [
+                ".NET Core Launch",
+                "BTime: Fullstack"
+            ],
+            "stopAll": true
+        }
+    ]
+}
