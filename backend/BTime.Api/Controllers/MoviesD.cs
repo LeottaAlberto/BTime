@@ -17,5 +17,5 @@ public partial class MoviesD
 
     public virtual MoviesM RMoviesM { get; set; } = null!;
 
-    public virtual User RUser { get; set; } = null!;
+    public virtual Users RUsers { get; set; } = null!;
 }
