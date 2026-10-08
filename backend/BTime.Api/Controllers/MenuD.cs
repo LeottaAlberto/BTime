@@ -13,5 +13,5 @@ public partial class MenuD
 
     public virtual MenuM? RMenuM { get; set; }
 
-    public virtual Users? RUser { get; set; }
+    public virtual Users? RUsers { get; set; }
 }

@@ -57,7 +57,7 @@ public partial class AppDbContext : DbContext
                 .HasForeignKey(d => d.RFolderId)
                 .HasConstraintName("Files_R_FolderId_fkey");
 
-            entity.HasOne(d => d.RUser).WithMany(p => p.Files)
+            entity.HasOne(d => d.RUsers).WithMany(p => p.Files)
                 .HasForeignKey(d => d.RUserId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("Files_R_UserId_fkey");
@@ -78,7 +78,7 @@ public partial class AppDbContext : DbContext
                 .HasForeignKey(d => d.RFolderId)
                 .HasConstraintName("Folders_R_FolderId_fkey");
 
-            entity.HasOne(d => d.RUser).WithMany(p => p.Folders)
+            entity.HasOne(d => d.RUsers).WithMany(p => p.Folders)
                 .HasForeignKey(d => d.RUserId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("Folders_R_UserId_fkey");
@@ -125,7 +125,7 @@ public partial class AppDbContext : DbContext
                 .HasForeignKey(d => d.RMenuMid)
                 .HasConstraintName("MenuD_R_MenuMId_fkey");
 
-            entity.HasOne(d => d.RUser).WithMany(p => p.MenuDs)
+            entity.HasOne(d => d.RUsers).WithMany(p => p.MenuDs)
                 .HasForeignKey(d => d.RUserId)
                 .HasConstraintName("MenuD_R_UserId_fkey");
         });
@@ -167,7 +167,7 @@ public partial class AppDbContext : DbContext
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("MoviesD_R_MoviesMId_fkey");
 
-            entity.HasOne(d => d.RUser).WithMany(p => p.MoviesDs)
+            entity.HasOne(d => d.RUsers).WithMany(p => p.MoviesDs)
                 .HasForeignKey(d => d.RUserId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("MoviesD_R_UserId_fkey");
@@ -192,7 +192,7 @@ public partial class AppDbContext : DbContext
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("MoviesM_R_ImagesMId_fkey");
 
-            entity.HasOne(d => d.RUser).WithMany(p => p.MoviesMs)
+            entity.HasOne(d => d.RUsers).WithMany(p => p.MoviesMs)
                 .HasForeignKey(d => d.RUserId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("MoviesM_R_UserId_fkey");
@@ -217,7 +217,7 @@ public partial class AppDbContext : DbContext
                 .HasForeignKey(d => d.RFolderId)
                 .HasConstraintName("Photos_R_FolderId_fkey");
 
-            entity.HasOne(d => d.RUser).WithMany(p => p.Photos)
+            entity.HasOne(d => d.RUsers).WithMany(p => p.Photos)
                 .HasForeignKey(d => d.RUserId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("Photos_R_UserId_fkey");

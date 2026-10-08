@@ -29,7 +29,7 @@ public partial class MoviesM
 
     public virtual ImagesM RImagesM { get; set; } = null!;
 
-    public virtual User RUser { get; set; } = null!;
+    public virtual Users RUsers { get; set; } = null!;
 
     public virtual ICollection<TagsD> TagsDs { get; set; } = new List<TagsD>();
 }

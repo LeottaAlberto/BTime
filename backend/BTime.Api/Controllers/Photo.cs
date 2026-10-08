@@ -31,5 +31,5 @@ public partial class Photo
 
     public virtual Folder? RFolder { get; set; }
 
-    public virtual User RUser { get; set; } = null!;
+    public virtual Users RUsers { get; set; } = null!;
 }
