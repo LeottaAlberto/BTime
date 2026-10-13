@@ -1,11 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace BTime.Api.Models;
 
 public partial class Folder
 {
-    public Guid Id { get; set; }
+    public Guid Id { get; set; } = Guid.NewGuid();
 
     public Guid? RFolderId { get; set; }
 
@@ -19,11 +19,11 @@ public partial class Folder
 
     public DateTime? DeletedAt { get; set; }
 
-    public virtual ICollection<File> Files { get; set; } = new List<File>();
+    public virtual ICollection<File> Files { get; set; } = [];
 
-    public virtual ICollection<Folder> InverseRFolder { get; set; } = new List<Folder>();
+    public virtual ICollection<Folder> InverseRFolder { get; set; } = [];
 
-    public virtual ICollection<Photo> Photos { get; set; } = new List<Photo>();
+    public virtual ICollection<Photo> Photos { get; set; } = [];
 
     public virtual Folder? RFolder { get; set; }
 
