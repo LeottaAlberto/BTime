@@ -37,6 +37,7 @@ public partial class AppDbContext : DbContext
     public virtual DbSet<TagsM> TagsMs { get; set; }
 
     public virtual DbSet<Users> Users { get; set; }
+    public virtual DbSet<UserDeviceActive> UserDeviceActive { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
