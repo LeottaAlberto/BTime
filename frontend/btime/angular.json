@@ -54,6 +54,9 @@
         },
         "serve": {
           "builder": "@angular/build:dev-server",
+          "options": {
+            "hmr": true
+          },
           "configurations": {
             "production": {
               "buildTarget": "btime:build:production"
