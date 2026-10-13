@@ -290,6 +290,16 @@ public partial class AppDbContext : DbContext
                 .HasConstraintName("Users_R_RoleId_fkey");
         });
 
+        modelBuilder.Entity<UserDeviceActive>()
+                .HasOne(d => d.User)
+                .WithMany(u => u.ActiveDevices)
+                .HasForeignKey(d => d.R_UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<UserDeviceActive>()
+            .HasIndex(d => d.RefreshToken)
+            .IsUnique();
+
         OnModelCreatingPartial(modelBuilder);
     }
 
