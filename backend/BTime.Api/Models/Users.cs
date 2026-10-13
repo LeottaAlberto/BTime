@@ -31,4 +31,5 @@ public partial class Users
     public virtual ICollection<Photo> Photos { get; set; } = [];
 
     public virtual Role RRole { get; set; } = null!;
+    public virtual ICollection<UserDeviceActive> ActiveDevices { get; set; } = [];
 }
