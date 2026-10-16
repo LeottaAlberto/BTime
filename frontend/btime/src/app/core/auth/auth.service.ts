@@ -14,12 +14,14 @@ export class AuthService {
   private http = inject(HttpClient);
   private router = inject(Router);
 
+  private readonly JWT_KEY = "jwt";
+  private readonly REFRESH_KEY = "refreshToken";
+
   constructor() {
     const jwt = this.getJwt();
     const refreshToken = this.getRefreshToken();
 
-    if (!jwt)
-      return;
+    if (!jwt) return;
 
     try {
       const jwtDec = jwtDecode<Record<string, any>>(jwt);
@@ -46,7 +48,7 @@ export class AuthService {
         role:
           jwtDec["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"] ??
           jwtDec["role"] ??
-          ""
+          "",
       });
     } catch (error) {
       console.error("JWT non valido o corrotto:", error);
@@ -54,16 +56,15 @@ export class AuthService {
     }
   }
 
-  public login(req: LoginRequest) : Observable<LoginResponse> {
+  public login(req: LoginRequest): Observable<LoginResponse> {
     return this.http.post<LoginResponse>("https://localhost:7255/api/auth/login", req).pipe(
       tap((res) => {
-        this.saveTokens(res.token, res.refreshToken);
-        this.currentUser.set(res);
+        this.saveTokens(res);
       }),
     );
   }
 
-  public refreshToken() : Observable<RefreshTokenResponse> {
+  public refreshToken(): Observable<RefreshTokenResponse> {
     const req: RefreshTokenRequest = {
       JwtToken: this.getJwt() ?? "",
       RefreshToken: this.getRefreshToken() ?? "",
@@ -71,25 +72,39 @@ export class AuthService {
 
     return this.http
       .post<RefreshTokenResponse>("https://localhost:7255/api/auth/refresh-token", req)
-      .pipe(tap((res) => this.saveTokens(res.JwtToken, res.RefreshToken)));
+      .pipe(tap((res) => this.saveTokens(res)));
   }
 
   public logout(): void {
-    localStorage.removeItem("jwt");
-    localStorage.removeItem("refreshToken");
+    localStorage.removeItem(this.JWT_KEY);
+    localStorage.removeItem(this.REFRESH_KEY);
     this.currentUser.set(null);
+    this.router.navigate(["/login"]);
   }
 
-  private saveTokens(jwt: string, refresh: string): void {
-    localStorage.setItem("jwt", jwt);
-    localStorage.setItem("refreshToken", refresh);
+  private saveTokens(res: LoginResponse | RefreshTokenResponse): void {
+    const jwt = "token" in res ? res.token : res.JwtToken;
+    const refresh = "refreshToken" in res ? res.refreshToken : res.RefreshToken;
+
+    if (!jwt || !refresh) return;
+
+    localStorage.setItem(this.JWT_KEY, jwt);
+    localStorage.setItem(this.REFRESH_KEY, refresh);
+
+    // Se è un LoginResponse abbiamo già tutti i dati dell'utente
+    if ("username" in res) this.currentUser.set(res);
+    else {
+      // Se è un refresh-token, aggiorniamo solo i token mantenendo username, email e role
+      this.currentUser.update((user) =>
+        user ? { ...user, token: jwt, refreshToken: refresh } : null,
+      );
+    }
   }
 
   private getJwt(): string | null {
-    return localStorage.getItem("jwt")?.toString() ?? null;
+    return localStorage.getItem(this.JWT_KEY);
   }
-
   private getRefreshToken(): string | null {
-    return localStorage.getItem("refreshToken")?.toString() ?? null;
+    return localStorage.getItem(this.REFRESH_KEY);
   }
 }
