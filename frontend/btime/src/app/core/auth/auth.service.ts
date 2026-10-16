@@ -32,18 +32,18 @@ export class AuthService {
 
       // Ricostruisce lo stato dell'utente mappando i claim del JWT
       this.currentUser.set({
-        Token: jwt,
-        RefreshToken: refreshToken ?? "",
-        Username:
+        token: jwt,
+        refreshToken: refreshToken ?? "",
+        username:
           jwtDec["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"] ??
           jwtDec["name"] ??
           jwtDec["unique_name"] ??
           "",
-        Email:
+        email:
           jwtDec["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"] ??
           jwtDec["email"] ??
           "",
-        Role:
+        role:
           jwtDec["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"] ??
           jwtDec["role"] ??
           ""
@@ -55,9 +55,9 @@ export class AuthService {
   }
 
   public login(req: LoginRequest) : Observable<LoginResponse> {
-    return this.http.post<LoginResponse>("https://localhost:7001/api/auth/login", req).pipe(
+    return this.http.post<LoginResponse>("https://localhost:7255/api/auth/login", req).pipe(
       tap((res) => {
-        this.saveTokens(res.Token, res.RefreshToken);
+        this.saveTokens(res.token, res.refreshToken);
         this.currentUser.set(res);
       }),
     );
@@ -70,7 +70,7 @@ export class AuthService {
     };
 
     return this.http
-      .post<RefreshTokenResponse>("https://localhost:7001/api/auth/refresh-token", req)
+      .post<RefreshTokenResponse>("https://localhost:7255/api/auth/refresh-token", req)
       .pipe(tap((res) => this.saveTokens(res.JwtToken, res.RefreshToken)));
   }
 
