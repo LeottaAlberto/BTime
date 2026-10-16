@@ -102,9 +102,15 @@ export class AuthService {
   }
 
   private getJwt(): string | null {
+    if (typeof window === "undefined")
+      return null; // Evita il crash lato server
     return localStorage.getItem(this.JWT_KEY);
   }
+
   private getRefreshToken(): string | null {
+    if (typeof window === "undefined")
+      return null;
+
     return localStorage.getItem(this.REFRESH_KEY);
   }
 }
