@@ -1,6 +1,87 @@
-<div class="w-120 bg-neutral-400 p-2">
-  <div class="rounded-xl overflow-hidden w-8 h-8 bg-amber-300">
-    <img src="https://imgs.search.brave.com/DY2P6Lh_8tBr9_SFdc3goqC6vogCqg2dcJDGHI9xN4M/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9pbWFn/ZXMudW5zcGxhc2gu/Y29tL3Bob3RvLTE1/OTI0OTU5ODE0ODgt/MDczMTUzNzc2ZDlh/P2ZtPWpwZyZxPTYw/Jnc9MzAwMCZhdXRv/PWZvcm1hdCZmaXQ9/Y3JvcCZpeGxpYj1y/Yi00LjEuMCZpeGlk/PU0zd3hNakEzZkRC/OE1IeHpaV0Z5WTJo/OE1UVjhmSFJwYldW/OFpXNThNSHg4TUh4/OGZEQT0"
-     alt="BTimeImage">
+<form (submit)="$event.preventDefault(); onClick()" class="w-120 bg-neutral-500 p-10 m-10 rounded-xl text-zinc-50">
+  <!-- Header -->
+  <div class="flex flex-row items-center justify-center gap-2">
+    <div
+    class="w-20 h-20 rounded-full overflow-hidden
+           bg-[url('https://cdn.create.vista.com/api/media/small/333790434/stock-photo-cropped-view-woman-holding-alarm-clock-blue-background-panoramic-shot')]
+           bg-no-repeat bg-center bg-auto bg-amber-400">
+          </div>
+    <h1 class="text-6xl font-bold">BTime</h1>
   </div>
-</div>
+
+  <!-- Body -->
+  <div class="text-center flex flex-col gap-4 mt-4">
+    <h3>Login into Dashboard</h3>
+    <!-- Inputs -->
+    <div class="flex flex-col gap-2 justify-start">
+      <div class="text-left flex flex-col gap-1">
+        <label for="username">Username</label>
+        <div class="relative flex items-center">
+          <span class="pi pi-user absolute left-3 text-neutral-300 pointer-events-none text-xl"></span>
+          <input
+            #usernameInput
+            type="text"
+            name="username"
+            class="w-full h-10 rounded-md bg-neutral-600 outline-2 outline-neutral-700 focus:outline-slate-900 pl-10 pr-4 text-zinc-50"
+            [value]="username() ?? ''"
+            (input)="username.set(usernameInput.value)"
+            required>
+        </div>
+      </div>
+
+      <div class="text-left flex flex-col gap-1">
+        <label for="mail">Mail</label>
+        <div class="relative flex items-center">
+          <span class="pi pi-user absolute left-3 text-neutral-300 pointer-events-none text-xl"></span>
+          <input
+            #mailInput
+            type="email"
+            name="mail"
+            class="w-full h-10 rounded-md bg-neutral-600 outline-2 outline-neutral-700 focus:outline-slate-900 pl-10 pr-4 text-zinc-50"
+            [value]="email() ?? ''"
+            (input)="email.set(mailInput.value)"
+            required>
+        </div>
+      </div>
+
+
+      <div class="text-left flex flex-col gap-1">
+        <label for="password">Password</label>
+        <div class="relative flex items-center">
+          <span class="pi pi-lock absolute left-3 text-neutral-300 pointer-events-none text-xl"></span>
+          <input
+            #passwordInput
+            type="password"
+            name="password"
+            class="w-full h-10 rounded-md bg-neutral-600 outline-2 outline-neutral-700 focus:outline-slate-900 pl-10 pr-4 text-zinc-50"
+            [value]="password() ?? ''"
+            (input)="password.set(passwordInput.value)"
+            required>
+          <span class="pi pi-eye absolute right-3 text-neutral-300 pointer-events-none text-xl cursor-pointer z-50"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Remember e forgotten password -->
+    <div class="flex flex-row justify-between items-center text-sm">
+      <label class="flex flex-row items-center gap-2 cursor-pointer select-none">
+        <input type="checkbox" name="rememberme" id="rememberme" class="peer sr-only">
+        <div class="size-5 rounded bg-neutral-700 border border-neutral-500 flex items-center justify-center transition-colors hover:border-neutral-400">
+          <span class="pi pi-check text-lime-500 text-xs font-bold hidden peer-checked:block"></span>
+        </div>
+        <span>Remember Me</span>
+      </label>
+      <a href="" class="hover:underline text-neutral-300">Forgot Password?</a>
+    </div>
+
+  </div>
+
+  <!-- Footer -->
+  <div class="flex flex-col items-center pt-4 gap-2">
+    <input type="submit" class="w-8/12 h-10 bg-neutral-800 rounded-md cursor-pointer hover:bg-neutral-900 transition-colors" value="Login">
+    <div class="flex flex-row justify-center gap-1 text-xs">
+      <p>No account?</p>
+      <a href="" class="hover:underline text-neutral-300">Register Now</a>
+    </div>
+  </div>
+</form>
