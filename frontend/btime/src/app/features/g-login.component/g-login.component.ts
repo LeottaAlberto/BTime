@@ -1,6 +1,7 @@
 import { Component, inject, signal, WritableSignal } from "@angular/core";
 import { AuthService } from "../../core/auth/auth.service";
 import { LoginRequest } from "../../core/interfaces/login/loginRequest.interface";
+import { Router } from "@angular/router";
 
 @Component({
   imports: [],
@@ -10,6 +11,7 @@ import { LoginRequest } from "../../core/interfaces/login/loginRequest.interface
 })
 export class GLoginComponent {
   private auth = inject(AuthService);
+  private router = inject(Router);
 
   public username: WritableSignal<string | null> = signal(null);
   public email: WritableSignal<string | null> = signal(null);
@@ -33,6 +35,7 @@ export class GLoginComponent {
     this.auth.login(req).subscribe({
       next: (res) => {
         alert("Login success");
+        this.router.navigate(["/dashboard"]);
       },
       error: (err) => {
         this.loginShowError(err.statusText);
