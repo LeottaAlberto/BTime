@@ -1,1 +1,12 @@
-<p>g-nav-item.component works!</p>
+<div
+  class="font-extralight p-0.5 rounded-xl cursor-pointer transition-colors"
+  [class.bg-cyan-600/60]="isSelected()"
+  [class.bg-transparent]="!isSelected()"
+  [class.hover:bg-neutral-700]="!isSelected()"
+  (click)="onClick()">
+  <div class="flex flex-row justify-start items-center gap-3 max-w-3/4">
+    <div class="pi pi-chevron-right text-xs pl-4"></div>
+    <div class="pi pi-{{icon()}} text-sm"></div>
+    <div class="text-sm">{{label()}}</div>
+  </div>
+</div>
