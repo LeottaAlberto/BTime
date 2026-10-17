@@ -1,7 +1,8 @@
 import { Component } from "@angular/core";
+import { GNavbarComponent } from "../g-navbar.component/g-navbar.component";
 
 @Component({
-  imports: [],
+  imports: [GNavbarComponent],
   selector: "g-dashboard",
   styleUrl: "./g-dashboard.component.css",
   templateUrl: "./g-dashboard.component.html",
