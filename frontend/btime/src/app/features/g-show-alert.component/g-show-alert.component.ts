@@ -2,7 +2,7 @@ import { Component } from "@angular/core";
 
 @Component({
   imports: [],
-  selector: "app-g-show-alert.component",
+  selector: "g-show-alert",
   styleUrl: "./g-show-alert.component.css",
   templateUrl: "./g-show-alert.component.html",
 })

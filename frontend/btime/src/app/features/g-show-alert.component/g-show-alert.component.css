@@ -1,0 +1,18 @@
+@keyframes countdown {
+  from {
+    width: 100%;
+  }
+  to {
+    width: 0%;
+  }
+}
+
+.progress-bar {
+  animation: countdown 4s linear forwards;
+}
+
+/* Pausa la barra se l'utente ci passa sopra con il mouse */
+.alert-card:hover .progress-bar {
+  animation-play-state: paused;
+}
+
