@@ -1,1 +1,36 @@
-<p>g-navbar.component works!</p>
+<div class="flex flex-col w-1/12 h-full p-2">
+  <!-- Head -->
+  <div class="flex flex-row items-center justify-center gap-2 pb-8 h-1/12">
+    <div
+    class="w-12 h-12 rounded-full overflow-hidden
+          bg-[url('https://cdn.create.vista.com/api/media/small/333790434/stock-photo-cropped-view-woman-holding-alarm-clock-blue-background-panoramic-shot')]
+          bg-no-repeat bg-center bg-cover">
+          </div>
+    <div>
+      <h1 class="text-xl font-bold">BTime</h1>
+      <p class="text-[10px]">Your NAS</p>
+    </div>
+  </div>
+
+  <!-- Body -->
+  <div class="h-3/4 flex flex-col gap-1">
+    @for (item of navItems(); track item.label) {
+      <g-nav-item [icon]="item.icon" [label]="item.label" [isSelected]="selectedLabel() == item.label" (select)="selectedLabel.set(item.label)"/>
+    }
+  </div>
+
+  <!-- Footer -->
+  <div class="flex flex-col items-end justify-end gap-2 h-1/4 py-4">
+    <div class="flex flex-row justify-start items-center gap-2 w-full">
+      <div
+        class="w-12 h-12 rounded-full overflow-hidden
+          bg-[url('https://imgs.search.brave.com/Nt1z2ObBrGxK-9i_PJ6ioz7PbFpYm1yCo7tbltrIVV0/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9pLnBp/bmltZy5jb20vb3Jp/Z2luYWxzL2M4LzA5/L2MzL2M4MDljM2Fh/MjI1N2I2ZTEwM2Zl/OGIzNzcwMWMwZDAw/LmpwZw')]
+          bg-no-repeat bg-center bg-cover">
+      </div>
+      <h1 class="text-sm font-bold">{{auth.currentUser()?.username}}</h1>
+    </div>
+
+    <p class="text-[12px]">{{auth.currentUser()?.email}}</p>
+
+  </div>
+</div>
