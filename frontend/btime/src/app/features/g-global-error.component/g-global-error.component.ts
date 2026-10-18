@@ -1,9 +1,12 @@
-import { Component } from "@angular/core";
+import { Component, inject } from "@angular/core";
+import { GlobalService as GlobalErrorService } from "../../core/services/globalError/global.service";
 
 @Component({
   imports: [],
-  selector: "app-g-global-error.component",
+  selector: "g-global-error",
   styleUrl: "./g-global-error.component.css",
   templateUrl: "./g-global-error.component.html",
 })
-export class GGlobalErrorComponent {}
+export class GGlobalErrorComponent {
+  public error = inject(GlobalErrorService);
+}
