@@ -1,1 +1,8 @@
-<p>g-loading-screen.component works!</p>
+@if (loadService.isVisible()) {
+  <div class="fixed inset-0 z-50 flex flex-col gap-4 justify-center items-center bg-neutral-950/70 backdrop-blur-xs text-white">
+    <i class="pi pi-spinner pi-spin text-5xl text-lime-500"></i>
+    <p class="text-sm font-medium text-neutral-300 tracking-wide">
+      Caricamento in corso...
+    </p>
+  </div>
+}
