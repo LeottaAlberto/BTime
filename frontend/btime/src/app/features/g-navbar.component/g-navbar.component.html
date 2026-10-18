@@ -25,7 +25,8 @@
       <div
         class="w-12 h-12 rounded-full overflow-hidden
           bg-[url('https://imgs.search.brave.com/Nt1z2ObBrGxK-9i_PJ6ioz7PbFpYm1yCo7tbltrIVV0/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9pLnBp/bmltZy5jb20vb3Jp/Z2luYWxzL2M4LzA5/L2MzL2M4MDljM2Fh/MjI1N2I2ZTEwM2Zl/OGIzNzcwMWMwZDAw/LmpwZw')]
-          bg-no-repeat bg-center bg-cover">
+          bg-no-repeat bg-center bg-cover cursor-pointer"
+          (click)="onClick()">
       </div>
       <h1 class="text-sm font-bold">{{auth.currentUser()?.username}}</h1>
       <span class="pi pi-sign-out rounded-full p-1.5 cursor-pointer hover:bg-neutral-700" (click)="onClickLogout()"></span>
@@ -36,5 +37,5 @@
   </div>
 
   <g-show-message/>
-  <g-show-alert/>
+  <!-- <g-show-alert/> -->
 </div>
