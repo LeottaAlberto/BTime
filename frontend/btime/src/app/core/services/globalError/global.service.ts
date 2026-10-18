@@ -1,7 +1,5 @@
 import { Injectable, signal, WritableSignal } from "@angular/core";
-import { AlertOptions } from "../../interfaces/service/alertOption.interface";
-import { StatusType } from "../../enums/statusType.enum";
-import { GlobalErrorOption } from "../../interfaces/service/globalEorrOption.interface";
+import { GlobalErrorOption } from "../../interfaces/service/globalErrorOption.interface";
 
 @Injectable({ providedIn: "root" })
 export class GlobalService {
