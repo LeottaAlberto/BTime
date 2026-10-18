@@ -8,11 +8,10 @@
 }
 
 .progress-bar {
-  animation: countdown 4s linear forwards;
+  animation: countdown var(--duration, 4000ms) linear forwards;
 }
 
 /* Pausa la barra se l'utente ci passa sopra con il mouse */
 .alert-card:hover .progress-bar {
   animation-play-state: paused;
 }
-
