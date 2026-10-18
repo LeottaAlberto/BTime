@@ -1,15 +1,15 @@
 import { Component, signal, ChangeDetectionStrategy, viewChild, Signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { GShowToastComponent } from './features/g-show-toast.component/g-show-toast.component';
+import { GGlobalErrorComponent } from './features/g-global-error.component/g-global-error.component';
 
 @Component({
   selector: "app-root",
-  imports: [RouterOutlet, GShowToastComponent],
+  imports: [RouterOutlet, GShowToastComponent, GGlobalErrorComponent],
   templateUrl: "./app.html",
   changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: "./app.css",
 })
 export class App {
   protected readonly title = signal("btime");
-  public showToast: Signal<GShowToastComponent | undefined> = viewChild(GShowToastComponent);
 }
