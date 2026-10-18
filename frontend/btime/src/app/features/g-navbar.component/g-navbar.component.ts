@@ -5,6 +5,7 @@ import { Router } from "@angular/router";
 import { GShowMessageComponent } from "../g-show-message.component/g-show-message.component";
 import { AlertService } from "../../core/services/alertMessage/alert.service";
 import { StatusType } from "../../core/enums/statusType.enum";
+import { HttpClient } from "@angular/common/http";
 
 @Component({
   imports: [GNavItemComponent, GShowMessageComponent],
@@ -40,14 +41,21 @@ export class GNavbarComponent implements OnInit {
     const confirmed = await this.messageBox()?.showMessage("Are you sure you want to log out?");
     if (confirmed) {
       this.logout();
-      this.alert.show({ title: "Logout Status", message: "Logout done successfully", status: StatusType.Good});
+      this.alert.show({
+        title: "Logout Status",
+        message: "Logout done successfully",
+        status: StatusType.Good,
+      });
       return;
     }
 
-    this.alert.show({ title: "Logout Status", message: "Logout Error", status: StatusType.Bad});
+    this.alert.show({ title: "Logout Status", message: "Logout Error", status: StatusType.Bad });
   }
 
+  private http = inject(HttpClient);
+
   public onClick() {
-    this.alert.show({ title: "Test!", message: "Testo di prova per vedere il testo come esce", status: StatusType.Normal });
+    // this.alert.show({ title: "Test!", message: "Testo di prova per vedere il testo come esce", status: StatusType.Normal });
+    this.http.get("https://localhost:7255/api/rotta-inesistente").subscribe();
   }
 }
