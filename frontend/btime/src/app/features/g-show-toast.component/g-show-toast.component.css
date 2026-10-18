@@ -12,6 +12,6 @@
 }
 
 /* Pausa la barra se l'utente ci passa sopra con il mouse */
-.alert-card:hover .progress-bar {
+.toast-card:hover .progress-bar {
   animation-play-state: paused;
 }

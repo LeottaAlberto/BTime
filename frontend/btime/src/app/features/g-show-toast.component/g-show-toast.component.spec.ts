@@ -1,16 +1,16 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
-import { GShowAlertComponent } from "./g-show-alert.component";
+import { GShowToastComponent } from "./g-show-toast.component";
 
-describe("GShowAlertComponent", () => {
-  let component: GShowAlertComponent;
-  let fixture: ComponentFixture<GShowAlertComponent>;
+describe("GShowToastComponent", () => {
+  let component: GShowToastComponent;
+  let fixture: ComponentFixture<GShowToastComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [GShowAlertComponent],
+      imports: [GShowToastComponent],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(GShowAlertComponent);
+    fixture = TestBed.createComponent(GShowToastComponent);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });
