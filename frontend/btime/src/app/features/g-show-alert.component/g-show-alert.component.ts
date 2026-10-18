@@ -1,9 +1,13 @@
-import { Component } from "@angular/core";
+import { Component, inject } from "@angular/core";
+import { AlertService } from "../../core/services/alertMessage/alert.service";
+import { StatusType } from "../../core/enums/statusType.enum";
 
 @Component({
-  imports: [],
   selector: "g-show-alert",
-  styleUrl: "./g-show-alert.component.css",
+  imports: [],
   templateUrl: "./g-show-alert.component.html",
+  styleUrl: "./g-show-alert.component.css",
 })
-export class GShowAlertComponent {}
+export class GShowAlertComponent {
+  public alert = inject(AlertService);
+}
