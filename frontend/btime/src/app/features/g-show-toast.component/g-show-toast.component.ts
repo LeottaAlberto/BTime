@@ -3,11 +3,11 @@ import { AlertService } from "../../core/services/alertMessage/alert.service";
 import { StatusType } from "../../core/enums/statusType.enum";
 
 @Component({
-  selector: "g-show-alert",
+  selector: "g-show-toast",
   imports: [],
-  templateUrl: "./g-show-alert.component.html",
-  styleUrl: "./g-show-alert.component.css",
+  templateUrl: "./g-show-toast.component.html",
+  styleUrl: "./g-show-toast.component.css",
 })
-export class GShowAlertComponent {
+export class GShowToastComponent {
   public alert = inject(AlertService);
 }
