@@ -38,7 +38,6 @@ export class GLoginComponent {
 
     this.auth.login(req).subscribe({
       next: (res) => {
-        alert("Login success");
         this.auth.currentUser.set(res);
         this.router.navigate(["/dashboard"]);
       },
@@ -51,8 +50,6 @@ export class GLoginComponent {
   private loginShowError(err: string) : void {
     if(err.includes("Unknown Error"))
       alert("Docker OFF")
-    else
-      alert("Login Error")
 
     console.error(err);
   }
