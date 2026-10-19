@@ -53,7 +53,7 @@ public class AuthController(AppDbContext db, JwtService jwtService, IConfigurati
         var response = new LoginResponse
         {
             Token = token,
-            RefreshToken = await GenerateRefrashToken(user.Id, token),
+            RefreshToken = await GenerateRefrashToken(user.Id, req.IpAddress, req.DeviceInfo),
             Username = user.Username,
             Email = user.Email,
             Role = roleName
@@ -128,7 +128,7 @@ public class AuthController(AppDbContext db, JwtService jwtService, IConfigurati
         if (user == null)
             return Unauthorized("Errore nella generazione del Token"); 
 
-        var s = await GenerateRefrashToken(user.Id, req.RefreshToken) ?? "";
+        var s = await GenerateRefrashToken(user.Id) ?? "";
 
         if (s == null || s == string.Empty)
             return Unauthorized("Errore nella generazione del Token");
@@ -141,22 +141,22 @@ public class AuthController(AppDbContext db, JwtService jwtService, IConfigurati
         return Ok(res);
     }
 
-    private async Task<string> GenerateRefrashToken(Guid userId, string idAddr)
+    private async Task<string> GenerateRefrashToken(Guid userId, string ipAddr = "", string devInfo = "")
     {
         var refreshToken = Guid.NewGuid().ToString();
         var expDate = DateTime.UtcNow.AddDays(EXPIRY_DAYS);
 
-        if (!await UpdateRefreshTokenIntoDB(userId, idAddr, refreshToken, expDate))
+        if (!await UpdateRefreshTokenIntoDB(userId, refreshToken, expDate, ipAddr, devInfo))
             return string.Empty;
 
         return refreshToken;
     }
 
-    private async Task<bool> UpdateRefreshTokenIntoDB(Guid userId, string ipAddr, string newToken, DateTime eDate)
+    private async Task<bool> UpdateRefreshTokenIntoDB(Guid userId, string newToken, DateTime eDate, string ipAddr = "", string devInfo = "")
     {
         try
         {
-            var uDevAc = await _db.UserDeviceActive.FirstOrDefaultAsync(u => u.R_UserId == userId && u.IpAddress == null);
+            var uDevAc = await _db.UserDeviceActive.FirstOrDefaultAsync(u => u.R_UserId == userId && u.IpAddress == ipAddr);
 
             if (uDevAc == null)
             {
@@ -164,7 +164,9 @@ public class AuthController(AppDbContext db, JwtService jwtService, IConfigurati
                 {
                     R_UserId = userId,
                     RefreshToken = newToken,
-                    RefreshTokenExpiryTime = eDate
+                    RefreshTokenExpiryTime = eDate,
+                    IpAddress = ipAddr,
+                    DeviceInfo = devInfo
                 };
 
                 _db.UserDeviceActive.Add(uDevActve);
