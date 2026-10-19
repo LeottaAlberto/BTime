@@ -9,9 +9,13 @@ public partial class TagsD
 
     public Guid RTagMid { get; set; }
 
-    public Guid RMovieMid { get; set; }
+    public Guid? RMovieMid { get; set; }
 
-    public virtual MoviesM RMovieM { get; set; } = null!;
+    public Guid? RSeriesMid { get; set; }
+
+    public virtual MoviesM? RMovieM { get; set; }
+
+    public virtual SeriesM? RSeriesM { get; set; }
 
     public virtual TagsM RTagM { get; set; } = null!;
 }
