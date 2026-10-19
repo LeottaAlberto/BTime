@@ -117,7 +117,7 @@ public class AuthController(AppDbContext db, JwtService jwtService, IConfigurati
         // Se è tutto ok, ti restituisce il "principal" contenente i claims.
         var principal = tokenHandler.ValidateToken(req.JwtToken, tokenValidationParameters, out SecurityToken securityToken);
 
-        // Estrarre l'ID esattamente come provavi a fare prima!
+        // Estrarre l'ID
         var uIdStr = principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
         if (uIdStr == null)
@@ -135,28 +135,28 @@ public class AuthController(AppDbContext db, JwtService jwtService, IConfigurati
 
         var res = new RefreshTokenRes() {
             JwtToken = _jwtS.GenToken(user, user.RRole?.Name ?? "User"),
-            NewAccessToken = s
+            RefreshToken = s
         };
 
         return Ok(res);
     }
 
-    private async Task<string> GenerateRefrashToken(Guid userId, string oldToken)
+    private async Task<string> GenerateRefrashToken(Guid userId, string idAddr)
     {
         var refreshToken = Guid.NewGuid().ToString();
         var expDate = DateTime.UtcNow.AddDays(EXPIRY_DAYS);
 
-        if (!await UpdateRefreshTokenIntoDB(userId, oldToken, refreshToken, expDate))
+        if (!await UpdateRefreshTokenIntoDB(userId, idAddr, refreshToken, expDate))
             return string.Empty;
 
         return refreshToken;
     }
 
-    private async Task<bool> UpdateRefreshTokenIntoDB(Guid userId, string oldToken, string newToken, DateTime eDate)
+    private async Task<bool> UpdateRefreshTokenIntoDB(Guid userId, string ipAddr, string newToken, DateTime eDate)
     {
         try
         {
-            var uDevAc = await _db.UserDeviceActive.FirstOrDefaultAsync(u => u.R_UserId == userId && u.RefreshToken == oldToken);
+            var uDevAc = await _db.UserDeviceActive.FirstOrDefaultAsync(u => u.R_UserId == userId && u.IpAddress == null);
 
             if (uDevAc == null)
             {
