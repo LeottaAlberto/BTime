@@ -1,6 +1,6 @@
 <aside class="flex flex-col justify-between w-64 min-w-64 h-full border-r border-neutral-800 p-4 select-none shrink-0">
   <!-- Head: Brand & Logo -->
-  <div class="flex items-center gap-3 pb-4 border-b border-neutral-800/80">
+  <div class="flex items-center gap-3 pb-4 border-b border-neutral-800/80 cursor-pointer" (click)="router.navigate(['/dashboard'])">
     <div
       class="w-10 h-10 rounded-xl overflow-hidden shadow-md ring-1 ring-neutral-700/60
              bg-[url('https://cdn.create.vista.com/api/media/small/333790434/stock-photo-cropped-view-woman-holding-alarm-clock-blue-background-panoramic-shot')]
@@ -29,7 +29,7 @@
         [icon]="item.icon"
         [label]="item.label"
         [isSelected]="selectedLabel() == item.label"
-        (select)="selectedLabel.set(item.label)"/>
+        (select)="onSelectNavItem(item.label)"/>
     }
   </div>
 

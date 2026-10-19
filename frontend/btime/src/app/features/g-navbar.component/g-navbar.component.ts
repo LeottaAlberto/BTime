@@ -30,6 +30,14 @@ export class GNavbarComponent implements OnInit {
     ];
 
     this.navItems.set(items);
+    this.selectedLabel.set("Home");
+  }
+
+  public onSelectNavItem(label: string): void {
+    this.selectedLabel.set(label);
+    if (label === "Home") {
+      this.router.navigate(["/dashboard"]);
+    }
   }
 
   public logout(): void {
