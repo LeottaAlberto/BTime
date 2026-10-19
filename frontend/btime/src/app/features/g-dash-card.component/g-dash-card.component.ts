@@ -10,4 +10,8 @@ export class GDashCardComponent {
   public title: InputSignal<string> = input<string>("");
   public img: InputSignal<string> = input<string>("");
   public description: InputSignal<string> = input<string>("");
+
+  public onClick() : void {
+
+  }
 }
