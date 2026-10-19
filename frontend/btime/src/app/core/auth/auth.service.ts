@@ -7,6 +7,7 @@ import { LoginRequest } from "../interfaces/login/loginRequest.interface";
 import { Observable, tap } from "rxjs";
 import { RefreshTokenResponse } from "../interfaces/refreshToken/refreshTokenResponse.interface";
 import { RefreshTokenRequest } from "../interfaces/refreshToken/refreshTokenRequest.interface";
+import { environment } from "../../../environments/environment.development";
 
 @Injectable({ providedIn: "root" }) // Questo decoratore permette di creare una sola instanza di questa classe per tutte l'app
 export class AuthService {
@@ -57,7 +58,7 @@ export class AuthService {
   }
 
   public login(req: LoginRequest): Observable<LoginResponse> {
-    return this.http.post<LoginResponse>("https://localhost:7255/api/auth/login", req).pipe(
+    return this.http.post<LoginResponse>(`${environment.apiUrl}/api/auth/login`, req).pipe(
       tap((res) => {
         this.saveTokens(res);
       }),
@@ -71,7 +72,7 @@ export class AuthService {
     };
 
     return this.http
-      .post<RefreshTokenResponse>("https://localhost:7255/api/auth/refresh-token", req)
+      .post<RefreshTokenResponse>(`${environment.apiUrl}/api/auth/refresh-token`, req)
       .pipe(tap((res) => this.saveTokens(res)));
   }
 
