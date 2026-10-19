@@ -2,6 +2,7 @@ import { Component, inject, signal, WritableSignal } from "@angular/core";
 import { AuthService } from "../../core/auth/auth.service";
 import { LoginRequest } from "../../core/interfaces/login/loginRequest.interface";
 import { Router } from "@angular/router";
+import { getClientDeviceInfo } from "../../core/services/deviceInfo/parseUserAgent.service";
 
 @Component({
   imports: [],
@@ -17,10 +18,11 @@ export class GLoginComponent {
   public email: WritableSignal<string | null> = signal(null);
   public password: WritableSignal<string | null> = signal(null);
 
-  public onClick(): void {
+  public async onClick(): Promise<void> {
     const user = this.username();
     const mail = this.email();
     const pwd = this.password();
+    const deviceInfo = await getClientDeviceInfo();
 
     if (!user || !mail || !pwd) {
       return;
@@ -29,20 +31,21 @@ export class GLoginComponent {
     const req: LoginRequest = {
       Username: user,
       Password: pwd,
-      Email: mail
+      Email: mail,
+      IpAddress: deviceInfo.ip ?? "",
+      DeviceInfo: deviceInfo.deviceType
     };
 
     this.auth.login(req).subscribe({
       next: (res) => {
         alert("Login success");
+        this.auth.currentUser.set(res);
         this.router.navigate(["/dashboard"]);
       },
       error: (err) => {
         this.loginShowError(err.statusText);
       }
     });
-
-    console.log("");
   }
 
   private loginShowError(err: string) : void {
