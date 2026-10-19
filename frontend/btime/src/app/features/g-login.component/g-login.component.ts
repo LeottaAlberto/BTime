@@ -3,6 +3,7 @@ import { AuthService } from "../../core/auth/auth.service";
 import { LoginRequest } from "../../core/interfaces/login/loginRequest.interface";
 import { Router } from "@angular/router";
 import { getClientDeviceInfo } from "../../core/services/deviceInfo/parseUserAgent.service";
+import { LoadingService } from "../../core/services/loading.service";
 
 @Component({
   imports: [],
@@ -13,6 +14,7 @@ import { getClientDeviceInfo } from "../../core/services/deviceInfo/parseUserAge
 export class GLoginComponent {
   private auth = inject(AuthService);
   private router = inject(Router);
+  public loadService = inject(LoadingService);
 
   public username: WritableSignal<string | null> = signal(null);
   public email: WritableSignal<string | null> = signal(null);
@@ -36,14 +38,16 @@ export class GLoginComponent {
       DeviceInfo: deviceInfo.deviceType
     };
 
-    this.auth.login(req).subscribe({
-      next: (res) => {
-        this.auth.currentUser.set(res);
-        this.router.navigate(["/dashboard"]);
-      },
-      error: (err) => {
-        this.loginShowError(err.statusText);
-      }
+    this.loadService.showLoading(() => {
+      this.auth.login(req).subscribe({
+        next: (res) => {
+          this.auth.currentUser.set(res);
+          this.router.navigate(["/dashboard"]);
+        },
+        error: (err) => {
+          this.loginShowError(err.statusText);
+        }
+      });
     });
   }
 
