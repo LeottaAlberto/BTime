@@ -58,7 +58,7 @@ export class AuthService {
   }
 
   public login(req: LoginRequest): Observable<LoginResponse> {
-    return this.http.post<LoginResponse>(`${environment.apiUrl}/api/auth/login`, req).pipe(
+    return this.http.post<LoginResponse>(`${environment.apiUrl}/auth/login`, req).pipe(
       tap((res) => {
         this.saveTokens(res);
       }),
@@ -72,7 +72,7 @@ export class AuthService {
     };
 
     return this.http
-      .post<RefreshTokenResponse>(`${environment.apiUrl}/api/auth/refresh-token`, req)
+      .post<RefreshTokenResponse>(`${environment.apiUrl}/auth/refresh-token`, req)
       .pipe(tap((res) => this.saveTokens(res)));
   }
 
