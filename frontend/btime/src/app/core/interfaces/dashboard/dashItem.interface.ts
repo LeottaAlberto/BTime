@@ -4,4 +4,5 @@ export interface DashItem {
   name?: string;
   description?: string;
   img?: string;
+  route: string;
 }
