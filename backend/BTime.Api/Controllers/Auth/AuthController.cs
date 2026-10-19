@@ -113,29 +113,48 @@ public class AuthController(AppDbContext db, JwtService jwtService, IConfigurati
 
         var tokenHandler = new JwtSecurityTokenHandler();
 
-        // Questo metodo spacchetta il token. Se la firma è falsificata, lancia un'eccezione.
-        // Se è tutto ok, ti restituisce il "principal" contenente i claims.
-        var principal = tokenHandler.ValidateToken(req.JwtToken, tokenValidationParameters, out SecurityToken securityToken);
+        ClaimsPrincipal principal;
+        try
+        {
+            // Questo metodo spacchetta il token. Se la firma è falsificata o non valida, lancia un'eccezione.
+            principal = tokenHandler.ValidateToken(req.JwtToken, tokenValidationParameters, out SecurityToken securityToken);
+        }
+        catch
+        {
+            return Unauthorized("Token non valido");
+        }
 
         // Estrarre l'ID
         var uIdStr = principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-        if (uIdStr == null)
+        if (string.IsNullOrEmpty(uIdStr) || !Guid.TryParse(uIdStr, out var userId))
             return Unauthorized("Token non valido");
 
-        var user = await _db.Users.FirstOrDefaultAsync(u => u.Id.ToString().Equals(uIdStr));
+        var user = await _db.Users
+            .Include(u => u.RRole)
+            .FirstOrDefaultAsync(u => u.Id == userId);
 
-        if (user == null)
-            return Unauthorized("Errore nella generazione del Token"); 
+        if (user == null || !user.IsActive)
+            return Unauthorized("Utente non trovato o disattivato");
 
-        var s = await GenerateRefrashToken(user.Id) ?? "";
+        // Validazione Refresh Token salvato nel DB
+        var activeDevice = await _db.UserDeviceActive
+            .FirstOrDefaultAsync(u => u.R_UserId == user.Id && u.RefreshToken == req.RefreshToken);
 
-        if (s == null || s == string.Empty)
-            return Unauthorized("Errore nella generazione del Token");
+        if (activeDevice == null || activeDevice.RefreshTokenExpiryTime <= DateTime.UtcNow)
+            return Unauthorized("Refresh token non valido o scaduto");
 
-        var res = new RefreshTokenRes() {
+        // Rotazione del token: genera un nuovo Refresh Token e aggiorna la scadenza
+        var newRefreshToken = Guid.NewGuid().ToString();
+        activeDevice.RefreshToken = newRefreshToken;
+        activeDevice.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(EXPIRY_DAYS);
+
+        await _db.SaveChangesAsync();
+
+        var res = new RefreshTokenRes()
+        {
             JwtToken = _jwtS.GenToken(user, user.RRole?.Name ?? "User"),
-            RefreshToken = s
+            RefreshToken = newRefreshToken
         };
 
         return Ok(res);
