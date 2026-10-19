@@ -9,7 +9,13 @@ public partial class ImagesD
 
     public Guid RImageMId { get; set; }
 
-    public Guid RMovieMId { get; set; }
+    public Guid? RMovieMId { get; set; }
+
+    public Guid? RSeriesMId { get; set; }
 
     public virtual ImagesM RImageM { get; set; } = null!;
+
+    public virtual MoviesM? RMovieM { get; set; }
+
+    public virtual SeriesM? RSeriesM { get; set; }
 }

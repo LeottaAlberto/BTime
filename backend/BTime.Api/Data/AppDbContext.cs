@@ -38,6 +38,10 @@ public partial class AppDbContext : DbContext
 
     public virtual DbSet<Users> Users { get; set; }
     public virtual DbSet<UserDeviceActive> UserDeviceActive { get; set; }
+    public virtual DbSet<SeriesM> SeriesMs { get; set; }
+    public virtual DbSet<SeasonsM> SeasonsMs { get; set; }
+    public virtual DbSet<EpisodesM> EpisodesMs { get; set; }
+    public virtual DbSet<EpisodesD> EpisodesDs { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -96,11 +100,22 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.Id).ValueGeneratedNever();
             entity.Property(e => e.RImageMId).HasColumnName("R_ImageMId");
             entity.Property(e => e.RMovieMId).HasColumnName("R_MovieMId");
+            entity.Property(e => e.RSeriesMId).HasColumnName("R_SeriesMId");
 
             entity.HasOne(d => d.RImageM).WithMany(p => p.ImagesDs)
                 .HasForeignKey(d => d.RImageMId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("ImagesD_R_ImageMId_fkey");
+
+            entity.HasOne(d => d.RMovieM).WithMany()
+                .HasForeignKey(d => d.RMovieMId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("ImagesD_R_MovieMId_fkey");
+
+            entity.HasOne(d => d.RSeriesM).WithMany(p => p.ImagesDs)
+                .HasForeignKey(d => d.RSeriesMId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("ImagesD_R_SeriesMId_fkey");
         });
 
         modelBuilder.Entity<ImagesM>(entity =>
@@ -246,12 +261,18 @@ public partial class AppDbContext : DbContext
 
             entity.Property(e => e.Id).ValueGeneratedNever();
             entity.Property(e => e.RMovieMid).HasColumnName("R_MovieMId");
+            entity.Property(e => e.RSeriesMid).HasColumnName("R_SeriesMId");
             entity.Property(e => e.RTagMid).HasColumnName("R_TagMId");
 
             entity.HasOne(d => d.RMovieM).WithMany(p => p.TagsDs)
                 .HasForeignKey(d => d.RMovieMid)
-                .OnDelete(DeleteBehavior.ClientSetNull)
+                .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("TagsD_R_MovieMId_fkey");
+
+            entity.HasOne(d => d.RSeriesM).WithMany(p => p.TagsDs)
+                .HasForeignKey(d => d.RSeriesMid)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("TagsD_R_SeriesMId_fkey");
 
             entity.HasOne(d => d.RTagM).WithMany(p => p.TagsDs)
                 .HasForeignKey(d => d.RTagMid)
@@ -300,6 +321,98 @@ public partial class AppDbContext : DbContext
         modelBuilder.Entity<UserDeviceActive>()
             .HasIndex(d => d.RefreshToken)
             .IsUnique();
+
+        modelBuilder.Entity<SeriesM>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("SeriesM_pkey");
+
+            entity.ToTable("SeriesM");
+
+            entity.Property(e => e.Id).ValueGeneratedNever();
+            entity.Property(e => e.CreatedAt).HasColumnType("timestamp with time zone");
+            entity.Property(e => e.DeletedAt).HasColumnType("timestamp with time zone");
+            entity.Property(e => e.Description).HasMaxLength(1000);
+            entity.Property(e => e.Rating).HasColumnType("decimal(3, 1)");
+            entity.Property(e => e.RImagesMid).HasColumnName("R_ImagesMId");
+            entity.Property(e => e.RUserId).HasColumnName("R_UserId");
+            entity.Property(e => e.Title).HasMaxLength(150);
+
+            entity.HasOne(d => d.RImagesM).WithMany(p => p.SeriesMs)
+                .HasForeignKey(d => d.RImagesMid)
+                .OnDelete(DeleteBehavior.SetNull)
+                .HasConstraintName("SeriesM_R_ImagesMId_fkey");
+
+            entity.HasOne(d => d.RUsers).WithMany(p => p.SeriesMs)
+                .HasForeignKey(d => d.RUserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("SeriesM_R_UserId_fkey");
+        });
+
+        modelBuilder.Entity<SeasonsM>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("SeasonsM_pkey");
+
+            entity.ToTable("SeasonsM");
+
+            entity.Property(e => e.Id).ValueGeneratedNever();
+            entity.Property(e => e.CreatedAt).HasColumnType("timestamp with time zone");
+            entity.Property(e => e.Description).HasMaxLength(500);
+            entity.Property(e => e.RSeriesMid).HasColumnName("R_SeriesMId");
+            entity.Property(e => e.Title).HasMaxLength(100);
+
+            entity.HasOne(d => d.RSeriesM).WithMany(p => p.SeasonsMs)
+                .HasForeignKey(d => d.RSeriesMid)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("SeasonsM_R_SeriesMId_fkey");
+        });
+
+        modelBuilder.Entity<EpisodesM>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("EpisodesM_pkey");
+
+            entity.ToTable("EpisodesM");
+
+            entity.Property(e => e.Id).ValueGeneratedNever();
+            entity.Property(e => e.CreatedAt).HasColumnType("timestamp with time zone");
+            entity.Property(e => e.DeletedAt).HasColumnType("timestamp with time zone");
+            entity.Property(e => e.Description).HasMaxLength(1000);
+            entity.Property(e => e.Path).HasMaxLength(500);
+            entity.Property(e => e.RImagesMid).HasColumnName("R_ImagesMId");
+            entity.Property(e => e.RSeasonMid).HasColumnName("R_SeasonMId");
+            entity.Property(e => e.Title).HasMaxLength(150);
+
+            entity.HasOne(d => d.RImagesM).WithMany(p => p.EpisodesMs)
+                .HasForeignKey(d => d.RImagesMid)
+                .OnDelete(DeleteBehavior.SetNull)
+                .HasConstraintName("EpisodesM_R_ImagesMId_fkey");
+
+            entity.HasOne(d => d.RSeasonM).WithMany(p => p.EpisodesMs)
+                .HasForeignKey(d => d.RSeasonMid)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("EpisodesM_R_SeasonMId_fkey");
+        });
+
+        modelBuilder.Entity<EpisodesD>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("EpisodesD_pkey");
+
+            entity.ToTable("EpisodesD");
+
+            entity.Property(e => e.Id).ValueGeneratedNever();
+            entity.Property(e => e.LastWatchedAt).HasColumnType("timestamp with time zone");
+            entity.Property(e => e.REpisodeMid).HasColumnName("R_EpisodeMId");
+            entity.Property(e => e.RUserId).HasColumnName("R_UserId");
+
+            entity.HasOne(d => d.REpisodeM).WithMany(p => p.EpisodesDs)
+                .HasForeignKey(d => d.REpisodeMid)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("EpisodesD_R_EpisodeMId_fkey");
+
+            entity.HasOne(d => d.RUsers).WithMany(p => p.EpisodesDs)
+                .HasForeignKey(d => d.RUserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("EpisodesD_R_UserId_fkey");
+        });
 
         OnModelCreatingPartial(modelBuilder);
     }

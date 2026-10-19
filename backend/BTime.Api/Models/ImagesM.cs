@@ -16,4 +16,8 @@ public partial class ImagesM
     public virtual ICollection<MenuM> MenuMs { get; set; } = [];
 
     public virtual ICollection<MoviesM> MoviesMs { get; set; } = [];
+
+    public virtual ICollection<SeriesM> SeriesMs { get; set; } = [];
+
+    public virtual ICollection<EpisodesM> EpisodesMs { get; set; } = [];
 }
