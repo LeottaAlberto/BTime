@@ -4,16 +4,19 @@
   <g-top-nav-bar/>
 
   <!-- Movies Dashboard -->
-  <div class="w-full h-fit flex flex-col gap-6">
+  <div class="w-full h-fit flex flex-col gap-6 pb-12">
 
     <!-- Hero Banner -->
     <g-hero-banner/>
 
     <!-- Continue Watching Section -->
-    <g-media-row [titleRow]="'Continue Watching'"/>
+    <g-media-row [titleRow]="'Continue Watching'" [items]="movS.watMovs() ?? []" />
 
     <!-- Films Section -->
-    <g-media-row [titleRow]="'Films'" [isVertical]="true"/>
+    <g-media-row [titleRow]="'Films'" [isVertical]="true" [items]="movS.films() ?? []" />
+
+    <!-- TV Series Section -->
+    <g-media-row [titleRow]="'TV Series'" [isVertical]="true" [items]="movS.series() ?? []" />
 
   </div>
 
