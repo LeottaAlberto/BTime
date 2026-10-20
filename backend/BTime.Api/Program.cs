@@ -81,6 +81,22 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 // Controllers
+// Health Check (Verifica stato server e connettività DB)
+app.MapGet("/health", async (AppDbContext db) =>
+{
+    try
+    {
+        var canConnect = await db.Database.CanConnectAsync();
+        return canConnect
+            ? Results.Ok(new { status = "Healthy", database = "Connected" })
+            : Results.StatusCode(503);
+    }
+    catch
+    {
+        return Results.StatusCode(503);
+    }
+}).AllowAnonymous();
+
 app.MapControllers();
 
 app.Run();
