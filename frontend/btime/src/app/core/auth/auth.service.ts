@@ -1,5 +1,5 @@
 import { HttpClient } from "@angular/common/http";
-import { inject, Injectable, signal } from "@angular/core";
+import { computed, inject, Injectable, signal } from "@angular/core";
 import { Router } from "@angular/router";
 import { LoginResponse } from "../interfaces/login/loginResponse.interface";
 import { jwtDecode } from "jwt-decode";
@@ -12,6 +12,7 @@ import { environment } from "../../../environments/environment.development";
 @Injectable({ providedIn: "root" }) // Questo decoratore permette di creare una sola instanza di questa classe per tutte l'app
 export class AuthService {
   public currentUser = signal<LoginResponse | null>(null);
+  public isAdmin = computed(() => this.currentUser()?.role === "Admin");
   private http = inject(HttpClient);
   private router = inject(Router);
 
