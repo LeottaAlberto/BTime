@@ -1,1 +1,16 @@
-<p>g-poster-card.component works!</p>
+<div class="group relative w-45 h-60 aspect-video rounded-lg overflow-hidden cursor-pointer transition-all duration-300 text-white shrink-0 scrollbar-thumb-neutral-700
+  hover:ring-2 hover:ring-violet-500 hover:shadow-xl hover:shadow-violet-900/20">
+
+  <!-- Immagine di sfondo dinamica (Non passa per il resolver di Vite) -->
+  <div
+    class="absolute inset-0 bg-no-repeat bg-center bg-cover transition-transform duration-500 group-hover:scale-110"
+    [style.backgroundImage]="icon() ? 'url(' + icon() + ')' : ''">
+  </div>
+
+  <!-- Informazioni -->
+  <div class="absolute top-3 right-3 z-10 flex flex-col gap-2">
+    <div class="flex justify-between items-end">
+      <p class="text-xs font-medium text-white bg-neutral-700/75 px-1 py-0.5 rounded-sm">Season {{season()}}</p>
+    </div>
+  </div>
+</div>
