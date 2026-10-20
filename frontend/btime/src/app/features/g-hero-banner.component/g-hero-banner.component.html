@@ -1,12 +1,18 @@
-<div class="relative w-full px-7 py-10 rounded-xl outline-1 outline-neutral-800 overflow-hidden">
+<div class="relative w-full min-h-95 md:min-h-110 px-7 py-10 rounded-xl outline-1 outline-neutral-800 overflow-hidden flex items-end shadow-2xl">
 
-  <!-- Background -->
+  <!-- Background Wallpaper -->
   <div class="absolute inset-0 z-0">
-    <div class="absolute inset-0 bg-no-repeat bg-center bg-cover"
-    [style.backgroundImage]="dashboard.movieBanner()?.icon ? 'url(' + dashboard.movieBanner()!.icon + ')' : ''"></div>
+    <div class="absolute inset-0 bg-no-repeat bg-center bg-cover transition-all duration-700"
+      [style.backgroundImage]="'url(' + bannerIcon() + ')'"></div>
     <div class="absolute inset-0 bg-linear-to-r from-black/93 from-30% to-transparent"></div>
+    <div class="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent"></div>
   </div>
 
-  <!-- Context -->
-  <g-hero-info [bannerTitle]="dashboard.movieBanner()?.heroTitle ?? ''" [description]="dashboard.movieBanner()?.description ?? ''" />
+  <!-- Context (visibile solo se è presente un titolo effettivo) -->
+  @if (movS.movieBanner()?.heroTitle) {
+    <g-hero-info
+      [bannerTitle]="movS.movieBanner()?.heroTitle ?? ''"
+      [description]="movS.movieBanner()?.description ?? ''" />
+  }
+
 </div>
