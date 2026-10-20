@@ -1,16 +1,30 @@
-<div class="group relative w-45 h-60 aspect-video rounded-lg mx-2 overflow-hidden cursor-pointer transition-all duration-300 text-white shrink-0 scrollbar-thumb-neutral-700
-  hover:ring-2 hover:ring-violet-500 hover:shadow-xl hover:shadow-violet-900/20">
+<div class="group relative w-44 h-64 rounded-lg overflow-hidden cursor-pointer transition-all duration-300 text-white shrink-0
+  hover:ring-2 hover:ring-violet-500 hover:shadow-xl hover:shadow-violet-900/30">
 
-  <!-- Immagine di sfondo dinamica (Non passa per il resolver di Vite) -->
+  <!-- Immagine di sfondo -->
   <div
     class="absolute inset-0 bg-no-repeat bg-center bg-cover transition-transform duration-500 group-hover:scale-110"
-    [style.backgroundImage]="icon() ? 'url(' + icon() + ')' : ''">
+    [style.backgroundImage]="resolvedIcon() ? 'url(' + resolvedIcon() + ')' : ''">
   </div>
 
-  <!-- Informazioni -->
-  <div class="absolute top-3 right-3 z-10 flex flex-col gap-2">
-    <div class="flex justify-between items-end">
-      <p class="text-xs font-medium text-white bg-neutral-700/75 px-1 py-0.5 rounded-sm">Season {{season()}}</p>
-    </div>
+  <!-- Overlay scuro sfumato in basso con Titolo -->
+  <div class="absolute inset-0 bg-linear-to-t from-black/85 via-black/20 to-transparent transition-opacity duration-300 flex flex-col justify-end p-3 z-10">
+    @if (title()) {
+      <p class="text-sm font-semibold truncate">{{title()}}</p>
+    }
   </div>
+
+  <!-- Badge in alto a destra (Stagioni o Anno) -->
+  <div class="absolute top-2 right-2 z-10 flex items-center gap-1">
+    @if (season() && season()! > 0) {
+      <p class="text-[11px] font-medium text-white bg-black/60 backdrop-blur-md px-1.5 py-0.5 rounded border border-neutral-700/50">
+        {{season()}} {{ season() === 1 ? 'Stagione' : 'Stagioni' }}
+      </p>
+    } @else if (year()) {
+      <p class="text-[11px] font-medium text-white bg-black/60 backdrop-blur-md px-1.5 py-0.5 rounded border border-neutral-700/50">
+        {{year()}}
+      </p>
+    }
+  </div>
+
 </div>
