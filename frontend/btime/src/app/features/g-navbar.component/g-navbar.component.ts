@@ -25,6 +25,7 @@ export class GNavbarComponent implements OnInit {
   ngOnInit(): void {
     const items = [
       { icon: "home", label: "Home" },
+      ...(this.auth.isAdmin() ? [{ icon: "shield", label: "Admin" }] : []),
       { icon: "cog", label: "Settings" },
       { icon: "trash", label: "Trash" },
     ];
@@ -37,6 +38,8 @@ export class GNavbarComponent implements OnInit {
     this.selectedLabel.set(label);
     if (label === "Home") {
       this.router.navigate(["/dashboard"]);
+    } else if (label === "Admin") {
+      this.router.navigate(["/dashboard/admin"]);
     }
   }
 
@@ -54,16 +57,14 @@ export class GNavbarComponent implements OnInit {
         message: "Logout done successfully",
         status: StatusType.Good,
       });
-      return;
     }
-
-    this.alert.show({ title: "Logout Status", message: "Logout Error", status: StatusType.Bad });
   }
 
-  private http = inject(HttpClient);
-
-  public onClick() {
-    // this.alert.show({ title: "Test!", message: "Testo di prova per vedere il testo come esce", status: StatusType.Normal });
-    this.http.get("https://localhost:7255/api/rotta-inesistente").subscribe();
+  public onClick(): void {
+    this.alert.show({
+      title: "Title",
+      message: "Questo è un messaggio di successo!",
+      status: StatusType.Good,
+    });
   }
 }
