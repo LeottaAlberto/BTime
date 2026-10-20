@@ -198,6 +198,9 @@ public partial class AppDbContext : DbContext
             entity.ToTable("MoviesM");
 
             entity.Property(e => e.Id).ValueGeneratedNever();
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                .HasColumnType("timestamp with time zone");
             entity.Property(e => e.DeletedAt).HasColumnType("timestamp without time zone");
             entity.Property(e => e.Description).HasMaxLength(500);
             entity.Property(e => e.Path).HasMaxLength(200);
