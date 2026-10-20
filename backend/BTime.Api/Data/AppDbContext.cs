@@ -335,7 +335,7 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.CreatedAt).HasColumnType("timestamp with time zone");
             entity.Property(e => e.DeletedAt).HasColumnType("timestamp with time zone");
             entity.Property(e => e.Description).HasMaxLength(1000);
-            entity.Property(e => e.Rating).HasColumnType("decimal(3, 1)");
+            entity.Property(e => e.Rating).HasColumnType("decimal(5, 2)");
             entity.Property(e => e.RImagesMid).HasColumnName("R_ImagesMId");
             entity.Property(e => e.RUserId).HasColumnName("R_UserId");
             entity.Property(e => e.Title).HasMaxLength(150);
