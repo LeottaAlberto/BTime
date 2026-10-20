@@ -11,4 +11,5 @@ import { GPosterCardComponent } from "../g-poster-card.component/g-poster-card.c
 export class GMediaRowComponent {
   public isVertical: InputSignal<boolean> = input<boolean>(false);
   public titleRow: InputSignal<string> = input<string>("");
+  public items: InputSignal<any[]> = input<any[]>([]);
 }
