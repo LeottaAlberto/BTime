@@ -1,4 +1,4 @@
-import { Component } from "@angular/core";
+import { Component, input, InputSignal } from "@angular/core";
 
 @Component({
   imports: [],
@@ -6,4 +6,7 @@ import { Component } from "@angular/core";
   styleUrl: "./g-hero-info.component.css",
   templateUrl: "./g-hero-info.component.html",
 })
-export class GHeroInfoComponent {}
+export class GHeroInfoComponent {
+  public bannerTitle: InputSignal<string> = input("");
+  public description: InputSignal<string> = input("");
+}
