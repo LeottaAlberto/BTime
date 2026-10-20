@@ -1,5 +1,5 @@
 import { Component, inject, OnInit } from "@angular/core";
-import { DashboardService } from "../../core/services/dashboard.service";
+import { DashboardService } from "../../core/services/dashboard/dashboard.service";
 import { LoadingService } from "../../core/services/loading.service";
 import { GDashCardComponent } from "../g-dash-card.component/g-dash-card.component";
 
