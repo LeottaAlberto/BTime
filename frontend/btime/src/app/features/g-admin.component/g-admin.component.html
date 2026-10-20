@@ -1,0 +1,996 @@
+<div class="flex flex-col w-full h-full max-w-6xl mx-auto gap-8 text-white select-none pb-24">
+
+  <!-- Header del Pannello Admin -->
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-neutral-800">
+    <div class="flex items-center gap-3">
+      <div class="w-12 h-12 rounded-xl bg-violet-600/20 border border-violet-500/30 flex items-center justify-center text-violet-400 shadow-lg shadow-violet-900/20">
+        <span class="pi pi-shield text-2xl"></span>
+      </div>
+      <div class="flex flex-col">
+        <div class="flex items-center gap-2">
+          <h1 class="text-2xl font-bold tracking-tight">Pannello Amministrazione</h1>
+          <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-violet-500/20 text-violet-300 border border-violet-500/30">
+            Admin Only
+          </span>
+        </div>
+        <p class="text-xs text-neutral-400">Carica e gestisci film, serie TV ed episodi su BTime</p>
+      </div>
+    </div>
+
+    <!-- Tab Switcher Principale -->
+    <div class="flex items-center gap-1.5 p-1 bg-neutral-900 border border-neutral-800 rounded-xl">
+      <button
+        (click)="setTab('movies')"
+        [class.bg-violet-600]="activeTab() === 'movies'"
+        [class.text-white]="activeTab() === 'movies'"
+        [class.text-neutral-400]="activeTab() !== 'movies'"
+        class="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer hover:text-white">
+        <span class="pi pi-video"></span>
+        Film
+      </button>
+
+      <button
+        (click)="setTab('series')"
+        [class.bg-violet-600]="activeTab() === 'series'"
+        [class.text-white]="activeTab() === 'series'"
+        [class.text-neutral-400]="activeTab() !== 'series'"
+        class="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer hover:text-white">
+        <span class="pi pi-list"></span>
+        Serie TV
+      </button>
+
+      <button
+        (click)="setTab('catalog')"
+        [class.bg-violet-600]="activeTab() === 'catalog'"
+        [class.text-white]="activeTab() === 'catalog'"
+        [class.text-neutral-400]="activeTab() !== 'catalog'"
+        class="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer hover:text-white">
+        <span class="pi pi-tags"></span>
+        Catalogo & Tag
+      </button>
+    </div>
+  </div>
+
+  <!-- Barra di Progresso Upload Video Globale (visibile durante il caricamento di file pesanti) -->
+  @if (uploadProgress() !== null) {
+    <div class="p-4 rounded-xl bg-neutral-900 border border-violet-500/40 shadow-xl flex flex-col gap-2 animate-pulse">
+      <div class="flex items-center justify-between text-xs font-medium">
+        <span class="flex items-center gap-2 text-violet-300">
+          <span class="pi pi-spin pi-spinner"></span>
+          Upload del file video in corso verso il server...
+        </span>
+        <span class="font-bold text-violet-400">{{ uploadProgress() }}%</span>
+      </div>
+      <div class="w-full bg-neutral-800 h-2.5 rounded-full overflow-hidden">
+        <div class="bg-violet-600 h-2.5 transition-all duration-200" [style.width.%]="uploadProgress()"></div>
+      </div>
+    </div>
+  }
+
+  <!-- ========================================================================= -->
+  <!-- TAB 1: GESTIONE & CARICAMENTO FILM                                       -->
+  <!-- ========================================================================= -->
+  @if (activeTab() === 'movies') {
+    <div class="flex flex-col gap-8">
+
+      <!-- Form Caricamento Film -->
+      <div class="flex flex-col gap-6 p-6 rounded-2xl bg-neutral-900/70 border border-neutral-800 backdrop-blur-sm shadow-xl">
+        <div class="flex items-center justify-between pb-4 border-b border-neutral-800">
+          <div class="flex items-center gap-3">
+            <span class="pi pi-plus-circle text-violet-400 text-xl"></span>
+            <div>
+              <h2 class="text-lg font-bold text-white">Caricamento Nuovo Film</h2>
+              <p class="text-xs text-neutral-400">Supporta caricamento diretto (Upload) oppure puntamento su disco/NAS</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+          <!-- Metadati Principali -->
+          <div class="flex flex-col gap-4">
+            <div class="flex flex-col gap-1.5">
+              <label class="text-xs font-semibold text-neutral-300">Titolo del Film *</label>
+              <input
+                type="text"
+                placeholder="es. Inception, Interstellar..."
+                [value]="movieTitle()"
+                (input)="movieTitle.set($any($event.target).value)"
+                class="w-full px-3.5 py-2.5 rounded-xl bg-neutral-800/80 border border-neutral-700/80 text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-violet-500 transition-colors" />
+            </div>
+
+            <div class="flex flex-col gap-1.5">
+              <label class="text-xs font-semibold text-neutral-300">Descrizione / Trama</label>
+              <textarea
+                rows="3"
+                placeholder="Breve sinossi del film..."
+                [value]="movieDesc()"
+                (input)="movieDesc.set($any($event.target).value)"
+                class="w-full px-3.5 py-2.5 rounded-xl bg-neutral-800/80 border border-neutral-700/80 text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-violet-500 transition-colors resize-none"></textarea>
+            </div>
+
+            <div class="flex flex-col gap-1.5">
+              <label class="text-xs font-semibold text-neutral-300">Durata (in minuti)</label>
+              <input
+                type="number"
+                placeholder="es. 148"
+                [value]="movieDuration() ?? ''"
+                (input)="movieDuration.set($any($event.target).value ? +$any($event.target).value : null)"
+                class="w-full px-3.5 py-2.5 rounded-xl bg-neutral-800/80 border border-neutral-700/80 text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-violet-500 transition-colors" />
+            </div>
+          </div>
+
+          <!-- Metodo Copertina & Metodo Video -->
+          <div class="flex flex-col gap-6">
+
+            <!-- 1. Copertina (Dual Mode) -->
+            <div class="flex flex-col gap-2 p-4 rounded-xl bg-neutral-950/40 border border-neutral-800/80">
+              <div class="flex items-center justify-between">
+                <label class="text-xs font-bold text-neutral-300 flex items-center gap-1.5">
+                  <span class="pi pi-image text-violet-400"></span>
+                  Locandina / Copertina
+                </label>
+                <!-- Switch modalità -->
+                <div class="flex items-center gap-1 bg-neutral-900 p-0.5 rounded-lg border border-neutral-800 text-[11px]">
+                  <button
+                    type="button"
+                    (click)="movieCoverMode.set('upload')"
+                    [class.bg-violet-600]="movieCoverMode() === 'upload'"
+                    [class.text-white]="movieCoverMode() === 'upload'"
+                    [class.text-neutral-400]="movieCoverMode() !== 'upload'"
+                    class="px-2.5 py-1 rounded cursor-pointer font-medium">
+                    Upload File
+                  </button>
+                  <button
+                    type="button"
+                    (click)="movieCoverMode.set('url')"
+                    [class.bg-violet-600]="movieCoverMode() === 'url'"
+                    [class.text-white]="movieCoverMode() === 'url'"
+                    [class.text-neutral-400]="movieCoverMode() !== 'url'"
+                    class="px-2.5 py-1 rounded cursor-pointer font-medium">
+                    URL / Percorso
+                  </button>
+                </div>
+              </div>
+
+              @if (movieCoverMode() === 'upload') {
+                <div class="flex items-center gap-3">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    (change)="onMovieCoverFileChange($event)"
+                    class="text-xs text-neutral-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-violet-600 file:text-white hover:file:bg-violet-700 cursor-pointer" />
+                  @if (movieCoverPreview()) {
+                    <img [src]="movieCoverPreview()" alt="Preview" class="w-10 h-14 object-cover rounded shadow border border-neutral-700" />
+                  }
+                </div>
+              } @else {
+                <div class="flex flex-col gap-1.5">
+                  <input
+                    type="text"
+                    placeholder="https://... oppure /hero-banner-fallback.jpg"
+                    [value]="movieCoverUrl()"
+                    (input)="movieCoverUrl.set($any($event.target).value)"
+                    class="w-full px-3 py-2 rounded-lg bg-neutral-800/80 border border-neutral-700/80 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-violet-500" />
+                  @if (movieCoverUrl()) {
+                    <div class="mt-1 flex items-center gap-2">
+                      <img [src]="movieCoverUrl()" alt="Preview" class="w-10 h-14 object-cover rounded shadow border border-neutral-700" />
+                      <span class="text-[10px] text-neutral-400">Anteprima URL inserito</span>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+
+            <!-- 2. File Video (Dual Mode) -->
+            <div class="flex flex-col gap-2 p-4 rounded-xl bg-neutral-950/40 border border-neutral-800/80">
+              <div class="flex items-center justify-between">
+                <label class="text-xs font-bold text-neutral-300 flex items-center gap-1.5">
+                  <span class="pi pi-video text-violet-400"></span>
+                  Sorgente Video *
+                </label>
+                <!-- Switch modalità -->
+                <div class="flex items-center gap-1 bg-neutral-900 p-0.5 rounded-lg border border-neutral-800 text-[11px]">
+                  <button
+                    type="button"
+                    (click)="movieVideoMode.set('upload')"
+                    [class.bg-violet-600]="movieVideoMode() === 'upload'"
+                    [class.text-white]="movieVideoMode() === 'upload'"
+                    [class.text-neutral-400]="movieVideoMode() !== 'upload'"
+                    class="px-2.5 py-1 rounded cursor-pointer font-medium">
+                    Upload File
+                  </button>
+                  <button
+                    type="button"
+                    (click)="movieVideoMode.set('path')"
+                    [class.bg-violet-600]="movieVideoMode() === 'path'"
+                    [class.text-white]="movieVideoMode() === 'path'"
+                    [class.text-neutral-400]="movieVideoMode() !== 'path'"
+                    class="px-2.5 py-1 rounded cursor-pointer font-medium">
+                    Percorso su Disco / Server
+                  </button>
+                </div>
+              </div>
+
+              @if (movieVideoMode() === 'upload') {
+                <div class="flex flex-col gap-1.5">
+                  <input
+                    type="file"
+                    accept="video/mp4,video/x-matroska,video/webm,video/avi"
+                    (change)="onMovieVideoFileChange($event)"
+                    class="text-xs text-neutral-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-violet-600 file:text-white hover:file:bg-violet-700 cursor-pointer" />
+                  @if (movieVideoFileName()) {
+                    <span class="text-[11px] text-emerald-400 flex items-center gap-1">
+                      <span class="pi pi-check"></span> File selezionato: {{ movieVideoFileName() }}
+                    </span>
+                  }
+                </div>
+              } @else {
+                <div class="flex flex-col gap-1">
+                  <input
+                    type="text"
+                    placeholder="es. D:\Film\Inception.2010.mp4 oppure /media/nas/Film.mp4"
+                    [value]="movieVideoPath()"
+                    (input)="movieVideoPath.set($any($event.target).value)"
+                    class="w-full px-3 py-2 rounded-lg bg-neutral-800/80 border border-neutral-700/80 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-violet-500" />
+                  <p class="text-[10px] text-neutral-400">
+                    Ideale per film già archiviati su disco locale o NAS sul server (evita upload da browser).
+                  </p>
+                </div>
+              }
+            </div>
+
+          </div>
+
+        </div>
+
+        <!-- Sezione Generi e Tag -->
+        <div class="flex flex-col gap-2 pt-2 border-t border-neutral-800">
+          <label class="text-xs font-semibold text-neutral-300">Generi & Tag</label>
+
+          <!-- Tag esistenti -->
+          <div class="flex flex-wrap gap-1.5 max-h-32 overflow-y-auto p-2 bg-neutral-950/40 rounded-xl border border-neutral-800">
+            @for (tag of adminService.tags(); track tag.id) {
+              <button
+                type="button"
+                (click)="toggleMovieTag(tag.id)"
+                [class.bg-violet-600]="movieSelectedTagIds().includes(tag.id)"
+                [class.border-violet-500]="movieSelectedTagIds().includes(tag.id)"
+                [class.text-white]="movieSelectedTagIds().includes(tag.id)"
+                [class.bg-neutral-800]="!movieSelectedTagIds().includes(tag.id)"
+                [class.border-neutral-700]="!movieSelectedTagIds().includes(tag.id)"
+                [class.text-neutral-400]="!movieSelectedTagIds().includes(tag.id)"
+                class="px-2.5 py-1 rounded-lg text-xs font-medium border transition-all cursor-pointer hover:border-violet-500 hover:text-white">
+                {{ tag.name }}
+              </button>
+            }
+          </div>
+
+          <!-- Aggiunta nuovo tag al volo -->
+          <div class="flex items-center gap-2 mt-2">
+            <input
+              type="text"
+              placeholder="Aggiungi nuovo genere (es. Thriller, Cyberpunk...)"
+              [value]="movieNewTagInput()"
+              (input)="movieNewTagInput.set($any($event.target).value)"
+              (keydown.enter)="$event.preventDefault(); addMovieCustomTag()"
+              class="w-72 px-3 py-1.5 rounded-lg bg-neutral-800/80 border border-neutral-700 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-violet-500" />
+            <button
+              type="button"
+              (click)="addMovieCustomTag()"
+              class="px-3 py-1.5 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-xs font-semibold text-neutral-200 border border-neutral-700 transition cursor-pointer">
+              + Aggiungi
+            </button>
+          </div>
+
+          @if (movieNewTagsList().length > 0) {
+            <div class="flex flex-wrap gap-1.5 mt-1">
+              @for (tag of movieNewTagsList(); track tag) {
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-violet-500/20 text-violet-300 border border-violet-500/40">
+                  {{ tag }}
+                  <span (click)="removeMovieCustomTag(tag)" class="pi pi-times cursor-pointer hover:text-white"></span>
+                </span>
+              }
+            </div>
+          }
+        </div>
+
+        <!-- Azioni Form Film -->
+        <div class="flex items-center justify-end gap-3 pt-4 border-t border-neutral-800">
+          <button
+            type="button"
+            (click)="resetMovieForm()"
+            [disabled]="isSubmitting()"
+            class="px-4 py-2 rounded-xl text-xs font-semibold text-neutral-400 hover:text-white hover:bg-neutral-800 transition cursor-pointer">
+            Azzera Campi
+          </button>
+
+          <button
+            type="button"
+            (click)="submitMovie()"
+            [disabled]="isSubmitting()"
+            class="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-700 disabled:opacity-50 text-xs font-bold text-white transition shadow-lg shadow-violet-900/30 cursor-pointer">
+            @if (isSubmitting()) {
+              <span class="pi pi-spin pi-spinner"></span>
+              Caricamento in corso...
+            } @else {
+              <span class="pi pi-check"></span>
+              Pubblica Film
+            }
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Elenco Film Esistenti nel Catalogo -->
+      <div class="flex flex-col gap-4">
+        <div class="flex items-center justify-between">
+          <h3 class="text-base font-bold text-white flex items-center gap-2">
+            <span class="pi pi-database text-violet-400"></span>
+            Film nel Catalogo ({{ adminService.movies().length }})
+          </h3>
+          <button
+            (click)="adminService.loadMoviesList().subscribe()"
+            class="text-xs text-neutral-400 hover:text-white flex items-center gap-1 transition cursor-pointer">
+            <span class="pi pi-refresh"></span> Aggiorna
+          </button>
+        </div>
+
+        @if (adminService.movies().length === 0) {
+          <div class="p-8 rounded-xl bg-neutral-900/40 border border-neutral-800 text-center text-xs text-neutral-400">
+            Nessun film registrato nel catalogo. Usa il form sopra per caricarne uno!
+          </div>
+        } @else {
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            @for (movie of adminService.movies(); track movie.id) {
+              <div class="flex gap-3.5 p-3.5 rounded-xl bg-neutral-900/60 border border-neutral-800/80 hover:border-violet-500/30 transition group">
+                <img
+                  [src]="getMediaUrl(movie.cover)"
+                  [alt]="movie.title"
+                  class="w-16 h-24 object-cover rounded-lg shadow-md border border-neutral-800 shrink-0" />
+                <div class="flex flex-col justify-between overflow-hidden flex-1">
+                  <div class="flex flex-col gap-1">
+                    <div class="flex items-start justify-between gap-2">
+                      <h4 class="text-xs font-bold text-white truncate" [title]="movie.title">{{ movie.title }}</h4>
+                      <button
+                        (click)="deleteMovie(movie)"
+                        title="Elimina film"
+                        class="text-neutral-500 hover:text-red-400 text-xs transition cursor-pointer">
+                        <span class="pi pi-trash"></span>
+                      </button>
+                    </div>
+                    <p class="text-[11px] text-neutral-400 line-clamp-2">{{ movie.description || 'Nessuna descrizione' }}</p>
+                  </div>
+
+                  <div class="flex items-center justify-between text-[10px] text-neutral-400 pt-2 border-t border-neutral-800/60">
+                    <span>{{ movie.duration ? movie.duration + ' min' : 'Durata non spec.' }}</span>
+                    <span class="truncate max-w-30 text-neutral-500" [title]="movie.path">{{ movie.path }}</span>
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+    </div>
+  }
+
+  <!-- ========================================================================= -->
+  <!-- TAB 2: GESTIONE & CARICAMENTO SERIE TV & EPISODI                         -->
+  <!-- ========================================================================= -->
+  @if (activeTab() === 'series') {
+    <div class="flex flex-col gap-6">
+
+      <!-- Sotto-schede di navigazione Serie TV -->
+      <div class="flex flex-wrap items-center gap-2 p-1 bg-neutral-900/80 border border-neutral-800 rounded-xl">
+        <button
+          (click)="setSeriesSubTab('new-series')"
+          [class.bg-violet-600]="seriesSubTab() === 'new-series'"
+          [class.text-white]="seriesSubTab() === 'new-series'"
+          [class.text-neutral-400]="seriesSubTab() !== 'new-series'"
+          class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer hover:text-white">
+          <span class="pi pi-plus-circle"></span>
+          1. Nuova Serie
+        </button>
+
+        <button
+          (click)="setSeriesSubTab('new-season')"
+          [class.bg-violet-600]="seriesSubTab() === 'new-season'"
+          [class.text-white]="seriesSubTab() === 'new-season'"
+          [class.text-neutral-400]="seriesSubTab() !== 'new-season'"
+          class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer hover:text-white">
+          <span class="pi pi-calendar-plus"></span>
+          2. Aggiungi Stagione
+        </button>
+
+        <button
+          (click)="setSeriesSubTab('new-episode')"
+          [class.bg-violet-600]="seriesSubTab() === 'new-episode'"
+          [class.text-white]="seriesSubTab() === 'new-episode'"
+          [class.text-neutral-400]="seriesSubTab() !== 'new-episode'"
+          class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer hover:text-white">
+          <span class="pi pi-upload"></span>
+          3. Carica Episodio
+        </button>
+
+        <button
+          (click)="setSeriesSubTab('tree')"
+          [class.bg-violet-600]="seriesSubTab() === 'tree'"
+          [class.text-white]="seriesSubTab() === 'tree'"
+          [class.text-neutral-400]="seriesSubTab() !== 'tree'"
+          class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer hover:text-white ml-auto">
+          <span class="pi pi-folder-open"></span>
+          Albero Serie TV ({{ adminService.seriesTree().length }})
+        </button>
+      </div>
+
+      <!-- Sotto-scheda: 1. Nuova Serie TV -->
+      @if (seriesSubTab() === 'new-series') {
+        <div class="flex flex-col gap-6 p-6 rounded-2xl bg-neutral-900/70 border border-neutral-800 shadow-xl">
+          <div class="flex items-center gap-2 pb-3 border-b border-neutral-800">
+            <span class="pi pi-tv text-violet-400 text-lg"></span>
+            <h3 class="text-base font-bold text-white">Creazione Nuova Serie TV</h3>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="flex flex-col gap-4">
+              <div class="flex flex-col gap-1.5">
+                <label class="text-xs font-semibold text-neutral-300">Titolo della Serie *</label>
+                <input
+                  type="text"
+                  placeholder="es. Breaking Bad, Stranger Things..."
+                  [value]="seriesTitle()"
+                  (input)="seriesTitle.set($any($event.target).value)"
+                  class="w-full px-3.5 py-2.5 rounded-xl bg-neutral-800/80 border border-neutral-700 text-sm text-white focus:outline-none focus:border-violet-500" />
+              </div>
+
+              <div class="flex flex-col gap-1.5">
+                <label class="text-xs font-semibold text-neutral-300">Descrizione Serie</label>
+                <textarea
+                  rows="3"
+                  placeholder="Descrizione della serie TV..."
+                  [value]="seriesDesc()"
+                  (input)="seriesDesc.set($any($event.target).value)"
+                  class="w-full px-3.5 py-2.5 rounded-xl bg-neutral-800/80 border border-neutral-700 text-sm text-white focus:outline-none focus:border-violet-500 resize-none"></textarea>
+              </div>
+
+              <div class="grid grid-cols-2 gap-4">
+                <div class="flex flex-col gap-1.5">
+                  <label class="text-xs font-semibold text-neutral-300">Anno di Rilascio</label>
+                  <input
+                    type="number"
+                    [value]="seriesYear() ?? ''"
+                    (input)="seriesYear.set($any($event.target).value ? +$any($event.target).value : null)"
+                    class="w-full px-3.5 py-2.5 rounded-xl bg-neutral-800/80 border border-neutral-700 text-sm text-white focus:outline-none focus:border-violet-500" />
+                </div>
+                <div class="flex flex-col gap-1.5">
+                  <label class="text-xs font-semibold text-neutral-300">Rating (Valutazione, 0-10)</label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="10"
+                    step="0.1"
+                    placeholder="es. 8.8"
+                    [value]="seriesRating() ?? ''"
+                    (input)="seriesRating.set($any($event.target).value ? +$any($event.target).value : null)"
+                    class="w-full px-3.5 py-2.5 rounded-xl bg-neutral-800/80 border border-neutral-700 text-sm text-white focus:outline-none focus:border-violet-500" />
+                </div>
+              </div>
+            </div>
+
+            <!-- Copertina Serie (Dual Mode) -->
+            <div class="flex flex-col gap-4">
+              <div class="flex flex-col gap-2 p-4 rounded-xl bg-neutral-950/40 border border-neutral-800">
+                <div class="flex items-center justify-between">
+                  <label class="text-xs font-bold text-neutral-300">Locandina Serie TV</label>
+                  <div class="flex items-center gap-1 bg-neutral-900 p-0.5 rounded-lg border border-neutral-800 text-[11px]">
+                    <button
+                      type="button"
+                      (click)="seriesCoverMode.set('upload')"
+                      [class.bg-violet-600]="seriesCoverMode() === 'upload'"
+                      [class.text-white]="seriesCoverMode() === 'upload'"
+                      [class.text-neutral-400]="seriesCoverMode() !== 'upload'"
+                      class="px-2.5 py-1 rounded cursor-pointer font-medium">
+                      Upload File
+                    </button>
+                    <button
+                      type="button"
+                      (click)="seriesCoverMode.set('url')"
+                      [class.bg-violet-600]="seriesCoverMode() === 'url'"
+                      [class.text-white]="seriesCoverMode() === 'url'"
+                      [class.text-neutral-400]="seriesCoverMode() !== 'url'"
+                      class="px-2.5 py-1 rounded cursor-pointer font-medium">
+                      URL / Percorso
+                    </button>
+                  </div>
+                </div>
+
+                @if (seriesCoverMode() === 'upload') {
+                  <div class="flex items-center gap-3">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      (change)="onSeriesCoverFileChange($event)"
+                      class="text-xs text-neutral-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-violet-600 file:text-white hover:file:bg-violet-700 cursor-pointer" />
+                    @if (seriesCoverPreview()) {
+                      <img [src]="seriesCoverPreview()" alt="Preview" class="w-10 h-14 object-cover rounded shadow border border-neutral-700" />
+                    }
+                  </div>
+                } @else {
+                  <input
+                    type="text"
+                    placeholder="https://..."
+                    [value]="seriesCoverUrl()"
+                    (input)="seriesCoverUrl.set($any($event.target).value)"
+                    class="w-full px-3 py-2 rounded-lg bg-neutral-800/80 border border-neutral-700 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-violet-500" />
+                }
+              </div>
+
+              <!-- Tag Serie -->
+              <div class="flex flex-col gap-2">
+                <label class="text-xs font-semibold text-neutral-300">Generi & Tag</label>
+                <div class="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto p-2 bg-neutral-950/40 rounded-xl border border-neutral-800">
+                  @for (tag of adminService.tags(); track tag.id) {
+                    <button
+                      type="button"
+                      (click)="toggleSeriesTag(tag.id)"
+                      [class.bg-violet-600]="seriesSelectedTagIds().includes(tag.id)"
+                      [class.border-violet-500]="seriesSelectedTagIds().includes(tag.id)"
+                      [class.text-white]="seriesSelectedTagIds().includes(tag.id)"
+                      [class.bg-neutral-800]="!seriesSelectedTagIds().includes(tag.id)"
+                      [class.border-neutral-700]="!seriesSelectedTagIds().includes(tag.id)"
+                      [class.text-neutral-400]="!seriesSelectedTagIds().includes(tag.id)"
+                      class="px-2.5 py-1 rounded-lg text-xs font-medium border transition-all cursor-pointer">
+                      {{ tag.name }}
+                    </button>
+                  }
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex justify-end pt-3 border-t border-neutral-800">
+            <button
+              (click)="submitSeries()"
+              [disabled]="isSubmitting()"
+              class="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-700 text-xs font-bold text-white transition shadow-lg shadow-violet-900/30 cursor-pointer">
+              @if (isSubmitting()) {
+                <span class="pi pi-spin pi-spinner"></span> Creazione...
+              } @else {
+                <span class="pi pi-check"></span> Crea Serie TV & Procedi a Stagioni
+              }
+            </button>
+          </div>
+        </div>
+      }
+
+      <!-- Sotto-scheda: 2. Aggiungi Stagione -->
+      @if (seriesSubTab() === 'new-season') {
+        <div class="flex flex-col gap-6 p-6 rounded-2xl bg-neutral-900/70 border border-neutral-800 shadow-xl max-w-2xl mx-auto w-full">
+          <div class="flex items-center gap-2 pb-3 border-b border-neutral-800">
+            <span class="pi pi-calendar-plus text-violet-400 text-lg"></span>
+            <h3 class="text-base font-bold text-white">Aggiungi Stagione a Serie TV</h3>
+          </div>
+
+          <div class="flex flex-col gap-4">
+            <div class="flex flex-col gap-1.5">
+              <label class="text-xs font-semibold text-neutral-300">Seleziona Serie TV *</label>
+              <select
+                [value]="seasonSeriesId()"
+                (change)="seasonSeriesId.set($any($event.target).value)"
+                class="w-full px-3.5 py-2.5 rounded-xl bg-neutral-800 border border-neutral-700 text-sm text-white focus:outline-none focus:border-violet-500">
+                <option value="" disabled>-- Seleziona una Serie --</option>
+                @for (s of adminService.seriesTree(); track s.id) {
+                  <option [value]="s.id">{{ s.title }} ({{ s.seasons.length }} stagioni attuali)</option>
+                }
+              </select>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+              <div class="flex flex-col gap-1.5">
+                <label class="text-xs font-semibold text-neutral-300">Numero Stagione *</label>
+                <input
+                  type="number"
+                  [value]="seasonNumber()"
+                  (input)="seasonNumber.set(+$any($event.target).value)"
+                  class="w-full px-3.5 py-2.5 rounded-xl bg-neutral-800 border border-neutral-700 text-sm text-white focus:outline-none focus:border-violet-500" />
+              </div>
+              <div class="flex flex-col gap-1.5">
+                <label class="text-xs font-semibold text-neutral-300">Titolo Opzionale</label>
+                <input
+                  type="text"
+                  placeholder="es. Stagione 1"
+                  [value]="seasonTitle()"
+                  (input)="seasonTitle.set($any($event.target).value)"
+                  class="w-full px-3.5 py-2.5 rounded-xl bg-neutral-800 border border-neutral-700 text-sm text-white focus:outline-none focus:border-violet-500" />
+              </div>
+            </div>
+
+            <div class="flex flex-col gap-1.5">
+              <label class="text-xs font-semibold text-neutral-300">Descrizione Stagione</label>
+              <textarea
+                rows="2"
+                placeholder="Dettagli sulla stagione..."
+                [value]="seasonDesc()"
+                (input)="seasonDesc.set($any($event.target).value)"
+                class="w-full px-3.5 py-2.5 rounded-xl bg-neutral-800 border border-neutral-700 text-sm text-white focus:outline-none focus:border-violet-500 resize-none"></textarea>
+            </div>
+          </div>
+
+          <div class="flex justify-end pt-3 border-t border-neutral-800">
+            <button
+              (click)="submitSeason()"
+              [disabled]="isSubmitting()"
+              class="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-700 text-xs font-bold text-white transition shadow-lg shadow-violet-900/30 cursor-pointer">
+              @if (isSubmitting()) {
+                <span class="pi pi-spin pi-spinner"></span> Salvataggio...
+              } @else {
+                <span class="pi pi-check"></span> Salva Stagione & Carica Episodi
+              }
+            </button>
+          </div>
+        </div>
+      }
+
+      <!-- Sotto-scheda: 3. Carica Episodio -->
+      @if (seriesSubTab() === 'new-episode') {
+        <div class="flex flex-col gap-6 p-6 rounded-2xl bg-neutral-900/70 border border-neutral-800 shadow-xl max-w-3xl mx-auto w-full">
+          <div class="flex items-center gap-2 pb-3 border-b border-neutral-800">
+            <span class="pi pi-upload text-violet-400 text-lg"></span>
+            <h3 class="text-base font-bold text-white">Caricamento Episodio</h3>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Serie -->
+            <div class="flex flex-col gap-1.5">
+              <label class="text-xs font-semibold text-neutral-300">Serie TV *</label>
+              <select
+                [value]="epSeriesId()"
+                (change)="epSeriesId.set($any($event.target).value); epSeasonId.set('')"
+                class="w-full px-3.5 py-2.5 rounded-xl bg-neutral-800 border border-neutral-700 text-sm text-white focus:outline-none focus:border-violet-500">
+                <option value="" disabled>-- Seleziona Serie --</option>
+                @for (s of adminService.seriesTree(); track s.id) {
+                  <option [value]="s.id">{{ s.title }}</option>
+                }
+              </select>
+            </div>
+
+            <!-- Stagione -->
+            <div class="flex flex-col gap-1.5">
+              <label class="text-xs font-semibold text-neutral-300">Stagione *</label>
+              <select
+                [value]="epSeasonId()"
+                (change)="epSeasonId.set($any($event.target).value)"
+                class="w-full px-3.5 py-2.5 rounded-xl bg-neutral-800 border border-neutral-700 text-sm text-white focus:outline-none focus:border-violet-500">
+                <option value="" disabled>-- Seleziona Stagione --</option>
+                @for (sea of availableSeasonsForSelectedSeries(); track sea.id) {
+                  <option [value]="sea.id">Stagione {{ sea.seasonNumber }}: {{ sea.title }} ({{ sea.episodesCount }} ep)</option>
+                }
+              </select>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="flex flex-col gap-1.5">
+              <label class="text-xs font-semibold text-neutral-300">Numero Episodio *</label>
+              <input
+                type="number"
+                [value]="epNumber()"
+                (input)="epNumber.set(+$any($event.target).value)"
+                class="w-full px-3.5 py-2.5 rounded-xl bg-neutral-800 border border-neutral-700 text-sm text-white focus:outline-none focus:border-violet-500" />
+            </div>
+
+            <div class="md:col-span-2 flex flex-col gap-1.5">
+              <label class="text-xs font-semibold text-neutral-300">Titolo Episodio *</label>
+              <input
+                type="text"
+                placeholder="es. Pilot, La tempesta..."
+                [value]="epTitle()"
+                (input)="epTitle.set($any($event.target).value)"
+                class="w-full px-3.5 py-2.5 rounded-xl bg-neutral-800 border border-neutral-700 text-sm text-white focus:outline-none focus:border-violet-500" />
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="flex flex-col gap-1.5">
+              <label class="text-xs font-semibold text-neutral-300">Durata (minuti)</label>
+              <input
+                type="number"
+                placeholder="es. 48"
+                [value]="epDuration() ?? ''"
+                (input)="epDuration.set($any($event.target).value ? +$any($event.target).value : null)"
+                class="w-full px-3.5 py-2.5 rounded-xl bg-neutral-800 border border-neutral-700 text-sm text-white focus:outline-none focus:border-violet-500" />
+            </div>
+
+            <div class="md:col-span-2 flex flex-col gap-1.5">
+              <label class="text-xs font-semibold text-neutral-300">Descrizione Episodio</label>
+              <input
+                type="text"
+                placeholder="Sinossi breve..."
+                [value]="epDesc()"
+                (input)="epDesc.set($any($event.target).value)"
+                class="w-full px-3.5 py-2.5 rounded-xl bg-neutral-800 border border-neutral-700 text-sm text-white focus:outline-none focus:border-violet-500" />
+            </div>
+          </div>
+
+          <!-- Video Episodio (Dual Mode) -->
+          <div class="flex flex-col gap-2 p-4 rounded-xl bg-neutral-950/40 border border-neutral-800">
+            <div class="flex items-center justify-between">
+              <label class="text-xs font-bold text-neutral-300 flex items-center gap-1.5">
+                <span class="pi pi-video text-violet-400"></span>
+                File Video Episodio *
+              </label>
+              <div class="flex items-center gap-1 bg-neutral-900 p-0.5 rounded-lg border border-neutral-800 text-[11px]">
+                <button
+                  type="button"
+                  (click)="epVideoMode.set('upload')"
+                  [class.bg-violet-600]="epVideoMode() === 'upload'"
+                  [class.text-white]="epVideoMode() === 'upload'"
+                  [class.text-neutral-400]="epVideoMode() !== 'upload'"
+                  class="px-2.5 py-1 rounded cursor-pointer font-medium">
+                  Upload File
+                </button>
+                <button
+                  type="button"
+                  (click)="epVideoMode.set('path')"
+                  [class.bg-violet-600]="epVideoMode() === 'path'"
+                  [class.text-white]="epVideoMode() === 'path'"
+                  [class.text-neutral-400]="epVideoMode() !== 'path'"
+                  class="px-2.5 py-1 rounded cursor-pointer font-medium">
+                  Percorso su Server
+                </button>
+              </div>
+            </div>
+
+            @if (epVideoMode() === 'upload') {
+              <div class="flex flex-col gap-1.5">
+                <input
+                  type="file"
+                  accept="video/*"
+                  (change)="onEpVideoFileChange($event)"
+                  class="text-xs text-neutral-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-violet-600 file:text-white hover:file:bg-violet-700 cursor-pointer" />
+                @if (epVideoFileName()) {
+                  <span class="text-[11px] text-emerald-400 flex items-center gap-1">
+                    <span class="pi pi-check"></span> File selezionato: {{ epVideoFileName() }}
+                  </span>
+                }
+              </div>
+            } @else {
+              <input
+                type="text"
+                placeholder="es. D:\Series\BreakingBad\S01E01.mp4"
+                [value]="epVideoPath()"
+                (input)="epVideoPath.set($any($event.target).value)"
+                class="w-full px-3 py-2 rounded-lg bg-neutral-800/80 border border-neutral-700 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-violet-500" />
+            }
+          </div>
+
+          <div class="flex justify-end pt-3 border-t border-neutral-800">
+            <button
+              (click)="submitEpisode()"
+              [disabled]="isSubmitting()"
+              class="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-700 text-xs font-bold text-white transition shadow-lg shadow-violet-900/30 cursor-pointer">
+              @if (isSubmitting()) {
+                <span class="pi pi-spin pi-spinner"></span> Pubblicazione...
+              } @else {
+                <span class="pi pi-check"></span> Pubblica Episodio
+              }
+            </button>
+          </div>
+        </div>
+      }
+
+      <!-- Sotto-scheda: Albero Serie TV -->
+      @if (seriesSubTab() === 'tree') {
+        <div class="flex flex-col gap-4">
+          <div class="flex items-center justify-between">
+            <h3 class="text-base font-bold text-white flex items-center gap-2">
+              <span class="pi pi-sitemap text-violet-400"></span>
+              Catalogo Serie TV & Struttura Episodi
+            </h3>
+            <button
+              (click)="adminService.loadSeriesTree().subscribe()"
+              class="text-xs text-neutral-400 hover:text-white flex items-center gap-1 transition cursor-pointer">
+              <span class="pi pi-refresh"></span> Ricarica Albero
+            </button>
+          </div>
+
+          @if (adminService.seriesTree().length === 0) {
+            <div class="p-8 rounded-xl bg-neutral-900/40 border border-neutral-800 text-center text-xs text-neutral-400">
+              Nessuna serie TV registrata nel database. Clicca su "1. Nuova Serie" per iniziare!
+            </div>
+          } @else {
+            <div class="flex flex-col gap-4">
+              @for (series of adminService.seriesTree(); track series.id) {
+                <div class="flex flex-col rounded-xl bg-neutral-900/60 border border-neutral-800 overflow-hidden shadow-lg">
+
+                  <!-- Header Serie -->
+                  <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 bg-neutral-900/90 border-b border-neutral-800">
+                    <div class="flex items-center gap-3">
+                      <img
+                        [src]="getMediaUrl(series.icon)"
+                        [alt]="series.title"
+                        class="w-12 h-16 object-cover rounded-lg shadow border border-neutral-800 shrink-0" />
+                      <div class="flex flex-col">
+                        <div class="flex items-center gap-2">
+                          <h4 class="text-sm font-bold text-white">{{ series.title }}</h4>
+                          @if (series.releaseYear) {
+                            <span class="text-[11px] text-neutral-400">({{ series.releaseYear }})</span>
+                          }
+                          @if (series.rating) {
+                            <span class="px-1.5 py-0.5 rounded text-[10px] bg-amber-500/20 text-amber-300 font-bold border border-amber-500/30">
+                              ★ {{ series.rating }}
+                            </span>
+                          }
+                        </div>
+                        <span class="text-xs text-neutral-400">
+                          {{ series.seasons.length }} {{ series.seasons.length === 1 ? 'Stagione' : 'Stagioni' }}
+                        </span>
+                      </div>
+                    </div>
+
+                    <!-- Scorciatoie Serie -->
+                    <div class="flex items-center gap-2">
+                      <button
+                        (click)="quickAddSeasonToSeries(series.id)"
+                        class="px-3 py-1.5 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-xs font-semibold text-neutral-200 border border-neutral-700 transition cursor-pointer flex items-center gap-1.5">
+                        <span class="pi pi-plus"></span> Stagione
+                      </button>
+                      <button
+                        (click)="deleteSeries(series)"
+                        title="Elimina serie e stagioni"
+                        class="p-2 rounded-lg text-neutral-500 hover:text-red-400 hover:bg-red-500/10 transition cursor-pointer">
+                        <span class="pi pi-trash"></span>
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Elenco Stagioni della Serie -->
+                  <div class="p-4 flex flex-col gap-3">
+                    @if (series.seasons.length === 0) {
+                      <div class="text-xs text-neutral-500 italic p-2">
+                        Nessuna stagione aggiunta per questa serie. Clicca su "+ Stagione" per crearne una.
+                      </div>
+                    } @else {
+                      @for (season of series.seasons; track season.id) {
+                        <div class="flex flex-col rounded-lg bg-neutral-950/50 border border-neutral-800/80 p-3 gap-2.5">
+                          <div class="flex items-center justify-between">
+                            <span class="text-xs font-bold text-violet-300 flex items-center gap-2">
+                              <span class="pi pi-folder text-violet-400"></span>
+                              Stagione {{ season.seasonNumber }}: {{ season.title }} ({{ season.episodesCount }} episodi)
+                            </span>
+                            <button
+                              (click)="quickAddEpisodeToSeason(series.id, season.id, season)"
+                              class="text-[11px] font-semibold text-violet-400 hover:text-violet-300 flex items-center gap-1 cursor-pointer">
+                              <span class="pi pi-plus"></span> Aggiungi Episodio
+                            </button>
+                          </div>
+
+                          <!-- Episodi della stagione -->
+                          @if (season.episodes.length === 0) {
+                            <p class="text-[11px] text-neutral-500 italic pl-5">Nessun episodio presente in questa stagione.</p>
+                          } @else {
+                            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 pl-3">
+                              @for (ep of season.episodes; track ep.id) {
+                                <div class="flex items-center justify-between p-2 rounded-md bg-neutral-900 border border-neutral-800/70 text-xs group">
+                                  <div class="flex items-center gap-2 overflow-hidden">
+                                    <span class="w-5 h-5 rounded-full bg-violet-600/30 text-violet-300 font-bold flex items-center justify-center text-[10px] shrink-0">
+                                      {{ ep.episodeNumber }}
+                                    </span>
+                                    <span class="font-medium text-neutral-200 truncate" [title]="ep.title">{{ ep.title }}</span>
+                                  </div>
+                                  <div class="flex items-center gap-2 shrink-0">
+                                    @if (ep.duration) {
+                                      <span class="text-[10px] text-neutral-500">{{ ep.duration }}m</span>
+                                    }
+                                    <button
+                                      (click)="deleteEpisode(ep)"
+                                      title="Elimina episodio"
+                                      class="text-neutral-500 hover:text-red-400 text-xs transition cursor-pointer">
+                                      <span class="pi pi-trash"></span>
+                                    </button>
+                                  </div>
+                                </div>
+                              }
+                            </div>
+                          }
+                        </div>
+                      }
+                    }
+                  </div>
+
+                </div>
+              }
+            </div>
+          }
+        </div>
+      }
+
+    </div>
+  }
+
+  <!-- ========================================================================= -->
+  <!-- TAB 3: CATALOGO, TAG & STATISTICHE                                       -->
+  <!-- ========================================================================= -->
+  @if (activeTab() === 'catalog') {
+    <div class="flex flex-col gap-6">
+
+      <!-- Statistiche Generali -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="flex items-center gap-4 p-5 rounded-2xl bg-neutral-900/60 border border-neutral-800 shadow-lg">
+          <div class="w-12 h-12 rounded-xl bg-violet-600/20 border border-violet-500/30 flex items-center justify-center text-violet-400">
+            <span class="pi pi-video text-2xl"></span>
+          </div>
+          <div class="flex flex-col">
+            <span class="text-2xl font-black text-white">{{ adminService.movies().length }}</span>
+            <span class="text-xs text-neutral-400 font-medium">Film nel catalogo</span>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-4 p-5 rounded-2xl bg-neutral-900/60 border border-neutral-800 shadow-lg">
+          <div class="w-12 h-12 rounded-xl bg-emerald-600/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+            <span class="pi pi-list text-2xl"></span>
+          </div>
+          <div class="flex flex-col">
+            <span class="text-2xl font-black text-white">{{ adminService.seriesTree().length }}</span>
+            <span class="text-xs text-neutral-400 font-medium">Serie TV nel catalogo</span>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-4 p-5 rounded-2xl bg-neutral-900/60 border border-neutral-800 shadow-lg">
+          <div class="w-12 h-12 rounded-xl bg-amber-600/20 border border-amber-500/30 flex items-center justify-center text-amber-400">
+            <span class="pi pi-tags text-2xl"></span>
+          </div>
+          <div class="flex flex-col">
+            <span class="text-2xl font-black text-white">{{ adminService.tags().length }}</span>
+            <span class="text-xs text-neutral-400 font-medium">Tag / Generi attivi</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Gestione Tag Standalone -->
+      <div class="flex flex-col gap-6 p-6 rounded-2xl bg-neutral-900/70 border border-neutral-800 shadow-xl">
+        <div class="flex items-center justify-between pb-3 border-b border-neutral-800">
+          <div class="flex items-center gap-2">
+            <span class="pi pi-tags text-violet-400 text-lg"></span>
+            <h3 class="text-base font-bold text-white">Gestione Generi & Tag</h3>
+          </div>
+          <span class="text-xs text-neutral-400">I tag permettono agli utenti di filtrare i contenuti</span>
+        </div>
+
+        <!-- Inserimento rapido -->
+        <div class="flex items-center gap-3">
+          <input
+            type="text"
+            placeholder="Nome nuovo tag (es. Anime, Documentario, Noir...)"
+            [value]="newStandaloneTagName()"
+            (input)="newStandaloneTagName.set($any($event.target).value)"
+            (keydown.enter)="$event.preventDefault(); submitStandaloneTag()"
+            class="w-80 px-3.5 py-2.5 rounded-xl bg-neutral-800 border border-neutral-700 text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-violet-500" />
+          <button
+            (click)="submitStandaloneTag()"
+            class="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-700 text-xs font-bold text-white transition shadow-lg shadow-violet-900/30 cursor-pointer">
+            <span class="pi pi-plus"></span>
+            Crea Tag
+          </button>
+        </div>
+
+        <!-- Griglia Tag Esistenti -->
+        <div class="flex flex-col gap-2 pt-2">
+          <label class="text-xs font-semibold text-neutral-400">Tag registrati nel sistema:</label>
+          <div class="flex flex-wrap gap-2">
+            @for (tag of adminService.tags(); track tag.id) {
+              <div class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-neutral-800/80 border border-neutral-700 text-xs font-medium text-neutral-200">
+                <span class="pi pi-tag text-violet-400 text-[10px]"></span>
+                {{ tag.name }}
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+
+    </div>
+  }
+
+</div>
