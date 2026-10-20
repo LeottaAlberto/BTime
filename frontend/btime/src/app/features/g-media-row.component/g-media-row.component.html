@@ -1,1 +1,13 @@
-<p>g-media-row.component works!</p>
+<div class="flex flex-col gap-4 w-full text-white mt-8">
+  <h2 class="text-xl font-bold px-2">{{titleRow()}}</h2>
+
+  <div class="px-4">
+      <!-- Horizontal Card -->
+      @if (!isVertical()) {
+        <g-resume-card [cardTitle]="'CASE CLOSE: RUN WITH DILDO'" [epName]="'The Awakening'" [season]="10" [episode]="1100" [minuteLeft]="69"
+      [icon]="'https://imgs.search.brave.com/Nt1z2ObBrGxK-9i_PJ6ioz7PbFpYm1yCo7tbltrIVV0/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9pLnBp/bmltZy5jb20vb3Jp/Z2luYWxzL2M4LzA5/L2MzL2M4MDljM2Fh/MjI1N2I2ZTEwM2Zl/OGIzNzcwMWMwZDAw/LmpwZw'"/>
+    } @else {
+      <g-poster-card [season]="3" [icon]="'https://imgs.search.brave.com/Nt1z2ObBrGxK-9i_PJ6ioz7PbFpYm1yCo7tbltrIVV0/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9pLnBp/bmltZy5jb20vb3Jp/Z2luYWxzL2M4LzA5/L2MzL2M4MDljM2Fh/MjI1N2I2ZTEwM2Zl/OGIzNzcwMWMwZDAw/LmpwZw'"/>
+      }
+  </div>
+</div>
