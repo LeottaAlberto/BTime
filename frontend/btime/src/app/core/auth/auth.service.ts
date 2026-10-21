@@ -7,7 +7,7 @@ import { LoginRequest } from "../interfaces/login/loginRequest.interface";
 import { Observable, tap } from "rxjs";
 import { RefreshTokenResponse } from "../interfaces/refreshToken/refreshTokenResponse.interface";
 import { RefreshTokenRequest } from "../interfaces/refreshToken/refreshTokenRequest.interface";
-import { environment } from "../../../environments/environment.development";
+import { environment } from "../../../environments/environment";
 
 @Injectable({ providedIn: "root" }) // Questo decoratore permette di creare una sola instanza di questa classe per tutte l'app
 export class AuthService {
@@ -85,8 +85,9 @@ export class AuthService {
   }
 
   private saveTokens(res: LoginResponse | RefreshTokenResponse): void {
-    const jwt = "token" in res ? res.token : res.JwtToken;
-    const refresh = "refreshToken" in res ? res.refreshToken : res.RefreshToken;
+    const anyRes = res as any;
+    const jwt = anyRes.token || anyRes.jwtToken || anyRes.JwtToken;
+    const refresh = anyRes.refreshToken || anyRes.RefreshToken;
 
     if (!jwt || !refresh) return;
 
@@ -94,7 +95,15 @@ export class AuthService {
     localStorage.setItem(this.REFRESH_KEY, refresh);
 
     // Se è un LoginResponse abbiamo già tutti i dati dell'utente
-    if ("username" in res) this.currentUser.set(res);
+    if ("username" in anyRes || "Username" in anyRes) {
+      this.currentUser.set({
+        token: jwt,
+        refreshToken: refresh,
+        username: anyRes.username || anyRes.Username || "",
+        email: anyRes.email || anyRes.Email || "",
+        role: anyRes.role || anyRes.Role || "",
+      });
+    }
     else {
       // Se è un refresh-token, aggiorniamo solo i token mantenendo username, email e role
       this.currentUser.update((user) =>

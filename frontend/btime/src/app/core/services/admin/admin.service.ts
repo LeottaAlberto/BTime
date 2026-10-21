@@ -1,7 +1,7 @@
 import { HttpClient, HttpEvent, HttpEventType, HttpRequest } from "@angular/common/http";
 import { inject, Injectable, signal, WritableSignal } from "@angular/core";
 import { Observable, tap } from "rxjs";
-import { environment } from "../../../../environments/environment.development";
+import { environment } from "../../../../environments/environment";
 import {
   AdminMovieItem,
   CreateEpisodePayload,

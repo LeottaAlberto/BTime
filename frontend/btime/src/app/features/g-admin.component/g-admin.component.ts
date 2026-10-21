@@ -7,7 +7,7 @@ import { AuthService } from "../../core/auth/auth.service";
 import { AdminService } from "../../core/services/admin/admin.service";
 import { AlertService } from "../../core/services/alertMessage/alert.service";
 import { StatusType } from "../../core/enums/statusType.enum";
-import { environment } from "../../../environments/environment.development";
+import { environment } from "../../../environments/environment";
 import {
   AdminMovieItem,
   SeriesEpisodeNode,

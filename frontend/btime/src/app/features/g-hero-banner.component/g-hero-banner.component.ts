@@ -2,7 +2,7 @@ import { Component, InputSignal, OnInit, computed, inject, input } from "@angula
 import { GHeroInfoComponent } from "../g-hero-info.component/g-hero-info.component";
 import { DashboardService } from "../../core/services/dashboard/dashboard.service";
 import { MovieService } from "../../core/services/dashboard/movies.service";
-import { environment } from "../../../environments/environment.development";
+import { environment } from "../../../environments/environment";
 
 @Component({
   imports: [GHeroInfoComponent],

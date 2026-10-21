@@ -1,5 +1,5 @@
 import { Component, computed, input, InputSignal } from "@angular/core";
-import { environment } from "../../../environments/environment.development";
+import { environment } from "../../../environments/environment";
 
 @Component({
   imports: [],

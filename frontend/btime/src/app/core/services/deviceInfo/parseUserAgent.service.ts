@@ -46,7 +46,10 @@ function parseUserAgent(ua: string) {
  */
 async function fetchPublicIP(): Promise<string | null> {
   try {
-    const response = await fetch("https://api.ipify.org?format=json");
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 1500);
+    const response = await fetch("https://api.ipify.org?format=json", { signal: controller.signal });
+    clearTimeout(timer);
     if (!response.ok) return null;
     const data = await response.json();
     return data.ip;

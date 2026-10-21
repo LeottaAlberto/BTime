@@ -2,7 +2,7 @@ import { HttpClient } from "@angular/common/http";
 import { inject, Injectable, signal, WritableSignal } from "@angular/core";
 import { Observable, tap } from "rxjs";
 import { HeroBannerRes } from "../../interfaces/dashboard/movies/heroBanner.interface";
-import { environment } from "../../../../environments/environment.development";
+import { environment } from "../../../../environments/environment";
 import { WatchingMovies } from "../../interfaces/dashboard/movies/watchingMovies.interface";
 import { MovieCard } from "../../interfaces/dashboard/movies/movieCard.interface";
 import { SeriesCard } from "../../interfaces/dashboard/movies/seriesCard.interface";

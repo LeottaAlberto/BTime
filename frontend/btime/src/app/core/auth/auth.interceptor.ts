@@ -34,10 +34,11 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
       catchError((err: HttpErrorResponse) => {
         if (err.status === ERROR401 && !req.url.includes("/api/auth/")) {
           return auth.refreshToken().pipe(
-            switchMap((refreshRes) => {
+            switchMap((refreshRes: any) => {
+              const newJwt = refreshRes?.jwtToken || refreshRes?.JwtToken || refreshRes?.token;
               const retryReq = req.clone({
                 setHeaders: {
-                  Authorization: `Bearer ${refreshRes.JwtToken}`,
+                  Authorization: `Bearer ${newJwt}`,
                 },
               });
 
