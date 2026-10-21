@@ -17,6 +17,8 @@ export const routes: Routes = [
       { path: "cloud", loadComponent: () => import("./features/g-cloud.component/g-cloud.component").then((c) => c.GCloudComponent) },
       { path: "photos", loadComponent: () => import("./features/g-photos.component/g-photos.component").then((c) => c.GPhotosComponent) },
       { path: "movies", loadComponent: () => import("./features/g-movies.component/g-movies.component").then((c) => c.GMoviesComponent) },
+      { path: "movies/media-details/:id", loadComponent: () => import("./features/g-media-detail.component/g-media-detail.component").then((c) => c.GMediaDetailComponent) },
+      { path: "movies/media-details", loadComponent: () => import("./features/g-media-detail.component/g-media-detail.component").then((c) => c.GMediaDetailComponent) },
       { path: "admin", canActivate: [adminGuard], loadComponent: () => import("./features/g-admin.component/g-admin.component").then((c) => c.GAdminComponent) },
     ],
   },
