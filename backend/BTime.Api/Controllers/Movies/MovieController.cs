@@ -216,6 +216,63 @@ namespace BTime.Api.Controllers.Dashboard
             return Ok(list);
         }
 
+        [HttpGet("series/{id}")]
+        public async Task<ActionResult<SeriesDetailRes>> GetSeriesDetail(Guid id)
+        {
+            var s = await _db.SeriesMs
+                .AsNoTracking()
+                .Include(s => s.RImagesM)
+                .Include(s => s.TagsDs)
+                    .ThenInclude(td => td.RTagM)
+                .Include(s => s.SeasonsMs)
+                    .ThenInclude(sea => sea.EpisodesMs)
+                        .ThenInclude(ep => ep.RImagesM)
+                .Where(s => s.Id == id && !s.IsDeleted)
+                .FirstOrDefaultAsync();
+
+            if (s == null)
+                return NotFound(new { message = "Serie non trovata." });
+
+            var res = new SeriesDetailRes
+            {
+                Id = s.Id,
+                Title = s.Title,
+                Icon = FormatUrl(s.RImagesM?.Path),
+                Description = s.Description,
+                SeasonsCount = s.SeasonsMs.Count,
+                ReleaseYear = s.ReleaseYear,
+                Rating = s.Rating,
+                Tags = s.TagsDs
+                    .Where(td => td.RTagM != null)
+                    .Select(td => td.RTagM.Name)
+                    .ToList(),
+                Seasons = s.SeasonsMs
+                    .OrderBy(sea => sea.SeasonNumber)
+                    .Select(sea => new SeasonDetailRes
+                    {
+                        Id = sea.Id,
+                        SeasonNumber = sea.SeasonNumber,
+                        Title = sea.Title,
+                        EpisodesCount = sea.EpisodesMs.Count(e => !e.IsDeleted),
+                        Episodes = sea.EpisodesMs
+                            .Where(e => !e.IsDeleted)
+                            .OrderBy(e => e.EpisodeNumber)
+                            .Select(e => new EpisodeDetailRes
+                            {
+                                Id = e.Id,
+                                EpisodeNumber = e.EpisodeNumber,
+                                Title = e.Title,
+                                Description = e.Description,
+                                Duration = e.Duration,
+                                Path = FormatUrl(e.Path),
+                                Icon = FormatUrl(e.RImagesM?.Path)
+                            }).ToList()
+                    }).ToList()
+            };
+
+            return Ok(res);
+        }
+
         private string FormatUrl(string? path)
         {
             if (string.IsNullOrWhiteSpace(path)) return string.Empty;
