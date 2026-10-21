@@ -1,1 +1,188 @@
-<p>g-media-detail.component works!</p>
+<div class="w-full h-full min-h-screen relative px-6 md:px-12 py-6 bg-neutral-950 overflow-hidden text-white rounded-xl outline-1 outline-purple-600/30">
+
+  <!-- Sfondo Immagine & Gradienti Scenografici (Dietro al resto) -->
+  <div class="absolute inset-0 z-0 pointer-events-none overflow-hidden select-none">
+    <!-- Immagine di sfondo con blur ed opacità sfumata -->
+    <div
+      class="absolute inset-0 bg-no-repeat bg-top bg-cover opacity-25 filter blur-lg scale-105 transition-all duration-700"
+      [style.backgroundImage]="'url(' + resolvedIcon() + ')'">
+    </div>
+
+    <!-- Sfumatura scura verso il basso per transizione morbida -->
+    <div class="absolute inset-0 bg-linear-to-t from-neutral-950 via-neutral-950/80 to-transparent"></div>
+
+    <!-- Vignettatura scura dall'alto e radiale stile cinematografico -->
+    <div class="absolute inset-0 bg-linear-to-b from-neutral-950/70 via-transparent to-neutral-950"></div>
+    <div class="absolute inset-0 bg-radial-[at_top] from-transparent via-neutral-950/50 to-neutral-950"></div>
+  </div>
+
+  <!-- Contenuto in primo piano (Davanti al background) -->
+  <div class="relative z-10 flex flex-col items-center gap-8 w-full h-full">
+
+    <!-- Top Bar con Logo e Pulsante Torna Indietro -->
+    <div class="flex items-center justify-between w-full pb-4 border-b border-white/10">
+      <!-- Logo BTime -->
+      <div class="font-bold text-2xl flex items-center select-none">
+        <span class="text-purple-600 font-extrabold text-3xl">B</span>
+        <span class="text-white">Time</span>
+      </div>
+
+      <!-- Pulsante Chiudi / Torna ai Movies -->
+      <button
+        (click)="close()"
+        type="button"
+        class="flex items-center gap-2 px-4 py-2 rounded-xl bg-neutral-900/80 hover:bg-neutral-800 border border-neutral-700/60 hover:border-purple-500/50 text-neutral-300 hover:text-white transition duration-200 cursor-pointer shadow-lg">
+        <i class="pi pi-arrow-left text-sm"></i>
+        <span class="text-sm font-medium">Torna al catalogo</span>
+      </button>
+    </div>
+
+    <!-- Header Info Principale (Locandina + Metadati) -->
+    <div class="flex flex-col md:flex-row items-center md:items-start gap-8 py-2 w-full">
+      <!-- Locandina / Cover -->
+      <div class="shrink-0 flex justify-center">
+        <div
+          class="w-64 h-96 bg-no-repeat bg-center bg-cover rounded-2xl ring-2 ring-purple-600/40 shadow-2xl shadow-purple-950/60 hover:scale-[1.01] transition duration-300"
+          [style.backgroundImage]="'url(' + resolvedIcon() + ')'">
+        </div>
+      </div>
+
+      <!-- Info Testuali -->
+      <div class="flex flex-col gap-4 flex-1 text-center md:text-left">
+        <!-- Titolo -->
+        <h1 class="text-3xl md:text-5xl font-extrabold tracking-tight uppercase text-white drop-shadow-md">
+          {{ seriesDetail()?.title || tvInfo()?.title || 'Caricamento...' }}
+        </h1>
+
+        <!-- Badge Metadati (Rating, Anno, Numero Stagioni) -->
+        <div class="flex flex-wrap items-center justify-center md:justify-start gap-2.5">
+          <!-- Rating -->
+          @if (seriesDetail()?.rating ?? tvInfo()?.rating; as rating) {
+            <div class="flex items-center gap-1.5 px-3 py-1 bg-yellow-500/15 border border-yellow-500/30 rounded-full text-yellow-300 font-semibold text-xs tracking-wide">
+              <span class="pi pi-star-fill text-[11px]"></span>
+              <span>{{ rating }}</span>
+            </div>
+          }
+
+          <!-- Anno -->
+          @if (seriesDetail()?.releaseYear ?? tvInfo()?.releaseYear; as year) {
+            <div class="px-3 py-1 bg-white/10 border border-white/20 rounded-full text-neutral-200 text-xs font-medium">
+              {{ year }}
+            </div>
+          }
+
+          <!-- Numero Stagioni -->
+          @if (seriesDetail()?.seasonsCount ?? tvInfo()?.seasonsCount; as seasons) {
+            <div class="px-3 py-1 bg-purple-950/60 border border-purple-700/50 rounded-full text-purple-300 text-xs font-medium">
+              {{ seasons }} {{ seasons === 1 ? 'Stagione' : 'Stagioni' }}
+            </div>
+          }
+
+          <!-- Tags / Generi -->
+          @for (tag of (seriesDetail()?.tags || tvInfo()?.tags || []); track tag) {
+            <div class="px-3 py-1 bg-neutral-800/80 border border-neutral-700 rounded-full text-neutral-300 text-xs font-medium">
+              {{ tag }}
+            </div>
+          }
+        </div>
+
+        <!-- Descrizione / Trama -->
+        <p class="text-neutral-300/85 text-sm md:text-base leading-relaxed pt-2 max-w-3xl whitespace-pre-line">
+          {{ seriesDetail()?.description || tvInfo()?.description || 'Nessuna descrizione disponibile per questa serie.' }}
+        </p>
+      </div>
+    </div>
+
+    <!-- Barra Navigazione Stagioni (Tabs dinamici) -->
+    @if (seriesDetail()?.seasons && seriesDetail()!.seasons.length > 0) {
+      <div class="w-full pt-4">
+        <div class="flex items-center gap-3 overflow-x-auto pb-2 scrollbar-thumb-neutral-700">
+          @for (s of seriesDetail()!.seasons; track s.id) {
+            <button
+              (click)="selectSeason(s)"
+              type="button"
+              class="px-5 py-2.5 rounded-xl font-medium text-sm transition-all duration-200 cursor-pointer flex items-center gap-2 shrink-0 border"
+              [class.bg-purple-600]="selectedSeason()?.id === s.id"
+              [class.text-white]="selectedSeason()?.id === s.id"
+              [class.border-purple-500]="selectedSeason()?.id === s.id"
+              [class.shadow-lg]="selectedSeason()?.id === s.id"
+              [class.shadow-purple-600/30]="selectedSeason()?.id === s.id"
+              [class.bg-neutral-900/80]="selectedSeason()?.id !== s.id"
+              [class.text-neutral-400]="selectedSeason()?.id !== s.id"
+              [class.border-neutral-800]="selectedSeason()?.id !== s.id"
+              [class.hover:text-white]="selectedSeason()?.id !== s.id"
+              [class.hover:border-neutral-700]="selectedSeason()?.id !== s.id">
+              <span>{{ s.title || ('Stagione ' + s.seasonNumber) }}</span>
+              <span class="text-xs opacity-75">({{ s.episodesCount }} ep)</span>
+            </button>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- Griglia Episodi della Stagione Selezionata -->
+    @if (selectedSeason() && selectedSeason()!.episodes.length > 0) {
+      <div class="w-full pt-2 pb-12">
+        <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+          <span>Episodi</span>
+          <span class="text-xs font-normal text-neutral-400">({{ selectedSeason()!.episodes.length }})</span>
+        </h3>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+          @for (ep of selectedSeason()!.episodes; track ep.id) {
+            <div class="group relative flex flex-col bg-neutral-900/70 border border-neutral-800/80 hover:border-purple-600/50 rounded-xl overflow-hidden hover:scale-[1.02] transition-all duration-300 shadow-md">
+              <!-- Thumbnail 16:9 con Overlay -->
+              <div class="relative aspect-video w-full bg-neutral-950 overflow-hidden">
+                <div
+                  class="absolute inset-0 bg-no-repeat bg-center bg-cover group-hover:scale-105 transition-transform duration-500"
+                  [style.backgroundImage]="'url(' + resolveEpisodeIcon(ep) + ')'">
+                </div>
+
+                <!-- Overlay Play hover -->
+                <div class="absolute inset-0 bg-black/40 group-hover:bg-purple-950/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                  <div class="w-10 h-10 rounded-full bg-purple-600 text-white flex items-center justify-center shadow-lg shadow-purple-600/50">
+                    <i class="pi pi-play text-sm ml-0.5"></i>
+                  </div>
+                </div>
+
+                <!-- Badge Numero Episodio -->
+                <div class="absolute top-2 left-2 z-10">
+                  <span class="px-2 py-0.5 rounded-md bg-purple-600/90 text-white font-bold text-[11px] shadow">
+                    EP. {{ ep.episodeNumber }}
+                  </span>
+                </div>
+
+                <!-- Durata -->
+                @if (ep.duration) {
+                  <div class="absolute bottom-2 right-2 z-10">
+                    <span class="px-1.5 py-0.5 rounded bg-black/75 text-neutral-200 text-[11px] font-medium">
+                      {{ ep.duration }}m
+                    </span>
+                  </div>
+                }
+              </div>
+
+              <!-- Dettagli Episodio -->
+              <div class="p-3.5 flex flex-col gap-1 flex-1">
+                <h4 class="text-sm font-semibold text-white group-hover:text-purple-300 transition truncate" [title]="ep.title">
+                  {{ ep.title }}
+                </h4>
+                @if (ep.description) {
+                  <p class="text-xs text-neutral-400 line-clamp-2 leading-relaxed">
+                    {{ ep.description }}
+                  </p>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    } @else if (seriesDetail() && (!selectedSeason() || selectedSeason()!.episodes.length === 0)) {
+      <div class="w-full py-12 text-center text-neutral-500 text-sm italic">
+        Nessun episodio caricato per questa stagione.
+      </div>
+    }
+
+  </div>
+
+</div>
