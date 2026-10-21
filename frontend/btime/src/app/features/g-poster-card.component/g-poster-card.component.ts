@@ -1,5 +1,6 @@
-import { Component, computed, input, InputSignal } from "@angular/core";
+import { Component, computed, inject, input, InputSignal } from "@angular/core";
 import { environment } from "../../../environments/environment";
+import { Router } from "@angular/router";
 
 @Component({
   imports: [],
@@ -8,6 +9,9 @@ import { environment } from "../../../environments/environment";
   templateUrl: "./g-poster-card.component.html",
 })
 export class GPosterCardComponent {
+
+  private router = inject(Router);
+
   public id: InputSignal<string> = input<string>("");
   public title: InputSignal<string> = input<string>("");
   public icon: InputSignal<string> = input<string>("");
@@ -26,4 +30,12 @@ export class GPosterCardComponent {
     }
     return raw;
   });
+
+  public onClick(): void {
+    if (this.id()) {
+      this.router.navigate(["/dashboard/movies/media-details", this.id()]);
+    } else {
+      this.router.navigate(["/dashboard/movies/media-details"]);
+    }
+  }
 }
