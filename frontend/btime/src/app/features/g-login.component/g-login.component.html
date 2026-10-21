@@ -12,6 +12,13 @@
   <!-- Body -->
   <div class="text-center flex flex-col gap-4 mt-4">
     <h3>Login into Dashboard</h3>
+
+    @if (errorMessage()) {
+      <div class="flex items-center gap-2 p-3 rounded-lg bg-red-950/80 border border-red-500/50 text-red-200 text-xs text-left shadow-lg">
+        <span class="pi pi-exclamation-triangle text-red-400 text-base shrink-0"></span>
+        <span class="flex-1 font-medium">{{ errorMessage() }}</span>
+      </div>
+    }
     <!-- Inputs -->
     <div class="flex flex-col gap-2 justify-start">
       <div class="text-left flex flex-col gap-1">

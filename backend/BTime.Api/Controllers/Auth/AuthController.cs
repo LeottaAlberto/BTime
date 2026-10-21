@@ -35,7 +35,9 @@ public class AuthController(AppDbContext db, JwtService jwtService, IConfigurati
         // Cerca l'utente con il ruolo associato
         var user = await _db.Users
             .Include(u => u.RRole)
-            .FirstOrDefaultAsync(u => u.Username == req.Username && u.Email == req.Email);
+            .FirstOrDefaultAsync(u =>
+                u.Username.ToLower() == (req.Username ?? "").Trim().ToLower() &&
+                u.Email.ToLower() == (req.Email ?? "").Trim().ToLower());
         // Verifica utente e password
         if (user == null || !user.IsActive || !BCrypt.Net.BCrypt.Verify(req.Password, user.Password))
             return Unauthorized(new { message = "Credenziali non valide o utente disattivato." });
