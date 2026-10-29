@@ -1,8 +1,8 @@
 <div class="flex flex-row min-w-dvw w-full h-screen bg-neutral-950 overflow-hidden">
-  <g-navbar/>
+  <g-navbar id="app-navbar"/>
 
   <!-- Area Principale Dinamica: qui vengono caricati i moduli tramite router-outlet -->
-  <main class="flex-1 flex flex-col p-6 overflow-y-auto scroll-smooth scrollbar-thumb-neutral-700">
+  <main id="app-main" class="flex-1 flex flex-col p-6 overflow-y-auto scroll-smooth scrollbar-thumb-neutral-700">
     <router-outlet />
   </main>
 </div>
