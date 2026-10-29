@@ -37,6 +37,7 @@ $RECYCLE.BIN/
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
+!.vscode/wait-for-backend.js
 *.code-workspace
 .history/
 
@@ -68,6 +69,7 @@ out/
 *.sln.docstates
 appsettings.Development.json
 appsettings.Local.json
+appsettings.Production.json
 *.Secrets.json
 
 # Entity Framework Core Logs / Tools
@@ -126,3 +128,16 @@ pnpm-debug.log*
 .env
 .env.local
 docker-compose.override.yml
+backend/BTime.Api/Migrations/*
+.gitignore
+*.jpg
+*.mp4
+launch-menu.bat
+launch-menu.ps1
+backup_btime_db.sql
+backup_db.bat
+backup_db.ps1
+.vscode/launch.json
+.vscode/tasks.json
+.vscode/wait-for-backend.js
+backend/BTime.Api/appsettings.json
