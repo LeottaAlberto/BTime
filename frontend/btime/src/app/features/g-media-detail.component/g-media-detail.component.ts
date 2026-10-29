@@ -72,6 +72,12 @@ export class GMediaDetailComponent implements OnInit {
     this.router.navigate(["dashboard/movies"])
   }
 
+  public playEpisode(ep: EpisodeDetail): void {
+    this.router.navigate(["/dashboard/movies/watch", ep.id], {
+      state: { episode: ep },
+    });
+  }
+
   private fallbackLoad(targetId: string): void {
     this.movS.getTvSeries().subscribe({
       next: (value) => {

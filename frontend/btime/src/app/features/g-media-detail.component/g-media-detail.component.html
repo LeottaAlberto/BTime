@@ -130,7 +130,8 @@
 
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
           @for (ep of selectedSeason()!.episodes; track ep.id) {
-            <div class="group relative flex flex-col bg-neutral-900/70 border border-neutral-800/80 hover:border-purple-600/50 rounded-xl overflow-hidden hover:scale-[1.02] transition-all duration-300 shadow-md">
+            <div class="group relative flex flex-col bg-neutral-900/70 border border-neutral-800/80 hover:border-purple-600/50 rounded-xl overflow-hidden hover:scale-[1.02] transition-all duration-300 shadow-md"
+            (click)="playEpisode(ep)">
               <!-- Thumbnail 16:9 con Overlay -->
               <div class="relative aspect-video w-full bg-neutral-950 overflow-hidden">
                 <div
