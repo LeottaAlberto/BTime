@@ -28,6 +28,7 @@ services:
     volumes:
       # Qualsiasi file/video caricato va a finire dritto sull'HDD
       - /mnt/merge_storage/btime_data/uploads:/app/uploads
+      - ./backend/BTime.Api/appsettings.Production.json:/app/appsettings.Production.json:ro
     depends_on:
       - postgres
     restart: unless-stopped
