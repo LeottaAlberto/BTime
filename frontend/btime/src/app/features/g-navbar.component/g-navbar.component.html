@@ -1,6 +1,13 @@
 <aside class="flex flex-col justify-between w-64 min-w-64 h-full border-r border-neutral-800 p-4 select-none shrink-0">
   <!-- Head: Brand & Logo -->
-  <div class="flex items-center gap-3 pb-4 border-b border-neutral-800/80 cursor-pointer" (click)="router.navigate(['/dashboard'])">
+  <div
+    tabindex="0"
+    role="button"
+    aria-label="Home Dashboard"
+    class="flex items-center gap-3 pb-4 border-b border-neutral-800/80 cursor-pointer rounded-xl p-1 transition-all focus:outline-none focus:ring-2 focus:ring-purple-500 focus:bg-neutral-800/50"
+    (click)="router.navigate(['/dashboard'])"
+    (keydown.enter)="router.navigate(['/dashboard'])"
+    (keydown.space)="router.navigate(['/dashboard'])">
     <div
       class="w-10 h-10 rounded-xl overflow-hidden shadow-md ring-1 ring-neutral-700/60
              bg-[url('https://cdn.create.vista.com/api/media/small/333790434/stock-photo-cropped-view-woman-holding-alarm-clock-blue-background-panoramic-shot')]
@@ -40,13 +47,18 @@
         <!-- Avatar con indicatore online -->
         <div class="relative shrink-0">
           <div
+            tabindex="0"
+            role="button"
+            aria-label="Dettagli profilo"
             class="w-9 h-9 rounded-full overflow-hidden ring-1 ring-neutral-600
                    bg-[url('https://imgs.search.brave.com/Nt1z2ObBrGxK-9i_PJ6ioz7PbFpYm1yCo7tbltrIVV0/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9pLnBp/bmltZy5jb20vb3Jp/Z2luYWxzL2M4LzA5/L2MzL2M4MDljM2Fh/MjI1N2I2ZTEwM2Zl/OGIzNzcwMWMwZDAw/LmpwZw')]
-                   bg-no-repeat bg-center bg-cover cursor-pointer hover:opacity-90 transition-opacity"
+                   bg-no-repeat bg-center bg-cover cursor-pointer hover:opacity-90 transition-all focus:outline-none focus:ring-2 focus:ring-purple-400 focus:scale-105"
             title="Dettagli profilo"
-            (click)="onClick()">
+            (click)="onClick()"
+            (keydown.enter)="onClick()"
+            (keydown.space)="onClick()">
           </div>
-          <span class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-neutral-900"></span>
+          <span class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-neutral-900 pointer-events-none"></span>
         </div>
 
         <!-- Dati Utente (Username + Email) -->
@@ -63,7 +75,9 @@
       <!-- Pulsante Logout -->
       <button
         type="button"
-        class="p-2 rounded-lg text-neutral-400 hover:text-red-400 hover:bg-red-500/10 cursor-pointer transition-colors shrink-0"
+        tabindex="0"
+        aria-label="Disconnetti"
+        class="p-2 rounded-lg text-neutral-400 hover:text-red-400 hover:bg-red-500/10 cursor-pointer transition-all shrink-0 focus:outline-none focus:ring-2 focus:ring-red-500 focus:text-red-400 focus:bg-red-500/20"
         title="Disconnetti"
         (click)="onClickLogout()">
         <i class="pi pi-sign-out text-sm"></i>

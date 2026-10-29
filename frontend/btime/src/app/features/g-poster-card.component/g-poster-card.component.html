@@ -1,10 +1,17 @@
-<div class="group relative w-44 h-64 rounded-lg overflow-hidden cursor-pointer transition-all duration-300 text-white shrink-0
-  hover:ring-2 hover:ring-violet-500 hover:shadow-xl hover:shadow-violet-900/30"
-  (click)="onClick()">
+<div
+  tabindex="0"
+  role="button"
+  [attr.aria-label]="title()"
+  class="group relative w-44 h-64 rounded-xl overflow-hidden cursor-pointer transition-all duration-300 text-white shrink-0
+    hover:ring-2 hover:ring-violet-500 hover:shadow-xl hover:shadow-violet-900/30
+    focus:outline-none focus:ring-4 focus:ring-purple-500 focus:scale-105 focus:shadow-2xl focus:shadow-purple-950/80"
+  (click)="onClick()"
+  (keydown.enter)="onClick()"
+  (keydown.space)="onClick()">
 
   <!-- Immagine di sfondo -->
   <div
-    class="absolute inset-0 bg-no-repeat bg-center bg-cover transition-transform duration-500 group-hover:scale-110"
+    class="absolute inset-0 bg-no-repeat bg-center bg-cover transition-transform duration-500 group-hover:scale-110 group-focus:scale-110"
     [style.backgroundImage]="resolvedIcon() ? 'url(' + resolvedIcon() + ')' : ''">
   </div>
 

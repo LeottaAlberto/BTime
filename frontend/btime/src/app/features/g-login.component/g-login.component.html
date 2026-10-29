@@ -29,7 +29,8 @@
             #usernameInput
             type="text"
             name="username"
-            class="w-full h-10 rounded-md bg-neutral-600 outline-2 outline-neutral-700 focus:outline-slate-900 pl-10 pr-4 text-zinc-50"
+            tabindex="0"
+            class="w-full h-10 rounded-md bg-neutral-600 outline-none border border-neutral-700 focus:border-purple-400 focus:ring-4 focus:ring-purple-400 pl-10 pr-4 text-zinc-50 transition-all"
             [value]="username() ?? ''"
             (input)="username.set(usernameInput.value)"
             required>
@@ -44,7 +45,8 @@
             #mailInput
             type="email"
             name="mail"
-            class="w-full h-10 rounded-md bg-neutral-600 outline-2 outline-neutral-700 focus:outline-slate-900 pl-10 pr-4 text-zinc-50"
+            tabindex="0"
+            class="w-full h-10 rounded-md bg-neutral-600 outline-none border border-neutral-700 focus:border-purple-400 focus:ring-4 focus:ring-purple-400 pl-10 pr-4 text-zinc-50 transition-all"
             [value]="email() ?? ''"
             (input)="email.set(mailInput.value)"
             required>
@@ -60,7 +62,8 @@
             #passwordInput
             type="password"
             name="password"
-            class="w-full h-10 rounded-md bg-neutral-600 outline-2 outline-neutral-700 focus:outline-slate-900 pl-10 pr-4 text-zinc-50"
+            tabindex="0"
+            class="w-full h-10 rounded-md bg-neutral-600 outline-none border border-neutral-700 focus:border-purple-400 focus:ring-4 focus:ring-purple-400 pl-10 pr-4 text-zinc-50 transition-all"
             [value]="password() ?? ''"
             (input)="password.set(passwordInput.value)"
             required>
@@ -72,23 +75,27 @@
     <!-- Remember e forgotten password -->
     <div class="flex flex-row justify-between items-center text-sm">
       <label class="flex flex-row items-center gap-2 cursor-pointer select-none">
-        <input type="checkbox" name="rememberme" id="rememberme" class="peer sr-only">
-        <div class="size-5 rounded bg-neutral-700 border border-neutral-500 flex items-center justify-center transition-colors hover:border-neutral-400">
+        <input type="checkbox" name="rememberme" id="rememberme" tabindex="0" class="peer sr-only focus:outline-none">
+        <div class="size-5 rounded bg-neutral-700 border border-neutral-500 peer-focus:ring-2 peer-focus:ring-purple-400 flex items-center justify-center transition-colors hover:border-neutral-400">
           <span class="pi pi-check text-lime-500 text-xs font-bold hidden peer-checked:block"></span>
         </div>
         <span>Remember Me</span>
       </label>
-      <a href="" class="hover:underline text-neutral-300">Forgot Password?</a>
+      <a href="" tabindex="0" class="hover:underline text-neutral-300 focus:outline-none focus:ring-2 focus:ring-purple-400 rounded px-1">Forgot Password?</a>
     </div>
 
   </div>
 
   <!-- Footer -->
   <div class="flex flex-col items-center pt-4 gap-2">
-    <input type="submit" class="w-8/12 h-10 bg-neutral-800 rounded-md cursor-pointer hover:bg-neutral-900 transition-colors" value="Login">
+    <input
+      type="submit"
+      tabindex="0"
+      class="w-8/12 h-10 bg-neutral-800 rounded-md cursor-pointer hover:bg-neutral-900 transition-all focus:outline-none focus:ring-4 focus:ring-purple-400 focus:scale-105"
+      value="Login">
     <div class="flex flex-row justify-center gap-1 text-xs">
       <p>No account?</p>
-      <a href="" class="hover:underline text-neutral-300">Register Now</a>
+      <a href="" tabindex="0" class="hover:underline text-neutral-300 focus:outline-none focus:ring-2 focus:ring-purple-400 rounded px-1">Register Now</a>
     </div>
   </div>
 </form>
