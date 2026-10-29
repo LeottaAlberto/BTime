@@ -24,15 +24,23 @@
   </div>
 
   <!-- Actions -->
-  <div class="flex flex-row justify-items-center gap-3">
+  <div class="flex flex-row justify-items-center gap-3 pt-2">
 
-    <div class="flex flex-row justify-start items-center gap-2 py-2 px-4 rounded-md bg-purple-800 drop-shadow-lg drop-shadow-purple-500/50 cursor-pointer">
-      <div class="pi pi-play-circle text-center"></div>
-      <h1>Play</h1>
+    <div
+      tabindex="0"
+      role="button"
+      aria-label="Riproduci"
+      class="flex flex-row justify-start items-center gap-2 py-2.5 px-5 rounded-xl bg-purple-700 drop-shadow-lg drop-shadow-purple-500/50 cursor-pointer transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-purple-400 focus:bg-purple-600 focus:scale-105 active:scale-95 text-white font-medium">
+      <div class="pi pi-play-circle text-lg"></div>
+      <span class="text-sm font-semibold">Play</span>
     </div>
-    <div class="flex flex-row justify-start items-center gap-2 py-2 px-4 rounded-md bg-neutral-800 outline-1 outline-neutral-700 cursor-pointer">
-      <div class="pi pi-info-circle text-center"></div>
-      <h1>More Info</h1>
+    <div
+      tabindex="0"
+      role="button"
+      aria-label="Maggiori informazioni"
+      class="flex flex-row justify-start items-center gap-2 py-2.5 px-5 rounded-xl bg-neutral-800/90 border border-neutral-700 cursor-pointer transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-purple-400 focus:bg-neutral-700 focus:scale-105 active:scale-95 text-white font-medium">
+      <div class="pi pi-info-circle text-lg"></div>
+      <span class="text-sm font-semibold">More Info</span>
     </div>
   </div>
 

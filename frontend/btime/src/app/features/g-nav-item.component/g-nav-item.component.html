@@ -1,9 +1,14 @@
 <div
-  class="font-extralight p-0.5 rounded-xl cursor-pointer transition-colors"
+  tabindex="0"
+  role="button"
+  [attr.aria-label]="label()"
+  class="font-extralight p-1 rounded-xl cursor-pointer transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:bg-neutral-800 focus:scale-[1.02]"
   [class.bg-cyan-600/60]="isSelected()"
   [class.bg-transparent]="!isSelected()"
   [class.hover:bg-neutral-700]="!isSelected()"
-  (click)="onClick()">
+  (click)="onClick()"
+  (keydown.enter)="onClick()"
+  (keydown.space)="onClick()">
   <div class="flex flex-row justify-start items-center gap-3 max-w-3/4">
     <div class="pi pi-chevron-right text-xs pl-4"></div>
     <div class="pi pi-{{icon()}} text-sm"></div>

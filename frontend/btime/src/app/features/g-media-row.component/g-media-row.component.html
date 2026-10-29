@@ -4,7 +4,7 @@
   <div class="px-4">
     <!-- Horizontal Cards (Continue Watching) -->
     @if (!isVertical()) {
-      <div class="flex flex-row justify-start items-center gap-5 overflow-x-auto pt-1 pb-3 px-1 scrollbar-thumb-neutral-700">
+      <div class="flex flex-row justify-start items-center gap-5 overflow-x-auto scroll-smooth pt-2 pb-4 px-2 scrollbar-thumb-neutral-700">
         @for (item of items(); track item.id) {
           <g-resume-card
             [cardTitle]="item.title"
@@ -21,7 +21,7 @@
       </div>
     } @else {
       <!-- Vertical Poster Row (Films, TV Series, etc.) -->
-      <div class="flex flex-row justify-start items-center gap-4 overflow-x-auto pt-1 pb-3 px-1 scrollbar-thumb-neutral-700">
+      <div class="flex flex-row justify-start items-center gap-5 overflow-x-auto scroll-smooth pt-2 pb-4 px-2 scrollbar-thumb-neutral-700">
         @for (item of items(); track item.id) {
           <g-poster-card
             [id]="item.id"

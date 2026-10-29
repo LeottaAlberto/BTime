@@ -20,31 +20,37 @@
     <!-- Tab Switcher Principale -->
     <div class="flex items-center gap-1.5 p-1 bg-neutral-900 border border-neutral-800 rounded-xl">
       <button
+        type="button"
+        tabindex="0"
         (click)="setTab('movies')"
         [class.bg-violet-600]="activeTab() === 'movies'"
         [class.text-white]="activeTab() === 'movies'"
         [class.text-neutral-400]="activeTab() !== 'movies'"
-        class="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer hover:text-white">
+        class="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer hover:text-white focus:outline-none focus:ring-2 focus:ring-purple-400 focus:scale-105">
         <span class="pi pi-video"></span>
         Film
       </button>
 
       <button
+        type="button"
+        tabindex="0"
         (click)="setTab('series')"
         [class.bg-violet-600]="activeTab() === 'series'"
         [class.text-white]="activeTab() === 'series'"
         [class.text-neutral-400]="activeTab() !== 'series'"
-        class="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer hover:text-white">
+        class="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer hover:text-white focus:outline-none focus:ring-2 focus:ring-purple-400 focus:scale-105">
         <span class="pi pi-list"></span>
         Serie TV
       </button>
 
       <button
+        type="button"
+        tabindex="0"
         (click)="setTab('catalog')"
         [class.bg-violet-600]="activeTab() === 'catalog'"
         [class.text-white]="activeTab() === 'catalog'"
         [class.text-neutral-400]="activeTab() !== 'catalog'"
-        class="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer hover:text-white">
+        class="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer hover:text-white focus:outline-none focus:ring-2 focus:ring-purple-400 focus:scale-105">
         <span class="pi pi-tags"></span>
         Catalogo & Tag
       </button>

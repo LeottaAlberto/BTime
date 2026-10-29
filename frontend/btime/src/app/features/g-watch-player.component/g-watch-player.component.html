@@ -1,7 +1,26 @@
-<video
-  [src]="videoUrl()"
-  [poster]="iconUrl()"
-  controls
-  autoplay
-  class="w-full h-full object-contain">
-</video>
+<div class="relative w-full h-full min-h-screen flex flex-col items-center justify-center bg-black overflow-hidden select-none">
+
+  <!-- Pulsante Chiudi / Esci dal Player con Telecomando -->
+  <button
+    type="button"
+    tabindex="0"
+    (click)="close()"
+    (keydown.enter)="close()"
+    (keydown.space)="close()"
+    aria-label="Torna al catalogo"
+    class="absolute top-6 left-6 z-50 flex items-center gap-2.5 px-5 py-2.5 rounded-xl bg-neutral-900/80 hover:bg-neutral-800 border border-neutral-700/80 text-white backdrop-blur-md cursor-pointer transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-purple-500 focus:scale-105 shadow-2xl">
+    <i class="pi pi-arrow-left text-sm"></i>
+    <span class="text-sm font-semibold">Torna al catalogo</span>
+  </button>
+
+  <!-- Player Video HTML5 nativo per Smart TV -->
+  <video
+    tabindex="0"
+    [src]="videoUrl()"
+    [poster]="iconUrl()"
+    controls
+    autoplay
+    class="w-full h-full object-contain focus:outline-none focus:ring-2 focus:ring-purple-500/40">
+  </video>
+
+</div>

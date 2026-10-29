@@ -1,17 +1,22 @@
 <!-- Card Video -->
-<div class="group relative w-72 aspect-video rounded-lg overflow-hidden cursor-pointer transition-all duration-300 hover:ring-2 hover:ring-violet-500 hover:shadow-xl hover:shadow-violet-900/20 text-white shrink-0">
+<div
+  tabindex="0"
+  role="button"
+  [attr.aria-label]="cardTitle()"
+  class="group relative w-72 aspect-video rounded-xl overflow-hidden cursor-pointer transition-all duration-300 hover:ring-2 hover:ring-violet-500 hover:shadow-xl hover:shadow-violet-900/20 text-white shrink-0
+    focus:outline-none focus:ring-4 focus:ring-purple-500 focus:scale-105 focus:shadow-2xl focus:shadow-purple-950/80">
 
   <!-- Immagine di sfondo -->
-  <div class="absolute inset-0 bg-no-repeat bg-center bg-cover transition-transform duration-500 group-hover:scale-110"
+  <div class="absolute inset-0 bg-no-repeat bg-center bg-cover transition-transform duration-500 group-hover:scale-110 group-focus:scale-110"
     [style.backgroundImage]="resolvedIcon() ? 'url(' + resolvedIcon() + ')' : ''">
   </div>
 
   <!-- Overlay scuro -->
-  <div class="absolute inset-0 bg-linear-to-t from-black/90 via-black/20 to-transparent transition-colors duration-300 group-hover:bg-black/40"></div>
+  <div class="absolute inset-0 bg-linear-to-t from-black/90 via-black/20 to-transparent transition-colors duration-300 group-hover:bg-black/40 group-focus:bg-black/40"></div>
 
-  <!-- Icona Play al centro (Appare in hover) -->
-  <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10">
-    <div class="flex justify-items-center bg-violet-600/80 p-4 rounded-full backdrop-blur-sm shadow-lg">
+  <!-- Icona Play al centro (Appare in hover e in focus con telecomando) -->
+  <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity duration-300 z-10">
+    <div class="flex justify-items-center bg-violet-600/90 p-4 rounded-full backdrop-blur-sm shadow-xl shadow-purple-900/60">
       <span class="pi pi-play text-2xl"></span>
     </div>
   </div>
