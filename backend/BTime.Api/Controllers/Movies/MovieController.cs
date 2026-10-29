@@ -273,6 +273,32 @@ namespace BTime.Api.Controllers.Dashboard
             return Ok(res);
         }
 
+        [HttpGet("episodes/{id}")]
+        public async Task<ActionResult<EpisodeDetailRes>> GetEpisodeById(Guid id)
+        {
+            var ep = await _db.EpisodesMs
+                .AsNoTracking()
+                .Include(e => e.RImagesM)
+                .Where(e => e.Id == id && !e.IsDeleted)
+                .FirstOrDefaultAsync();
+
+            if (ep == null)
+                return NotFound(new { message = "Episodio non trovato." });
+
+            var res = new EpisodeDetailRes
+            {
+                Id = ep.Id,
+                EpisodeNumber = ep.EpisodeNumber,
+                Title = ep.Title,
+                Description = ep.Description,
+                Duration = ep.Duration,
+                Path = FormatUrl(ep.Path),
+                Icon = FormatUrl(ep.RImagesM?.Path)
+            };
+
+            return Ok(res);
+        }
+
         private string FormatUrl(string? path)
         {
             if (string.IsNullOrWhiteSpace(path)) return string.Empty;
