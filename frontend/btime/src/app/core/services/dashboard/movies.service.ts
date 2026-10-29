@@ -6,7 +6,7 @@ import { environment } from "../../../../environments/environment";
 import { WatchingMovies } from "../../interfaces/dashboard/movies/watchingMovies.interface";
 import { MovieCard } from "../../interfaces/dashboard/movies/movieCard.interface";
 import { SeriesCard } from "../../interfaces/dashboard/movies/seriesCard.interface";
-import { SeriesDetail } from "../../interfaces/dashboard/movies/seriesDetail.interface";
+import { EpisodeDetail, SeriesDetail } from "../../interfaces/dashboard/movies/seriesDetail.interface";
 
 @Injectable({ providedIn: "root" })
 export class MovieService {
@@ -71,5 +71,9 @@ export class MovieService {
 
   public getSeriesDetail(id: string): Observable<SeriesDetail> {
     return this.http.get<SeriesDetail>(`${environment.apiUrl}/dashboard/movies/series/${id}`);
+  }
+
+  public getEpisodeById(id: string): Observable<EpisodeDetail> {
+    return this.http.get<EpisodeDetail>(`${environment.apiUrl}/dashboard/movies/episodes/${id}`);
   }
 }
