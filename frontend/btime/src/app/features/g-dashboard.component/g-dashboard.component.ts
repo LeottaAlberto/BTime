@@ -12,12 +12,14 @@ export class GDashboardComponent {
 
   @HostListener("window:keydown", ["$event"])
   public onTvKeyDown(event: KeyboardEvent): void {
-    const isRight = event.key === "ArrowRight" || event.key === "Right" || event.keyCode === 39;
-    const isLeft = event.key === "ArrowLeft" || event.key === "Left" || event.keyCode === 37;
-    const isUp = event.key === "ArrowUp" || event.key === "Up" || event.keyCode === 38;
-    const isDown = event.key === "ArrowDown" || event.key === "Down" || event.keyCode === 40;
+    // Supporto universale: PC, Smart TV Samsung Tizen, LG webOS, Amazon Fire TV Stick (Fire OS) e Xiaomi Box (Android TV)
+    const isRight = event.key === "ArrowRight" || event.key === "Right" || event.keyCode === 39 || event.keyCode === 22;
+    const isLeft = event.key === "ArrowLeft" || event.key === "Left" || event.keyCode === 37 || event.keyCode === 21;
+    const isUp = event.key === "ArrowUp" || event.key === "Up" || event.keyCode === 38 || event.keyCode === 19;
+    const isDown = event.key === "ArrowDown" || event.key === "Down" || event.keyCode === 40 || event.keyCode === 20;
+    const isSelect = event.key === "Enter" || event.key === "Select" || event.keyCode === 13 || event.keyCode === 23 || event.keyCode === 66;
 
-    if (!isRight && !isLeft && !isUp && !isDown) return;
+    if (!isRight && !isLeft && !isUp && !isDown && !isSelect) return;
 
     const navbar = document.getElementById("app-navbar");
     const main = document.getElementById("app-main");
@@ -25,7 +27,7 @@ export class GDashboardComponent {
 
     const active = document.activeElement as HTMLElement | null;
 
-    // Helper per ottenere tutti gli elementi focusabili visibili in un contenitore (compatibile Smart TV)
+    // Helper per ottenere tutti gli elementi focusabili visibili in un contenitore (compatibile Android TV & Silk)
     const getFocusable = (container: HTMLElement): HTMLElement[] => {
       return Array.from(
         container.querySelectorAll<HTMLElement>(
@@ -43,12 +45,25 @@ export class GDashboardComponent {
       });
     };
 
-    // Se nessun elemento è selezionato al momento della pressione freccia, parte dalla navbar
-    if (!active || active === document.body) {
-      const firstNav = getFocusable(navbar)[0];
-      if (firstNav) {
+    // Tasto CENTRALE (OK / Select / Enter) su telecomando Firestick o Xiaomi Box:
+    // Se premuto su un elemento custom con tabindex (come una card o episodio), scatena l'evento click nativo
+    if (isSelect) {
+      if (active && active !== document.body && active.tagName !== "BUTTON" && active.tagName !== "A" && active.tagName !== "INPUT") {
         event.preventDefault();
-        firstNav.focus();
+        active.click();
+        return;
+      }
+      return;
+    }
+
+    // Se nessun elemento ha il focus (o se è sul body), parte dalla voce attiva della navbar
+    if (!active || active === document.body || (!navbar.contains(active) && !main.contains(active))) {
+      const activeNav =
+        navbar.querySelector<HTMLElement>('[class*="bg-cyan-600"], .active') ||
+        getFocusable(navbar)[0];
+      if (activeNav) {
+        event.preventDefault();
+        activeNav.focus();
       }
       return;
     }
@@ -68,8 +83,10 @@ export class GDashboardComponent {
         const mainItems = getFocusable(main);
         if (mainItems.length > 0) {
           event.preventDefault();
-          mainItems[0].focus();
-          mainItems[0].scrollIntoView({ behavior: "smooth", block: "nearest", inline: "nearest" });
+          // Su TV preferiamo non focalizzare l'input per evitare che si apra la tastiera virtuale a schermo intero
+          const target = mainItems.find((el) => el.tagName !== "INPUT") || mainItems[0];
+          target.focus();
+          target.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "nearest" });
         }
         return;
       }
@@ -108,7 +125,7 @@ export class GDashboardComponent {
         const itemsToLeft = mainItems.filter((el) => {
           if (el === active) return false;
           const r = el.getBoundingClientRect();
-          const isToLeft = r.right <= activeRect.left + 15;
+          const isToLeft = r.right <= activeRect.left + 25;
           const verticalOverlap = Math.max(0, Math.min(r.bottom, activeRect.bottom) - Math.max(r.top, activeRect.top));
           return isToLeft && (verticalOverlap > 10 || Math.abs(r.top - activeRect.top) < 70);
         });
@@ -142,19 +159,19 @@ export class GDashboardComponent {
         let secondaryDist = 0;
 
         if (isRight) {
-          isDirectionValid = r.left >= activeRect.right - 15;
+          isDirectionValid = r.left >= activeRect.right - 25;
           primaryDist = r.left - activeRect.right;
           secondaryDist = Math.abs(r.top + r.height / 2 - (activeRect.top + activeRect.height / 2));
         } else if (isLeft) {
-          isDirectionValid = r.right <= activeRect.left + 15;
+          isDirectionValid = r.right <= activeRect.left + 25;
           primaryDist = activeRect.left - r.right;
           secondaryDist = Math.abs(r.top + r.height / 2 - (activeRect.top + activeRect.height / 2));
         } else if (isDown) {
-          isDirectionValid = r.top >= activeRect.bottom - 15;
+          isDirectionValid = r.top >= activeRect.bottom - 25;
           primaryDist = r.top - activeRect.bottom;
           secondaryDist = Math.abs(r.left + r.width / 2 - (activeRect.left + activeRect.width / 2));
         } else if (isUp) {
-          isDirectionValid = r.bottom <= activeRect.top + 15;
+          isDirectionValid = r.bottom <= activeRect.top + 25;
           primaryDist = activeRect.top - r.bottom;
           secondaryDist = Math.abs(r.left + r.width / 2 - (activeRect.left + activeRect.width / 2));
         }
