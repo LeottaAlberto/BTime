@@ -12,8 +12,12 @@ export class GDashboardComponent {
 
   @HostListener("window:keydown", ["$event"])
   public onTvKeyDown(event: KeyboardEvent): void {
-    const navKeys = ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"];
-    if (!navKeys.includes(event.key)) return;
+    const isRight = event.key === "ArrowRight" || event.key === "Right" || event.keyCode === 39;
+    const isLeft = event.key === "ArrowLeft" || event.key === "Left" || event.keyCode === 37;
+    const isUp = event.key === "ArrowUp" || event.key === "Up" || event.keyCode === 38;
+    const isDown = event.key === "ArrowDown" || event.key === "Down" || event.keyCode === 40;
+
+    if (!isRight && !isLeft && !isUp && !isDown) return;
 
     const navbar = document.getElementById("app-navbar");
     const main = document.getElementById("app-main");
@@ -21,17 +25,20 @@ export class GDashboardComponent {
 
     const active = document.activeElement as HTMLElement | null;
 
-    // Helper per ottenere tutti gli elementi focusabili visibili in un contenitore
+    // Helper per ottenere tutti gli elementi focusabili visibili in un contenitore (compatibile Smart TV)
     const getFocusable = (container: HTMLElement): HTMLElement[] => {
       return Array.from(
         container.querySelectorAll<HTMLElement>(
           'button:not([disabled]), [tabindex="0"], a[href], input:not([disabled]), video[tabindex="0"]'
         )
       ).filter((el) => {
+        const isVisible = el.offsetParent !== null || el.getClientRects().length > 0;
+        const style = window.getComputedStyle(el);
         return (
-          el.offsetParent !== null &&
+          isVisible &&
           !el.hasAttribute("disabled") &&
-          window.getComputedStyle(el).visibility !== "hidden"
+          style.display !== "none" &&
+          style.visibility !== "hidden"
         );
       });
     };
@@ -57,7 +64,7 @@ export class GDashboardComponent {
       const currentIndex = navItems.indexOf(active);
 
       // FRECCIA DESTRA -> Salta dalla Navbar al Main della Dashboard!
-      if (event.key === "ArrowRight") {
+      if (isRight) {
         const mainItems = getFocusable(main);
         if (mainItems.length > 0) {
           event.preventDefault();
@@ -68,7 +75,7 @@ export class GDashboardComponent {
       }
 
       // FRECCIA GIÙ -> Scende tra le voci della Navbar
-      if (event.key === "ArrowDown") {
+      if (isDown) {
         event.preventDefault();
         const nextIndex = (currentIndex + 1) % navItems.length;
         navItems[nextIndex]?.focus();
@@ -76,7 +83,7 @@ export class GDashboardComponent {
       }
 
       // FRECCIA SU -> Sale tra le voci della Navbar
-      if (event.key === "ArrowUp") {
+      if (isUp) {
         event.preventDefault();
         const prevIndex = (currentIndex - 1 + navItems.length) % navItems.length;
         navItems[prevIndex]?.focus();
@@ -89,7 +96,7 @@ export class GDashboardComponent {
     // ==========================================
     if (inMain) {
       // Se l'utente sta scrivendo in una casella di testo (es. search bar), permettiamo al cursore di muoversi
-      if (active instanceof HTMLInputElement && event.key === "ArrowLeft" && active.selectionStart !== 0) {
+      if (active instanceof HTMLInputElement && isLeft && active.selectionStart !== 0) {
         return;
       }
 
@@ -97,13 +104,13 @@ export class GDashboardComponent {
       const activeRect = active.getBoundingClientRect();
 
       // FRECCIA SINISTRA -> Controlla se siamo sul bordo sinistro per tornare alla NAVBAR!
-      if (event.key === "ArrowLeft") {
+      if (isLeft) {
         const itemsToLeft = mainItems.filter((el) => {
           if (el === active) return false;
           const r = el.getBoundingClientRect();
-          const isLeft = r.right <= activeRect.left + 15;
+          const isToLeft = r.right <= activeRect.left + 15;
           const verticalOverlap = Math.max(0, Math.min(r.bottom, activeRect.bottom) - Math.max(r.top, activeRect.top));
-          return isLeft && (verticalOverlap > 10 || Math.abs(r.top - activeRect.top) < 70);
+          return isToLeft && (verticalOverlap > 10 || Math.abs(r.top - activeRect.top) < 70);
         });
 
         // Se non c'è nessun elemento a sinistra all'interno del Main -> TORNA ALLA NAVBAR
@@ -134,19 +141,19 @@ export class GDashboardComponent {
         let primaryDist = 0;
         let secondaryDist = 0;
 
-        if (event.key === "ArrowRight") {
+        if (isRight) {
           isDirectionValid = r.left >= activeRect.right - 15;
           primaryDist = r.left - activeRect.right;
           secondaryDist = Math.abs(r.top + r.height / 2 - (activeRect.top + activeRect.height / 2));
-        } else if (event.key === "ArrowLeft") {
+        } else if (isLeft) {
           isDirectionValid = r.right <= activeRect.left + 15;
           primaryDist = activeRect.left - r.right;
           secondaryDist = Math.abs(r.top + r.height / 2 - (activeRect.top + activeRect.height / 2));
-        } else if (event.key === "ArrowDown") {
+        } else if (isDown) {
           isDirectionValid = r.top >= activeRect.bottom - 15;
           primaryDist = r.top - activeRect.bottom;
           secondaryDist = Math.abs(r.left + r.width / 2 - (activeRect.left + activeRect.width / 2));
-        } else if (event.key === "ArrowUp") {
+        } else if (isUp) {
           isDirectionValid = r.bottom <= activeRect.top + 15;
           primaryDist = activeRect.top - r.bottom;
           secondaryDist = Math.abs(r.left + r.width / 2 - (activeRect.left + activeRect.width / 2));
