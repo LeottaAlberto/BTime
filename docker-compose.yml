@@ -1,4 +1,5 @@
 services:
+  # 1. Database Postgres (Dati salvati su HDD)
   postgres:
     image: postgres:16-alpine
     container_name: btime_db
@@ -9,9 +10,29 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-    restart: always
+      # [Cartella su HDD] : [Cartella interna container]
+      - /mnt/merge_storage/btime_data/postgres:/var/lib/postgresql/data
+    restart: unless-stopped
 
+  # 2. Backend .NET (Uploads salvati su HDD)
+  api:
+    build:
+      context: ./backend/BTime.Api
+      dockerfile: Dockerfile
+    container_name: btime_api
+    environment:
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=btime_db;Username=cloudadmin;Password=cloudpassword123
+      - ASPNETCORE_ENVIRONMENT=Production
+    ports:
+      - "5008:5008"
+    volumes:
+      # Qualsiasi file/video caricato va a finire dritto sull'HDD
+      - /mnt/merge_storage/btime_data/uploads:/app/uploads
+    depends_on:
+      - postgres
+    restart: unless-stopped
+
+  # 3. PgAdmin (Opzionale per gestione DB)
   pgadmin:
     image: dpage/pgadmin4:latest
     container_name: btime_pgadmin
@@ -22,7 +43,4 @@ services:
       - "5050:80"
     depends_on:
       - postgres
-    restart: always
-
-volumes:
-  postgres_data:
+    restart: unless-stopped
