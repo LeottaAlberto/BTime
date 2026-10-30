@@ -1,6 +1,7 @@
-import { Component, HostListener } from "@angular/core";
+import { AfterViewInit, Component, HostListener, inject, OnDestroy } from "@angular/core";
 import { GNavbarComponent } from "../g-navbar.component/g-navbar.component";
-import { RouterOutlet } from "@angular/router";
+import { NavigationEnd, Router, RouterOutlet } from "@angular/router";
+import { filter, Subscription } from "rxjs";
 
 @Component({
   imports: [GNavbarComponent, RouterOutlet],
@@ -8,7 +9,101 @@ import { RouterOutlet } from "@angular/router";
   styleUrl: "./g-dashboard.component.css",
   templateUrl: "./g-dashboard.component.html",
 })
-export class GDashboardComponent {
+export class GDashboardComponent implements AfterViewInit, OnDestroy {
+  private router = inject(Router);
+  private routerSub?: Subscription;
+  private mutationObserver?: MutationObserver;
+  private lastMainFocused: HTMLElement | null = null;
+  private pendingAutoFocus = false;
+
+  public ngAfterViewInit(): void {
+    // Ad ogni cambio rotta (es. ingresso in Movies, Dettagli Serie o Player), prepara l'auto-focus nel Main
+    this.routerSub = this.router.events
+      .pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd))
+      .subscribe(() => {
+        this.lastMainFocused = null;
+        this.pendingAutoFocus = true;
+        setTimeout(() => this.tryAutoFocusMain(), 80);
+      });
+
+    // Osserva il caricamento asincrono delle card (film, serie, episodi) nel Main
+    const main = document.getElementById("app-main");
+    if (main) {
+      this.mutationObserver = new MutationObserver(() => {
+        const active = document.activeElement as HTMLElement | null;
+        const hasNoFocus = !active || active === document.body;
+        if (hasNoFocus || this.pendingAutoFocus) {
+          this.tryAutoFocusMain();
+        }
+      });
+      this.mutationObserver.observe(main, { childList: true, subtree: true });
+    }
+
+    setTimeout(() => this.tryAutoFocusMain(), 150);
+  }
+
+  public ngOnDestroy(): void {
+    this.routerSub?.unsubscribe();
+    this.mutationObserver?.disconnect();
+  }
+
+  private getFocusable(container: HTMLElement): HTMLElement[] {
+    return Array.from(
+      container.querySelectorAll<HTMLElement>(
+        'button:not([disabled]), [tabindex="0"], a[href], video[tabindex="0"]'
+      )
+    ).filter((el) => {
+      const isVisible = el.offsetParent !== null || el.getClientRects().length > 0;
+      const style = window.getComputedStyle(el);
+      return (
+        isVisible &&
+        !el.hasAttribute("disabled") &&
+        style.display !== "none" &&
+        style.visibility !== "hidden"
+      );
+    });
+  }
+
+  private tryAutoFocusMain(): void {
+    const main = document.getElementById("app-main");
+    if (!main) return;
+
+    // Preferisci focalizzare direttamente una card contenuto (film, serie, modulo, episodio, player) se presente
+    const preferredCard = main.querySelector<HTMLElement>(
+      'g-poster-card [tabindex="0"], g-resume-card [tabindex="0"], g-dash-card [tabindex="0"], g-media-detail [tabindex="0"][role="button"], g-watch-player button[tabindex="0"]'
+    );
+    if (preferredCard) {
+      this.pendingAutoFocus = false;
+      this.focusMainElement(preferredCard, main);
+      return;
+    }
+
+    const items = this.getFocusable(main);
+    if (items.length > 0) {
+      this.focusMainElement(items[0], main);
+    }
+  }
+
+  private focusMainElement(target: HTMLElement, main: HTMLElement): void {
+    this.lastMainFocused = target;
+    target.focus({ preventScroll: true });
+
+    const mainRect = main.getBoundingClientRect();
+    const targetRect = target.getBoundingClientRect();
+    const offsetTop = targetRect.top - mainRect.top + main.scrollTop;
+    const desiredTop = Math.max(0, offsetTop - mainRect.height / 2 + targetRect.height / 2);
+
+    main.scrollTo({ top: desiredTop, behavior: "smooth" });
+    target.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+  }
+
+  private isSameRow(a: DOMRect, b: DOMRect): boolean {
+    const cyA = a.top + a.height / 2;
+    const cyB = b.top + b.height / 2;
+    const overlapY = Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top);
+    const minHeight = Math.min(a.height, b.height);
+    return overlapY > minHeight * 0.35 || Math.abs(cyA - cyB) < 30;
+  }
 
   @HostListener("window:keydown", ["$event"])
   public onTvKeyDown(event: KeyboardEvent): void {
@@ -21,50 +116,54 @@ export class GDashboardComponent {
 
     if (!isRight && !isLeft && !isUp && !isDown && !isSelect) return;
 
+    this.pendingAutoFocus = false;
+
     const navbar = document.getElementById("app-navbar");
     const main = document.getElementById("app-main");
     if (!navbar || !main) return;
 
     const active = document.activeElement as HTMLElement | null;
 
-    // Helper per ottenere tutti gli elementi focusabili visibili in un contenitore (compatibile Android TV & Silk)
-    const getFocusable = (container: HTMLElement): HTMLElement[] => {
-      return Array.from(
-        container.querySelectorAll<HTMLElement>(
-          'button:not([disabled]), [tabindex="0"], a[href], input:not([disabled]), video[tabindex="0"]'
-        )
-      ).filter((el) => {
-        const isVisible = el.offsetParent !== null || el.getClientRects().length > 0;
-        const style = window.getComputedStyle(el);
-        return (
-          isVisible &&
-          !el.hasAttribute("disabled") &&
-          style.display !== "none" &&
-          style.visibility !== "hidden"
-        );
-      });
-    };
-
-    // Tasto CENTRALE (OK / Select / Enter) su telecomando Firestick o Xiaomi Box:
-    // Se premuto su un elemento custom con tabindex (come una card o episodio), scatena l'evento click nativo
-    if (isSelect) {
-      if (active && active !== document.body && active.tagName !== "BUTTON" && active.tagName !== "A" && active.tagName !== "INPUT") {
-        event.preventDefault();
-        active.click();
+    // Se l'utente sta digitando dentro l'input di ricerca:
+    if (active instanceof HTMLInputElement) {
+      if (isDown || isUp) {
+        active.blur();
+        const searchWrapper = active.closest<HTMLElement>('[tabindex="0"]');
+        if (searchWrapper) {
+          searchWrapper.focus();
+        }
+      } else {
         return;
+      }
+    }
+
+    // Gestione tasto OK / Select su Firestick e Android TV (keyCode 23 / "Select")
+    if (isSelect) {
+      if ((event.keyCode === 23 || event.key === "Select") && event.key !== "Enter") {
+        if (active && active !== document.body && active.tagName !== "BUTTON" && active.tagName !== "A" && active.tagName !== "INPUT") {
+          event.preventDefault();
+          active.click();
+        }
       }
       return;
     }
 
-    // Se nessun elemento ha il focus (o se è sul body), parte dalla voce attiva della navbar
+    // Se nessun elemento ha il focus (o se è sul body), focalizza il contenuto del Main (o la Navbar)
     if (!active || active === document.body || (!navbar.contains(active) && !main.contains(active))) {
+      event.preventDefault();
+      const mainItems = this.getFocusable(main);
+      if (mainItems.length > 0) {
+        const preferred =
+          (this.lastMainFocused && main.contains(this.lastMainFocused) ? this.lastMainFocused : null) ||
+          main.querySelector<HTMLElement>('g-poster-card [tabindex="0"], g-resume-card [tabindex="0"], g-dash-card [tabindex="0"]') ||
+          mainItems[0];
+        this.focusMainElement(preferred, main);
+        return;
+      }
       const activeNav =
         navbar.querySelector<HTMLElement>('[class*="bg-cyan-600"], .active') ||
-        getFocusable(navbar)[0];
-      if (activeNav) {
-        event.preventDefault();
-        activeNav.focus();
-      }
+        this.getFocusable(navbar)[0];
+      activeNav?.focus();
       return;
     }
 
@@ -75,18 +174,19 @@ export class GDashboardComponent {
     // 1. FOCUS ALL'INTERNO DELLA NAVBAR
     // ==========================================
     if (inNavbar) {
-      const navItems = getFocusable(navbar);
+      const navItems = this.getFocusable(navbar);
       const currentIndex = navItems.indexOf(active);
 
       // FRECCIA DESTRA -> Salta dalla Navbar al Main della Dashboard!
       if (isRight) {
-        const mainItems = getFocusable(main);
+        const mainItems = this.getFocusable(main);
         if (mainItems.length > 0) {
           event.preventDefault();
-          // Su TV preferiamo non focalizzare l'input per evitare che si apra la tastiera virtuale a schermo intero
-          const target = mainItems.find((el) => el.tagName !== "INPUT") || mainItems[0];
-          target.focus();
-          target.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "nearest" });
+          const target =
+            (this.lastMainFocused && main.contains(this.lastMainFocused) ? this.lastMainFocused : null) ||
+            main.querySelector<HTMLElement>('g-poster-card [tabindex="0"], g-resume-card [tabindex="0"], g-dash-card [tabindex="0"]') ||
+            mainItems[0];
+          this.focusMainElement(target, main);
         }
         return;
       }
@@ -112,31 +212,40 @@ export class GDashboardComponent {
     // 2. FOCUS ALL'INTERNO DEL MAIN DASHBOARD
     // ==========================================
     if (inMain) {
-      // Se l'utente sta scrivendo in una casella di testo (es. search bar), permettiamo al cursore di muoversi
-      if (active instanceof HTMLInputElement && isLeft && active.selectionStart !== 0) {
-        return;
-      }
-
-      const mainItems = getFocusable(main);
+      const mainItems = this.getFocusable(main);
       const activeRect = active.getBoundingClientRect();
+      const cxA = activeRect.left + activeRect.width / 2;
+      const cyA = activeRect.top + activeRect.height / 2;
 
-      // FRECCIA SINISTRA -> Controlla se siamo sul bordo sinistro per tornare alla NAVBAR!
-      if (isLeft) {
-        const itemsToLeft = mainItems.filter((el) => {
+      // --- MOVIMENTO ORIZZONTALE (DESTRA / SINISTRA SULLA STESSA RIGA) ---
+      if (isRight || isLeft) {
+        const sameRowItems = mainItems.filter((el) => {
           if (el === active) return false;
           const r = el.getBoundingClientRect();
-          const isToLeft = r.right <= activeRect.left + 25;
-          const verticalOverlap = Math.max(0, Math.min(r.bottom, activeRect.bottom) - Math.max(r.top, activeRect.top));
-          return isToLeft && (verticalOverlap > 10 || Math.abs(r.top - activeRect.top) < 70);
+          if (!this.isSameRow(activeRect, r)) return false;
+          const cxB = r.left + r.width / 2;
+          return isRight ? cxB > cxA + 5 : cxB < cxA - 5;
         });
 
-        // Se non c'è nessun elemento a sinistra all'interno del Main -> TORNA ALLA NAVBAR
-        if (itemsToLeft.length === 0) {
+        if (sameRowItems.length > 0) {
           event.preventDefault();
+          sameRowItems.sort((a, b) => {
+            const distA = Math.abs(a.getBoundingClientRect().left + a.getBoundingClientRect().width / 2 - cxA);
+            const distB = Math.abs(b.getBoundingClientRect().left + b.getBoundingClientRect().width / 2 - cxA);
+            return distA - distB;
+          });
+          this.focusMainElement(sameRowItems[0], main);
+          return;
+        }
+
+        // Se ha premuto SINISTRA e siamo sul primo elemento della riga -> TORNA ALLA NAVBAR!
+        if (isLeft) {
+          event.preventDefault();
+          this.lastMainFocused = active;
           const activeNav =
             navbar.querySelector<HTMLElement>('[class*="bg-cyan-600"], .active') ||
             navbar.querySelectorAll<HTMLElement>("g-nav-item [tabindex='0']")[0] ||
-            getFocusable(navbar)[0];
+            this.getFocusable(navbar)[0];
 
           if (activeNav) {
             activeNav.focus();
@@ -146,49 +255,38 @@ export class GDashboardComponent {
         }
       }
 
-      // Navigazione Spaziale Smart 2D all'interno del Main (tra righe, card e pulsanti)
-      let bestCandidate: HTMLElement | null = null;
-      let minDistance = Infinity;
+      // --- MOVIMENTO VERTICALE (SU / GIÙ TRA RIGHE DIVERSE) ---
+      if (isDown || isUp) {
+        const verticalCandidates = mainItems
+          .filter((el) => {
+            if (el === active) return false;
+            const r = el.getBoundingClientRect();
+            if (this.isSameRow(activeRect, r)) return false;
+            const cyB = r.top + r.height / 2;
+            return isDown ? cyB > cyA + 15 : cyB < cyA - 15;
+          })
+          .map((el) => {
+            const r = el.getBoundingClientRect();
+            const dy = isDown
+              ? Math.max(0, r.top - activeRect.bottom)
+              : Math.max(0, activeRect.top - r.bottom);
+            const dx = Math.abs(r.left + r.width / 2 - cxA);
+            return { el, rect: r, dy, dx };
+          });
 
-      for (const el of mainItems) {
-        if (el === active) continue;
-        const r = el.getBoundingClientRect();
+        if (verticalCandidates.length > 0) {
+          event.preventDefault();
+          // 1. Trova la riga più vicina verticalmente
+          verticalCandidates.sort((a, b) => a.dy - b.dy);
+          const closestRowRect = verticalCandidates[0].rect;
 
-        let isDirectionValid = false;
-        let primaryDist = 0;
-        let secondaryDist = 0;
+          // 2. Filtra tutti gli elementi appartenenti a quella riga più vicina
+          const closestRowItems = verticalCandidates.filter((c) => this.isSameRow(closestRowRect, c.rect));
 
-        if (isRight) {
-          isDirectionValid = r.left >= activeRect.right - 25;
-          primaryDist = r.left - activeRect.right;
-          secondaryDist = Math.abs(r.top + r.height / 2 - (activeRect.top + activeRect.height / 2));
-        } else if (isLeft) {
-          isDirectionValid = r.right <= activeRect.left + 25;
-          primaryDist = activeRect.left - r.right;
-          secondaryDist = Math.abs(r.top + r.height / 2 - (activeRect.top + activeRect.height / 2));
-        } else if (isDown) {
-          isDirectionValid = r.top >= activeRect.bottom - 25;
-          primaryDist = r.top - activeRect.bottom;
-          secondaryDist = Math.abs(r.left + r.width / 2 - (activeRect.left + activeRect.width / 2));
-        } else if (isUp) {
-          isDirectionValid = r.bottom <= activeRect.top + 25;
-          primaryDist = activeRect.top - r.bottom;
-          secondaryDist = Math.abs(r.left + r.width / 2 - (activeRect.left + activeRect.width / 2));
+          // 3. All'interno di quella riga, scegli l'elemento più allineato orizzontalmente
+          closestRowItems.sort((a, b) => a.dx - b.dx);
+          this.focusMainElement(closestRowItems[0].el, main);
         }
-
-        if (isDirectionValid) {
-          const dist = primaryDist + secondaryDist * 1.6;
-          if (dist < minDistance) {
-            minDistance = dist;
-            bestCandidate = el;
-          }
-        }
-      }
-
-      if (bestCandidate) {
-        event.preventDefault();
-        bestCandidate.focus();
-        bestCandidate.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "nearest" });
       }
     }
   }
