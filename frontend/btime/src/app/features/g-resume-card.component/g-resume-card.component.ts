@@ -1,5 +1,6 @@
-import { Component, computed, input, InputSignal } from "@angular/core";
+import { Component, computed, inject, input, InputSignal } from "@angular/core";
 import { environment } from "../../../environments/environment";
+import { Router } from "@angular/router";
 
 @Component({
   imports: [],
@@ -8,6 +9,10 @@ import { environment } from "../../../environments/environment";
   templateUrl: "./g-resume-card.component.html",
 })
 export class GResumeCardComponent {
+  private router = inject(Router);
+
+  public id: InputSignal<string> = input<string>("");
+  public mediaType: InputSignal<string> = input<string>("");
   public cardTitle: InputSignal<string> = input<string>("");
   public season: InputSignal<number | undefined> = input<number | undefined>(undefined);
   public episode: InputSignal<number | undefined> = input<number | undefined>(undefined);
@@ -27,4 +32,13 @@ export class GResumeCardComponent {
     }
     return raw;
   });
+
+  public onClick(): void {
+    if (!this.id()) return;
+    if (this.mediaType() === "episode" || (this.season() && this.episode())) {
+      this.router.navigate(["/dashboard/movies/watch", this.id()]);
+    } else {
+      this.router.navigate(["/dashboard/movies/media-details", this.id()]);
+    }
+  }
 }
