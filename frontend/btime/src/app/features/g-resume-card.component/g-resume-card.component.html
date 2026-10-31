@@ -6,7 +6,7 @@
   (click)="onClick()"
   (keydown.enter)="onClick()"
   (keydown.space)="onClick()"
-  class="group relative w-72 aspect-video rounded-xl overflow-hidden cursor-pointer transition-all duration-300 hover:ring-2 hover:ring-violet-500 hover:shadow-xl hover:shadow-violet-900/20 text-white shrink-0
+  class="group relative w-60 sm:w-68 md:w-72 2xl:w-84 aspect-video rounded-xl overflow-hidden cursor-pointer transition-all duration-300 hover:ring-2 hover:ring-violet-500 hover:shadow-xl hover:shadow-violet-900/20 text-white shrink-0
     focus:outline-none focus:ring-4 focus:ring-purple-500 focus:scale-105 focus:shadow-2xl focus:shadow-purple-950/80">
 
   <!-- Immagine di sfondo -->
@@ -28,7 +28,7 @@
   <div class="absolute bottom-3 left-3 right-3 z-10 flex flex-col gap-2">
     <div class="flex justify-between items-end">
       <div class="flex flex-col overflow-hidden mr-2">
-        <h3 class="font-semibold text-sm truncate w-48">{{cardTitle()}}</h3>
+        <h3 class="font-semibold text-xs sm:text-sm 2xl:text-base truncate w-36 sm:w-44 md:w-48 2xl:w-56">{{cardTitle()}}</h3>
         @if (season() && episode()) {
           <p class="text-neutral-300 text-xs truncate">S{{season()}}:E{{episode()}}@if (epName()) { - "{{epName()}}" }</p>
         } @else if (epName()) {
