@@ -1,11 +1,11 @@
-<div class="flex flex-row justify-start items-start gap-8 w-full py-5">
+<div class="flex flex-wrap lg:flex-nowrap justify-between items-center gap-3 sm:gap-4 lg:gap-8 w-full py-3 sm:py-5">
     <!-- search bar -->
-    <g-search-input class="w-full"/>
-
-    <!-- Filters -->
-    <g-category-filter-group class="w-full"/>
+    <g-search-input class="flex-1 min-w-48 lg:w-full order-1"/>
 
     <!-- Allerts -->
-    <g-notification-bell/>
+    <g-notification-bell class="order-2 lg:order-3 shrink-0"/>
+
+    <!-- Filters -->
+    <g-category-filter-group class="w-full lg:flex-1 order-3 lg:order-2 min-w-0"/>
 
   </div>

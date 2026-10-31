@@ -1,12 +1,12 @@
-<form (submit)="$event.preventDefault(); onClick()" class="w-120 bg-neutral-500 p-10 m-10 rounded-xl text-zinc-50">
+<form (submit)="$event.preventDefault(); onClick()" class="w-full max-w-120 bg-neutral-500 p-6 sm:p-10 m-4 sm:m-10 rounded-xl text-zinc-50 shadow-2xl">
   <!-- Header -->
-  <div class="flex flex-row items-center justify-center gap-2">
+  <div class="flex flex-row items-center justify-center gap-2 sm:gap-3">
     <div
-    class="w-20 h-20 rounded-full overflow-hidden
+    class="w-14 h-14 sm:w-20 sm:h-20 rounded-full overflow-hidden shrink-0
            bg-[url('https://cdn.create.vista.com/api/media/small/333790434/stock-photo-cropped-view-woman-holding-alarm-clock-blue-background-panoramic-shot')]
            bg-no-repeat bg-center bg-auto bg-amber-400">
           </div>
-    <h1 class="text-6xl font-bold">BTime</h1>
+    <h1 class="text-4xl sm:text-6xl font-bold">BTime</h1>
   </div>
 
   <!-- Body -->

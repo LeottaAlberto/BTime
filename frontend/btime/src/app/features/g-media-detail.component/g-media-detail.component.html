@@ -1,4 +1,4 @@
-<div class="w-full h-full min-h-screen relative px-6 md:px-12 py-6 bg-neutral-950 overflow-hidden text-white rounded-xl outline-1 outline-purple-600/30">
+<div class="w-full h-full min-h-full relative px-4 sm:px-6 md:px-12 py-4 sm:py-6 bg-neutral-950 overflow-hidden text-white rounded-xl outline-1 outline-purple-600/30">
 
   <!-- Sfondo Immagine & Gradienti Scenografici (Dietro al resto) -->
   <div class="absolute inset-0 z-0 pointer-events-none overflow-hidden select-none">
@@ -40,19 +40,19 @@
     </div>
 
     <!-- Header Info Principale (Locandina + Metadati) -->
-    <div class="flex flex-col md:flex-row items-center md:items-start gap-8 py-2 w-full">
+    <div class="flex flex-col md:flex-row items-center md:items-start gap-6 sm:gap-8 py-2 w-full">
       <!-- Locandina / Cover -->
       <div class="shrink-0 flex justify-center">
         <div
-          class="w-64 h-96 bg-no-repeat bg-center bg-cover rounded-2xl ring-2 ring-purple-600/40 shadow-2xl shadow-purple-950/60 hover:scale-[1.01] transition duration-300"
+          class="w-44 h-64 sm:w-56 sm:h-80 md:w-64 md:h-96 2xl:w-72 2xl:h-108 bg-no-repeat bg-center bg-cover rounded-2xl ring-2 ring-purple-600/40 shadow-2xl shadow-purple-950/60 hover:scale-[1.01] transition duration-300"
           [style.backgroundImage]="'url(' + resolvedIcon() + ')'">
         </div>
       </div>
 
       <!-- Info Testuali -->
-      <div class="flex flex-col gap-4 flex-1 text-center md:text-left">
+      <div class="flex flex-col gap-3 sm:gap-4 flex-1 text-center md:text-left">
         <!-- Titolo -->
-        <h1 class="text-3xl md:text-5xl font-extrabold tracking-tight uppercase text-white drop-shadow-md">
+        <h1 class="text-2xl sm:text-3xl md:text-5xl 2xl:text-6xl font-extrabold tracking-tight uppercase text-white drop-shadow-md">
           {{ seriesDetail()?.title || tvInfo()?.title || 'Caricamento...' }}
         </h1>
 
@@ -132,7 +132,7 @@
           <span class="text-xs font-normal text-neutral-400">({{ selectedSeason()!.episodes.length }})</span>
         </h3>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 gap-4 sm:gap-5">
           @for (ep of selectedSeason()!.episodes; track ep.id) {
             <div
               tabindex="0"
