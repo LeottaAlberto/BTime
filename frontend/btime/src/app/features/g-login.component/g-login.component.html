@@ -1,101 +1,205 @@
-<form (submit)="$event.preventDefault(); onClick()" class="w-full max-w-120 bg-neutral-500 p-6 sm:p-10 m-4 sm:m-10 rounded-xl text-zinc-50 shadow-2xl">
-  <!-- Header -->
-  <div class="flex flex-row items-center justify-center gap-2 sm:gap-3">
-    <div
-    class="w-14 h-14 sm:w-20 sm:h-20 rounded-full overflow-hidden shrink-0
-           bg-[url('https://cdn.create.vista.com/api/media/small/333790434/stock-photo-cropped-view-woman-holding-alarm-clock-blue-background-panoramic-shot')]
-           bg-no-repeat bg-center bg-auto bg-amber-400">
+<div
+  [class]="
+    isTv()
+      ? 'w-full max-w-4xl bg-neutral-500 p-6 sm:p-10 m-4 sm:m-8 rounded-2xl text-zinc-50 shadow-2xl flex flex-col md:flex-row items-stretch gap-8'
+      : 'w-full max-w-120 bg-neutral-500 p-6 sm:p-10 m-4 sm:m-10 rounded-xl text-zinc-50 shadow-2xl'
+  "
+>
+  <!-- Sezione QR Code: visibile ESCLUSIVAMENTE se il client è una TV -->
+  @if (isTv()) {
+    <div class="flex-1 flex flex-col items-center justify-between bg-neutral-700/60 border border-neutral-400/30 rounded-xl p-6 text-center">
+      <div class="flex flex-col items-center gap-1">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/20 border border-purple-300/40 text-purple-100 text-xs font-semibold">
+          <span class="pi pi-qrcode text-sm"></span>
+          <span>Accesso Rapido TV</span>
+        </div>
+
+        @if (isTvApp()) {
+          <span class="text-[11px] text-lime-300 font-medium mt-1">
+            TvAppBTime rilevata • Sessione estesa attiva
+          </span>
+        }
+
+        <h2 class="text-xl sm:text-2xl font-bold mt-2">Inquadra il QR Code</h2>
+        <p class="text-xs sm:text-sm text-neutral-200 max-w-xs">
+          Scansiona con la fotocamera dello smartphone per accedere senza usare il telecomando.
+        </p>
+      </div>
+
+      <!-- Area QR Code -->
+      <div class="my-4 relative flex items-center justify-center">
+        @if (qrLoading()) {
+          <div class="w-52 h-52 sm:w-56 sm:h-56 rounded-xl bg-neutral-800/80 flex flex-col items-center justify-center gap-3 p-4">
+            <span class="pi pi-spin pi-spinner text-3xl text-purple-300"></span>
+            <span class="text-xs text-neutral-300">Generazione QR Code...</span>
           </div>
-    <h1 class="text-4xl sm:text-6xl font-bold">BTime</h1>
-  </div>
+        } @else if (qrError()) {
+          <div class="w-52 h-52 sm:w-56 sm:h-56 rounded-xl bg-red-950/70 border border-red-400/40 flex flex-col items-center justify-center gap-3 p-4">
+            <span class="pi pi-exclamation-circle text-3xl text-red-300"></span>
+            <span class="text-xs text-red-100">{{ qrError() }}</span>
+          </div>
+        } @else if (qrSvg(); as svg) {
+          <div class="relative w-52 h-52 sm:w-56 sm:h-56 p-2 bg-white rounded-xl shadow-xl">
+            <svg
+              [attr.viewBox]="svg.viewBox"
+              shape-rendering="crispEdges"
+              class="w-full h-full rounded-lg"
+              aria-label="QR Code per login su TV"
+            >
+              <rect width="100%" height="100%" fill="#FFFFFF" />
+              <path [attr.d]="svg.path" fill="#09090B" />
+            </svg>
 
-  <!-- Body -->
-  <div class="text-center flex flex-col gap-4 mt-4">
-    <h3>Login into Dashboard</h3>
+            @if (qrExpired()) {
+              <div class="absolute inset-0 rounded-xl bg-neutral-900/90 backdrop-blur-xs flex flex-col items-center justify-center gap-2 p-4 text-zinc-50">
+                <span class="pi pi-clock text-2xl text-amber-300"></span>
+                <span class="text-sm font-semibold">QR Code scaduto</span>
+                <span class="text-xs text-neutral-300">Premi OK per generarne uno nuovo</span>
+              </div>
+            }
 
-    @if (errorMessage()) {
-      <div class="flex items-center gap-2 p-3 rounded-lg bg-red-950/80 border border-red-500/50 text-red-200 text-xs text-left shadow-lg">
-        <span class="pi pi-exclamation-triangle text-red-400 text-base shrink-0"></span>
-        <span class="flex-1 font-medium">{{ errorMessage() }}</span>
-      </div>
-    }
-    <!-- Inputs -->
-    <div class="flex flex-col gap-2 justify-start">
-      <div class="text-left flex flex-col gap-1">
-        <label for="username">Username</label>
-        <div class="relative flex items-center">
-          <span class="pi pi-user absolute left-3 text-neutral-300 pointer-events-none text-xl"></span>
-          <input
-            #usernameInput
-            type="text"
-            name="username"
-            tabindex="0"
-            class="w-full h-10 rounded-md bg-neutral-600 outline-none border border-neutral-700 focus:border-purple-400 focus:ring-4 focus:ring-purple-400 pl-10 pr-4 text-zinc-50 transition-all"
-            [value]="username() ?? ''"
-            (input)="username.set(usernameInput.value)"
-            required>
-        </div>
-      </div>
-
-      <div class="text-left flex flex-col gap-1">
-        <label for="mail">Mail</label>
-        <div class="relative flex items-center">
-          <span class="pi pi-user absolute left-3 text-neutral-300 pointer-events-none text-xl"></span>
-          <input
-            #mailInput
-            type="email"
-            name="mail"
-            tabindex="0"
-            class="w-full h-10 rounded-md bg-neutral-600 outline-none border border-neutral-700 focus:border-purple-400 focus:ring-4 focus:ring-purple-400 pl-10 pr-4 text-zinc-50 transition-all"
-            [value]="email() ?? ''"
-            (input)="email.set(mailInput.value)"
-            required>
-        </div>
+            @if (qrApproved()) {
+              <div class="absolute inset-0 rounded-xl bg-emerald-950/90 flex flex-col items-center justify-center gap-2 p-4 text-emerald-100">
+                <span class="pi pi-check-circle text-3xl text-emerald-400"></span>
+                <span class="text-sm font-bold">Accesso autorizzato!</span>
+              </div>
+            }
+          </div>
+        }
       </div>
 
+      <!-- Stato / Timer e Pulsante Rigenera (navigabile con telecomando D-pad) -->
+      <div class="w-full flex flex-col items-center gap-3">
+        @if (!qrExpired() && !qrError() && !qrLoading() && !qrApproved()) {
+          <div class="flex items-center gap-2 text-xs text-neutral-200">
+            <span class="inline-block size-2 rounded-full bg-lime-400 animate-pulse"></span>
+            <span>In attesa di conferma • Scade tra <strong>{{ qrFormattedTime() }}</strong></span>
+          </div>
+        }
 
-      <div class="text-left flex flex-col gap-1">
-        <label for="password">Password</label>
-        <div class="relative flex items-center">
-          <span class="pi pi-lock absolute left-3 text-neutral-300 pointer-events-none text-xl"></span>
-          <input
-            #passwordInput
-            type="password"
-            name="password"
-            tabindex="0"
-            class="w-full h-10 rounded-md bg-neutral-600 outline-none border border-neutral-700 focus:border-purple-400 focus:ring-4 focus:ring-purple-400 pl-10 pr-4 text-zinc-50 transition-all"
-            [value]="password() ?? ''"
-            (input)="password.set(passwordInput.value)"
-            required>
-          <span class="pi pi-eye absolute right-3 text-neutral-300 pointer-events-none text-xl cursor-pointer z-50"></span>
-        </div>
+        <button
+          type="button"
+          tabindex="0"
+          (click)="initQrSession()"
+          class="px-4 py-2 rounded-md bg-neutral-800 hover:bg-neutral-900 text-xs sm:text-sm font-medium cursor-pointer transition-all focus:outline-none focus:ring-4 focus:ring-purple-400 focus:scale-105 flex items-center gap-2"
+        >
+          <span class="pi pi-refresh text-xs"></span>
+          <span>{{ qrExpired() || qrError() ? "Rigenera QR Code" : "Aggiorna QR Code" }}</span>
+        </button>
       </div>
     </div>
 
-    <!-- Remember e forgotten password -->
-    <div class="flex flex-row justify-between items-center text-sm">
-      <label class="flex flex-row items-center gap-2 cursor-pointer select-none">
-        <input type="checkbox" name="rememberme" id="rememberme" tabindex="0" class="peer sr-only focus:outline-none">
-        <div class="size-5 rounded bg-neutral-700 border border-neutral-500 peer-focus:ring-2 peer-focus:ring-purple-400 flex items-center justify-center transition-colors hover:border-neutral-400">
-          <span class="pi pi-check text-lime-500 text-xs font-bold hidden peer-checked:block"></span>
+    <!-- Divisore per layout TV -->
+    <div class="hidden md:flex flex-col items-center justify-center">
+      <div class="w-px flex-1 bg-neutral-400/40"></div>
+      <span class="py-3 text-xs uppercase tracking-wider text-neutral-200 font-semibold">oppure</span>
+      <div class="w-px flex-1 bg-neutral-400/40"></div>
+    </div>
+  }
+
+  <!-- Form Login Classico -->
+  <form (submit)="$event.preventDefault(); onClick()" class="flex-1 flex flex-col justify-between">
+    <!-- Header -->
+    <div class="flex flex-row items-center justify-center gap-2 sm:gap-3">
+      <div
+        class="w-14 h-14 sm:w-20 sm:h-20 rounded-full overflow-hidden shrink-0
+               bg-[url('https://cdn.create.vista.com/api/media/small/333790434/stock-photo-cropped-view-woman-holding-alarm-clock-blue-background-panoramic-shot')]
+               bg-no-repeat bg-center bg-auto bg-amber-400"
+      ></div>
+      <h1 class="text-4xl sm:text-6xl font-bold">BTime</h1>
+    </div>
+
+    <!-- Body -->
+    <div class="text-center flex flex-col gap-4 mt-4">
+      <h3>Login into Dashboard</h3>
+
+      @if (errorMessage()) {
+        <div class="flex items-center gap-2 p-3 rounded-lg bg-red-950/80 border border-red-500/50 text-red-200 text-xs text-left shadow-lg">
+          <span class="pi pi-exclamation-triangle text-red-400 text-base shrink-0"></span>
+          <span class="flex-1 font-medium">{{ errorMessage() }}</span>
         </div>
-        <span>Remember Me</span>
-      </label>
-      <a href="" tabindex="0" class="hover:underline text-neutral-300 focus:outline-none focus:ring-2 focus:ring-purple-400 rounded px-1">Forgot Password?</a>
+      }
+
+      <!-- Inputs -->
+      <div class="flex flex-col gap-2 justify-start">
+        <div class="text-left flex flex-col gap-1">
+          <label for="username">Username</label>
+          <div class="relative flex items-center">
+            <span class="pi pi-user absolute left-3 text-neutral-300 pointer-events-none text-xl"></span>
+            <input
+              #usernameInput
+              type="text"
+              name="username"
+              tabindex="0"
+              class="w-full h-10 rounded-md bg-neutral-600 outline-none border border-neutral-700 focus:border-purple-400 focus:ring-4 focus:ring-purple-400 pl-10 pr-4 text-zinc-50 transition-all"
+              [value]="username() ?? ''"
+              (input)="username.set(usernameInput.value)"
+              required
+            />
+          </div>
+        </div>
+
+        <div class="text-left flex flex-col gap-1">
+          <label for="mail">Mail</label>
+          <div class="relative flex items-center">
+            <span class="pi pi-user absolute left-3 text-neutral-300 pointer-events-none text-xl"></span>
+            <input
+              #mailInput
+              type="email"
+              name="mail"
+              tabindex="0"
+              class="w-full h-10 rounded-md bg-neutral-600 outline-none border border-neutral-700 focus:border-purple-400 focus:ring-4 focus:ring-purple-400 pl-10 pr-4 text-zinc-50 transition-all"
+              [value]="email() ?? ''"
+              (input)="email.set(mailInput.value)"
+              required
+            />
+          </div>
+        </div>
+
+        <div class="text-left flex flex-col gap-1">
+          <label for="password">Password</label>
+          <div class="relative flex items-center">
+            <span class="pi pi-lock absolute left-3 text-neutral-300 pointer-events-none text-xl"></span>
+            <input
+              #passwordInput
+              type="password"
+              name="password"
+              tabindex="0"
+              class="w-full h-10 rounded-md bg-neutral-600 outline-none border border-neutral-700 focus:border-purple-400 focus:ring-4 focus:ring-purple-400 pl-10 pr-4 text-zinc-50 transition-all"
+              [value]="password() ?? ''"
+              (input)="password.set(passwordInput.value)"
+              required
+            />
+            <span class="pi pi-eye absolute right-3 text-neutral-300 pointer-events-none text-xl cursor-pointer z-50"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Remember e forgotten password -->
+      <div class="flex flex-row justify-between items-center text-sm">
+        <label class="flex flex-row items-center gap-2 cursor-pointer select-none">
+          <input type="checkbox" name="rememberme" id="rememberme" tabindex="0" class="peer sr-only focus:outline-none" />
+          <div class="size-5 rounded bg-neutral-700 border border-neutral-500 peer-focus:ring-2 peer-focus:ring-purple-400 flex items-center justify-center transition-colors hover:border-neutral-400">
+            <span class="pi pi-check text-lime-500 text-xs font-bold hidden peer-checked:block"></span>
+          </div>
+          <span>Remember Me</span>
+        </label>
+        <a href="" tabindex="0" class="hover:underline text-neutral-300 focus:outline-none focus:ring-2 focus:ring-purple-400 rounded px-1">Forgot Password?</a>
+      </div>
     </div>
 
-  </div>
-
-  <!-- Footer -->
-  <div class="flex flex-col items-center pt-4 gap-2">
-    <input
-      type="submit"
-      tabindex="0"
-      class="w-8/12 h-10 bg-neutral-800 rounded-md cursor-pointer hover:bg-neutral-900 transition-all focus:outline-none focus:ring-4 focus:ring-purple-400 focus:scale-105"
-      value="Login">
-    <div class="flex flex-row justify-center gap-1 text-xs">
-      <p>No account?</p>
-      <a href="" tabindex="0" class="hover:underline text-neutral-300 focus:outline-none focus:ring-2 focus:ring-purple-400 rounded px-1">Register Now</a>
+    <!-- Footer -->
+    <div class="flex flex-col items-center pt-4 gap-2">
+      <input
+        type="submit"
+        tabindex="0"
+        class="w-8/12 h-10 bg-neutral-800 rounded-md cursor-pointer hover:bg-neutral-900 transition-all focus:outline-none focus:ring-4 focus:ring-purple-400 focus:scale-105"
+        value="Login"
+      />
+      <div class="flex flex-row justify-center gap-1 text-xs">
+        <p>No account?</p>
+        <a href="" tabindex="0" class="hover:underline text-neutral-300 focus:outline-none focus:ring-2 focus:ring-purple-400 rounded px-1">Register Now</a>
+      </div>
     </div>
-  </div>
-</form>
+  </form>
+</div>
