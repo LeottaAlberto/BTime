@@ -6,4 +6,5 @@ public class LoginRequest {
     public string Password { get; set; } = string.Empty;
     public string IpAddress { get; set; } = string.Empty;
     public string DeviceInfo { get; set; } = string.Empty;
+    public bool IsTvAppBTime { get; set; } = false;
 }

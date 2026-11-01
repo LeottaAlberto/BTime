@@ -9,6 +9,13 @@ export const routes: Routes = [
   { path: "", redirectTo: "dashboard", pathMatch: "full" },
   { path: "login", component: GLoginComponent, canActivate: [guestGuard] },
   {
+    path: "qr-auth",
+    loadComponent: () =>
+      import("./features/g-qr-authorize.component/g-qr-authorize.component").then(
+        (c) => c.GQrAuthorizeComponent,
+      ),
+  },
+  {
     path: "dashboard",
     component: GDashboardComponent,
     canActivate: [authGuard],
