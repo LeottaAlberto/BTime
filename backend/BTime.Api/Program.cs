@@ -31,6 +31,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 // Registrazione Servizi Applicativi
 builder.Services.AddScoped<JwtService>();
+builder.Services.AddSingleton<QrLoginService>();
 
 // Configurazione Autenticazione & Autorizzazione JWT
 var jwtSettings = builder.Configuration.GetSection("Jwt");

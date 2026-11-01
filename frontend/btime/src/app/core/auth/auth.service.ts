@@ -8,6 +8,15 @@ import { Observable, tap } from "rxjs";
 import { RefreshTokenResponse } from "../interfaces/refreshToken/refreshTokenResponse.interface";
 import { RefreshTokenRequest } from "../interfaces/refreshToken/refreshTokenRequest.interface";
 import { environment } from "../../../environments/environment";
+import { isTvAppBTimeClient } from "../services/deviceInfo/parseUserAgent.service";
+import {
+  QrApproveRequest,
+  QrApproveWithCredentialsRequest,
+  QrCreateRequest,
+  QrCreateResponse,
+  QrInfoResponse,
+  QrStatusResponse,
+} from "../interfaces/qrLogin/qrLogin.interface";
 
 @Injectable({ providedIn: "root" }) // Questo decoratore permette di creare una sola instanza di questa classe per tutte l'app
 export class AuthService {
@@ -28,14 +37,8 @@ export class AuthService {
     try {
       const jwtDec = jwtDecode<Record<string, any>>(jwt);
 
-      // Verifica scadenza token
-      if (jwtDec["exp"] && jwtDec["exp"] * 1000 < Date.now()) {
-        this.logout();
-        return;
-      }
-
       // Ricostruisce lo stato dell'utente mappando i claim del JWT
-      this.currentUser.set({
+      const restoredUser: LoginResponse = {
         token: jwt,
         refreshToken: refreshToken ?? "",
         username:
@@ -51,7 +54,25 @@ export class AuthService {
           jwtDec["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"] ??
           jwtDec["role"] ??
           "",
-      });
+      };
+
+      // Verifica scadenza token: se è scaduto ma abbiamo un RefreshToken valido (es. TvAppBTime),
+      // rinnova silenziosamente la sessione invece di disconnettere subito il dispositivo.
+      if (jwtDec["exp"] && jwtDec["exp"] * 1000 < Date.now()) {
+        if (refreshToken) {
+          this.currentUser.set(restoredUser);
+          queueMicrotask(() => {
+            this.refreshToken().subscribe({
+              error: () => this.logout(),
+            });
+          });
+          return;
+        }
+        this.logout();
+        return;
+      }
+
+      this.currentUser.set(restoredUser);
     } catch (error) {
       console.error("JWT non valido o corrotto:", error);
       this.logout();
@@ -59,7 +80,11 @@ export class AuthService {
   }
 
   public login(req: LoginRequest): Observable<LoginResponse> {
-    return this.http.post<LoginResponse>(`${environment.apiUrl}/auth/login`, req).pipe(
+    const payload: LoginRequest = {
+      ...req,
+      IsTvAppBTime: req.IsTvAppBTime ?? isTvAppBTimeClient(),
+    };
+    return this.http.post<LoginResponse>(`${environment.apiUrl}/auth/login`, payload).pipe(
       tap((res) => {
         this.saveTokens(res);
       }),
@@ -70,11 +95,47 @@ export class AuthService {
     const req: RefreshTokenRequest = {
       JwtToken: this.getJwt() ?? "",
       RefreshToken: this.getRefreshToken() ?? "",
+      IsTvAppBTime: isTvAppBTimeClient(),
     };
 
     return this.http
       .post<RefreshTokenResponse>(`${environment.apiUrl}/auth/refresh-token`, req)
       .pipe(tap((res) => this.saveTokens(res)));
+  }
+
+  // ==================== QR CODE LOGIN ====================
+
+  public createQrSession(req: QrCreateRequest): Observable<QrCreateResponse> {
+    return this.http.post<QrCreateResponse>(`${environment.apiUrl}/auth/qr/create`, req);
+  }
+
+  public getQrSessionInfo(code: string): Observable<QrInfoResponse> {
+    return this.http.get<QrInfoResponse>(
+      `${environment.apiUrl}/auth/qr/info/${encodeURIComponent(code)}`,
+    );
+  }
+
+  public pollQrSessionStatus(code: string): Observable<QrStatusResponse> {
+    return this.http.get<QrStatusResponse>(
+      `${environment.apiUrl}/auth/qr/status/${encodeURIComponent(code)}`,
+    );
+  }
+
+  public approveQrSession(req: QrApproveRequest): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(`${environment.apiUrl}/auth/qr/approve`, req);
+  }
+
+  public approveQrSessionWithCredentials(
+    req: QrApproveWithCredentialsRequest,
+  ): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(
+      `${environment.apiUrl}/auth/qr/approve-credentials`,
+      req,
+    );
+  }
+
+  public completeQrLogin(res: LoginResponse): void {
+    this.saveTokens(res);
   }
 
   public logout(): void {
@@ -103,8 +164,7 @@ export class AuthService {
         email: anyRes.email || anyRes.Email || "",
         role: anyRes.role || anyRes.Role || "",
       });
-    }
-    else {
+    } else {
       // Se è un refresh-token, aggiorniamo solo i token mantenendo username, email e role
       this.currentUser.update((user) =>
         user ? { ...user, token: jwt, refreshToken: refresh } : null,
@@ -113,14 +173,12 @@ export class AuthService {
   }
 
   private getJwt(): string | null {
-    if (typeof window === "undefined")
-      return null; // Evita il crash lato server
+    if (typeof window === "undefined") return null; // Evita il crash lato server
     return localStorage.getItem(this.JWT_KEY);
   }
 
   private getRefreshToken(): string | null {
-    if (typeof window === "undefined")
-      return null;
+    if (typeof window === "undefined") return null;
 
     return localStorage.getItem(this.REFRESH_KEY);
   }

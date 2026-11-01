@@ -7,7 +7,9 @@ export interface ClientDeviceInfo {
   os: {
     name: string;
   };
-  deviceType: "Mobile" | "Tablet" | "Desktop";
+  deviceType: "Mobile" | "Tablet" | "Desktop" | "TV";
+  isTv: boolean;
+  isTvAppBTime: boolean;
   screen: {
     width: number;
     height: number;

@@ -9,7 +9,8 @@ namespace BTime.Api.Features.Services;
 public class JwtService(IConfiguration config)
 {
     private readonly IConfiguration _config = config;
-    public string GenToken(Users user, string roleName)
+
+    public string GenToken(Users user, string roleName, bool isTvApp = false)
     {
         var jwtSettings = _config.GetSection("Jwt");
         var secretKey = jwtSettings["SecretKey"]!;
@@ -23,6 +24,16 @@ public class JwtService(IConfiguration config)
             new (ClaimTypes.Role, roleName)
         };
 
+        if (isTvApp)
+        {
+            claims.Add(new Claim("client_app", "TvAppBTime"));
+        }
+
+        // Durata estesa per i dispositivi che si collegano tramite TvAppBTime (default: 43200 min = 30 giorni)
+        var expiryMinutes = isTvApp
+            ? (double.TryParse(jwtSettings["TvAppExpiryInMinutes"], out var tvExp) ? tvExp : 43200)
+            : (double.TryParse(jwtSettings["ExpiryInMinutes"], out var stdExp) ? stdExp : 120);
+
         // 2. Creazione della chiave crittografica
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
@@ -32,7 +43,7 @@ public class JwtService(IConfiguration config)
             issuer: jwtSettings["Issuer"],
             audience: jwtSettings["Audience"],
             claims: claims,
-            expires: DateTime.UtcNow.AddMinutes(double.Parse(jwtSettings["ExpiryInMinutes"]!)),
+            expires: DateTime.UtcNow.AddMinutes(expiryMinutes),
             signingCredentials: creds
         );
 
