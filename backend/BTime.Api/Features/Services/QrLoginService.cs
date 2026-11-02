@@ -181,12 +181,18 @@ public class QrLoginService
     {
         try
         {
-            string? lanCandidate = null;
+            string? lan192Candidate = null;
+            string? tailscaleCandidate = null;
+            string? lan10Candidate = null;
 
             foreach (var ni in NetworkInterface.GetAllNetworkInterfaces())
             {
                 if (ni.OperationalStatus != OperationalStatus.Up ||
                     ni.NetworkInterfaceType == NetworkInterfaceType.Loopback)
+                    continue;
+
+                var nameDesc = $"{ni.Name} {ni.Description}".ToLowerInvariant();
+                if (nameDesc.Contains("vethernet") || nameDesc.Contains("wsl") || nameDesc.Contains("docker") || nameDesc.Contains("hyper-v"))
                     continue;
 
                 var props = ni.GetIPProperties();
@@ -196,21 +202,25 @@ public class QrLoginService
                         continue;
 
                     var bytes = ua.Address.GetAddressBytes();
-                    // Tailscale CGNAT 100.64.0.0/10 -> priorità massima per accesso remoto/TV
-                    if (bytes[0] == 100 && bytes[1] >= 64 && bytes[1] <= 127)
+                    // Rete locale domestica 192.168.x.x (raggiungibile da smartphone in Wi-Fi anche senza VPN)
+                    if (lan192Candidate == null && bytes[0] == 192 && bytes[1] == 168)
                     {
-                        return ua.Address.ToString();
+                        lan192Candidate = ua.Address.ToString();
                     }
-
-                    // LAN privata 192.168.x.x o 10.x.x.x
-                    if (lanCandidate == null && (bytes[0] == 192 && bytes[1] == 168 || bytes[0] == 10))
+                    // Tailscale CGNAT 100.64.0.0/10
+                    else if (tailscaleCandidate == null && bytes[0] == 100 && bytes[1] >= 64 && bytes[1] <= 127)
                     {
-                        lanCandidate = ua.Address.ToString();
+                        tailscaleCandidate = ua.Address.ToString();
+                    }
+                    // Altra LAN privata 10.x.x.x
+                    else if (lan10Candidate == null && bytes[0] == 10)
+                    {
+                        lan10Candidate = ua.Address.ToString();
                     }
                 }
             }
 
-            return lanCandidate;
+            return lan192Candidate ?? tailscaleCandidate ?? lan10Candidate;
         }
         catch
         {
