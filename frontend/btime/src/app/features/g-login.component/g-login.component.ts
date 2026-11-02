@@ -1,20 +1,8 @@
-import {
-  Component,
-  computed,
-  inject,
-  OnDestroy,
-  OnInit,
-  signal,
-  WritableSignal,
-} from "@angular/core";
+import { Component, computed, inject, OnDestroy, OnInit, signal, WritableSignal, } from "@angular/core";
 import { AuthService } from "../../core/auth/auth.service";
 import { LoginRequest } from "../../core/interfaces/login/loginRequest.interface";
 import { Router } from "@angular/router";
-import {
-  getClientDeviceInfo,
-  isTvAppBTimeClient,
-  isTvClient,
-} from "../../core/services/deviceInfo/parseUserAgent.service";
+import { getClientDeviceInfo, isDesktopClient, isTvAppBTimeClient, isTvClient, } from "../../core/services/deviceInfo/parseUserAgent.service";
 import { LoadingService } from "../../core/services/loading.service";
 import { firstValueFrom } from "rxjs";
 import { generateQrSvgData, QrSvgData } from "../../core/utils/qr-code.util";
@@ -35,11 +23,12 @@ export class GLoginComponent implements OnInit, OnDestroy {
   public password: WritableSignal<string | null> = signal(null);
   public errorMessage: WritableSignal<string | null> = signal(null);
 
-  // Rilevamento TV e TvAppBTime
+  // Rilevamento TV, Desktop e TvAppBTime
   public isTv = signal<boolean>(false);
+  public isDesktop = signal<boolean>(false);
   public isTvApp = signal<boolean>(false);
 
-  // Stato Login tramite QR Code (attivo solo su client TV)
+  // Stato Login tramite QR Code (attivo solo su client TV e Desktop)
   public qrCode = signal<string | null>(null);
   public qrSvg = signal<QrSvgData | null>(null);
   public qrScanUrl = signal<string | null>(null);
@@ -69,7 +58,7 @@ export class GLoginComponent implements OnInit, OnDestroy {
     this.detectTvEnvironment();
 
     // Osserva l'eventuale iniezione asincrona di #__tvFsStyle da parte di WebViewController in TvAppBTime
-    if (typeof document !== "undefined" && typeof MutationObserver !== "undefined" && !this.isTv()) {
+    if ( typeof document !== "undefined" && typeof MutationObserver !== "undefined" && !this.isTv()) {
       this.domObserver = new MutationObserver(() => {
         if (document.getElementById("__tvFsStyle")) {
           this.detectTvEnvironment();
@@ -100,9 +89,11 @@ export class GLoginComponent implements OnInit, OnDestroy {
   private detectTvEnvironment(): void {
     const tvApp = isTvAppBTimeClient();
     const tv = isTvClient();
+    const desktop = isDesktopClient();
 
     this.isTvApp.set(tvApp);
     this.isTv.set(tv);
+    this.isDesktop.set(desktop);
 
     if (tv && !this.qrInitialized) {
       this.qrInitialized = true;
@@ -119,12 +110,14 @@ export class GLoginComponent implements OnInit, OnDestroy {
 
     try {
       const tvApp = isTvAppBTimeClient();
+      const desktop = isDesktopClient();
       this.isTvApp.set(tvApp);
+      this.isDesktop.set(desktop);
 
       const res = await firstValueFrom(
         this.auth.createQrSession({
           IpAddress: "",
-          DeviceInfo: tvApp ? "TV (TvAppBTime)" : "TV",
+          DeviceInfo: tvApp ? "TV (TvAppBTime)" : desktop ? "Desktop" : "TV",
           IsTvAppBTime: tvApp,
         }),
       );
@@ -266,10 +259,14 @@ export class GLoginComponent implements OnInit, OnDestroy {
       if (err?.status === 401) {
         this.errorMessage.set(serverMsg || "Credenziali non valide o utente non autorizzato.");
       } else if (err?.status === 0) {
-        this.errorMessage.set("Server non raggiungibile. Verifica la connessione al Backend su porta 5008.");
+        this.errorMessage.set(
+          "Server non raggiungibile. Verifica la connessione al Backend su porta 5008.",
+        );
       } else {
         this.errorMessage.set(
-          typeof serverMsg === "string" ? serverMsg : "Si è verificato un errore durante il login. Riprova.",
+          typeof serverMsg === "string"
+            ? serverMsg
+            : "Si è verificato un errore durante il login. Riprova.",
         );
       }
     }
