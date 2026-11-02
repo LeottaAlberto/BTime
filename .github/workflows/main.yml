@@ -1,0 +1,32 @@
+name: Release & Auto-Deploy BTime
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  # Scansiona la repo su GitHub Cloud e prepara/pubblica la Release Ufficiale
+  release-please:
+    runs-on: ubuntu-latest
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
+    steps:
+      - uses: googleapis/release-please-action@v4
+        id: release
+        with:
+          release-type: simple
+
+  # Parte SOLO quando una Release Ufficiale viene creata, direttamente sul tuo server Ubuntu
+  deploy-server:
+    needs: release-please
+    if: ${{ needs.release-please.outputs.release_created == 'true' }}
+    runs-on: self-hosted
+    steps:
+      - name: Esegui aggiornamento BTime alla versione ufficiale
+        run: /bin/bash /home/bob/BTime/update_btime.sh ${{ needs.release-please.outputs.tag_name }}
