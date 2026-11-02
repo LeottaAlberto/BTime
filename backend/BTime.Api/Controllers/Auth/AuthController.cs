@@ -192,9 +192,7 @@ public class AuthController(
     {
         var isTvApp = IsTvAppBTimeRequest(req?.IsTvAppBTime ?? false, req?.DeviceInfo);
         var resolvedIp = ResolveIpAddress(req?.IpAddress);
-        var resolvedDevice = ResolveDeviceInfo(
-            string.IsNullOrWhiteSpace(req?.DeviceInfo) ? "TV" : req.DeviceInfo,
-            isTvApp);
+        var resolvedDevice = ResolveDeviceInfo(string.IsNullOrWhiteSpace(req?.DeviceInfo) ? "TV" : req.DeviceInfo, isTvApp);
 
         var session = _qrService.CreateSession(resolvedIp, resolvedDevice, isTvApp);
         var expiresIn = (int)Math.Max(0, (session.ExpiresAtUtc - DateTime.UtcNow).TotalSeconds);

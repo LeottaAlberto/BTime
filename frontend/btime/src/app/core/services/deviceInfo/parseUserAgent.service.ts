@@ -51,6 +51,38 @@ export function isTvClient(ua?: string): boolean {
   return false;
 }
 
+/**
+ * Rileva se il dispositivo corrente è un computer/desktop (Windows, macOS, Linux, ChromeOS).
+ * Esclude esplicitamente dispositivi mobili e Smart TV (anche in modalità desktop simulata).
+ */
+export function isDesktopClient(ua?: string): boolean {
+  const userAgent = ua ?? (typeof navigator !== "undefined" ? navigator.userAgent : "");
+
+  // Se è una TV o una console riconosciuta, NON è un computer
+  if (TV_UA_REGEX.test(userAgent)) {
+    return false;
+  }
+
+  // Se è l'app TvAppBTime (che magari simula l'UA di Windows/Chrome per la modalità desktop),
+  // sappiamo che in realtà è una TV, quindi NON è un computer
+  if (isTvAppBTimeClient(userAgent)) {
+    return false;
+  }
+
+  // Escludiamo i dispositivi mobili (smartphone e tablet)
+  // Nota: è fondamentale escludere "Android" qui, altrimenti verrebbe scambiato per "Linux" nel check successivo.
+  const isMobileOrTablet = /Mobile|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
+  if (isMobileOrTablet) {
+    return false;
+  }
+
+  // Verifichiamo la presenza dei sistemi operativi tipicamente Desktop
+  // Windows NT (PC Windows), Macintosh (Mac), Linux (PC Linux), CrOS (Chromebook)
+  const isDesktopOS = /Windows NT|Macintosh|Linux|CrOS/i.test(userAgent);
+
+  return isDesktopOS;
+}
+
 function parseUserAgent(ua: string) {
   let browserName = "Unknown Browser";
   let browserVersion = "";
@@ -58,6 +90,7 @@ function parseUserAgent(ua: string) {
   let deviceType: "Mobile" | "Tablet" | "Desktop" | "TV" = "Desktop";
 
   const isTv = isTvClient(ua);
+  const isDesktop = isDesktopClient(ua);
   const isTvApp = isTvAppBTimeClient(ua);
 
   // Rilevamento Device Type (TV ha priorità perché Android TV / Fire TV contengono anche "Android" o "Mobile")
