@@ -95,7 +95,7 @@ export class GLoginComponent implements OnInit, OnDestroy {
     this.isTv.set(tv);
     this.isDesktop.set(desktop);
 
-    if (tv && !this.qrInitialized) {
+    if ((tv || desktop) && !this.qrInitialized) {
       this.qrInitialized = true;
       void this.initQrSession();
     }
