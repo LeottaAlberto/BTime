@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.1](https://github.com/LeottaAlberto/BTime/compare/v1.1.0...v1.1.1) (2026-11-03)
+
+
+### Bug Fixes
+
+* **docker-compose.yml:** change admin email ([f3724b1](https://github.com/LeottaAlberto/BTime/commit/f3724b18cecbf2dcbd37c606722cd703d4da9db1))
+
 ## [1.1.0](https://github.com/LeottaAlberto/BTime/compare/v1.0.0...v1.1.0) (2026-11-03)
 
 
