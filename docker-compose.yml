@@ -16,7 +16,7 @@ services:
     image: dpage/pgadmin4:latest
     container_name: btime_pgadmin
     environment:
-      PGADMIN_DEFAULT_EMAIL: admin@cloud.local
+      PGADMIN_DEFAULT_EMAIL: leottaalberto43@gmail.com
       PGADMIN_DEFAULT_PASSWORD: adminpassword123
     ports:
       - "5050:80"
