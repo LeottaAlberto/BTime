@@ -1,4 +1,4 @@
-import { Component, computed, ElementRef, input, output, signal, ViewChild, WritableSignal } from "@angular/core";
+import { Component, computed, ElementRef, input, output, signal, viewChild, WritableSignal } from "@angular/core";
 import { EpisodeDetail } from "../../core/interfaces/dashboard/movies/seriesDetail.interface";
 
 @Component({
@@ -8,8 +8,8 @@ import { EpisodeDetail } from "../../core/interfaces/dashboard/movies/seriesDeta
   templateUrl: "./g-custom-player.component.html",
 })
 export class GCustomPlayerComponent {
-  @ViewChild("videoPlayer") videoRef!: ElementRef<HTMLVideoElement>;
-  @ViewChild("playerContainer") playerContainer!: ElementRef<HTMLElement>;
+  public videoRef = viewChild<ElementRef<HTMLVideoElement>>("videoPlayer");
+  public playerContainer = viewChild<ElementRef<HTMLElement>>("playerContainer");
 
   private readonly skipSeconds = 15;
 
@@ -37,7 +37,7 @@ export class GCustomPlayerComponent {
   });
 
   public togglePlay() {
-    const video = this.videoRef?.nativeElement;
+    const video = this.videoRef()?.nativeElement;
     if (!video) return;
 
     if (video.paused) video.play();
@@ -60,16 +60,18 @@ export class GCustomPlayerComponent {
 
   // Metodo chiamato dall'evento (loadedmetadata)
   public onLoadedMetadata() {
-    if (this.videoRef?.nativeElement) {
+    const video = this.videoRef()?.nativeElement;
+    if (video) {
       // Quando i metadati public sono caricati, la durata effettiva del file è disponibile
-      this.duration.set(this.videoRef.nativeElement.duration);
+      this.duration.set(video.duration);
     }
   }
 
   // Metodo chiamato dall'evento (timeupdate)
   public onTimeUpdate() {
-    if (this.videoRef?.nativeElement) {
-      this.currentTime.set(this.videoRef.nativeElement.currentTime);
+    const video = this.videoRef()?.nativeElement;
+    if (video) {
+      this.currentTime.set(video.currentTime);
     }
   }
 
@@ -95,7 +97,8 @@ export class GCustomPlayerComponent {
   }
 
   public toggleFullscreen() {
-    const elem = this.playerContainer.nativeElement as any;
+    const elem = this.playerContainer()?.nativeElement as any;
+    if (!elem) return;
 
     // Enter Fullscreen
     if (!document.fullscreenElement) {
@@ -114,7 +117,7 @@ export class GCustomPlayerComponent {
   }
 
   public onSkip(isForward: boolean) {
-    const video = this.videoRef?.nativeElement;
+    const video = this.videoRef()?.nativeElement;
     if (!video) return;
 
     const newTime = isForward
@@ -122,14 +125,17 @@ export class GCustomPlayerComponent {
       : video.currentTime - this.skipSeconds;
 
     video.currentTime = Math.max(0, Math.min(newTime, video.duration));
+    this.onUserActivity();
   }
 
   public seekTo(event: MouseEvent): void {
+    const video = this.videoRef()?.nativeElement;
+    if (!video || !video.duration) return;
+
     const bar = event.currentTarget as HTMLElement;
     const rect = bar.getBoundingClientRect();
     const clickX = event.clientX - rect.left;
-    const percentage = clickX / rect.width;
-    const video = this.videoRef.nativeElement;
+    const percentage = Math.max(0, Math.min(1, clickX / rect.width));
     this.currentTime.set(percentage * video.duration);
     video.currentTime = percentage * video.duration;
   }

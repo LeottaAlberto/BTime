@@ -4,9 +4,14 @@
   (keydown)="onUserActivity()">
 
   <!-- Controls -->
-  @if (showControls()) {
+  <div
+    [class.opacity-0]="!showControls()"
+    [class.pointer-events-none]="!showControls()"
+    class="transition-opacity duration-300">
     <div class="absolute top-0 left-0 flex flex-row justify-start items-center gap-2 w-full p-3 z-50">
-      <div class="flex items-center gap-2 p-3 cursor-pointer rounded-full transition-all hover:bg-white/10" (click)="onBackClick.emit()"><span class="pi pi-arrow-left"></span></div>
+      <button type="button" class="flex items-center gap-2 p-3 cursor-pointer rounded-full transition-all hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:bg-white/20" (click)="onBackClick.emit()" tabindex="0">
+        <span class="pi pi-arrow-left"></span>
+      </button>
       <h1>{{ episode()?.title }}</h1>
     </div>
 
@@ -22,14 +27,14 @@
         tabindex="0"
         (keydown.arrowleft)="onSkip(false); $event.stopPropagation()"
         (keydown.arrowright)="onSkip(true); $event.stopPropagation()"
-        class="group relative w-full h-1.5 hover:h-2 bg-neutral-700/80 rounded-full cursor-pointer flex items-center">
+        class="group relative w-full h-1.5 hover:h-2 bg-neutral-700/80 rounded-full cursor-pointer flex items-center focus:h-2.5 focus:ring-2 focus:ring-purple-400 focus:outline-none">
         <!-- Parte già vista (Viola) -->
         <div
           class="h-full bg-purple-500 rounded-full relative"
           [style.width.%]="slidePoint()">
           <!-- Pallino indicatore -->
           <span
-            class="absolute right-0 top-1/2 -translate-y-1/2 w-3.5 h-3.5 bg-violet-500 rounded-full shadow scale-0 group-hover:scale-100 transition-transform focus:h-3.5 outline-none border-none">
+            class="absolute right-0 top-1/2 -translate-y-1/2 w-3.5 h-3.5 bg-violet-500 rounded-full shadow scale-0 group-hover:scale-100 group-focus:scale-100 transition-transform focus:h-3.5 outline-none border-none">
           </span>
         </div>
       </div>
@@ -40,23 +45,23 @@
 
         <!-- Left Side -->
         <div class="flex flex-row justify-start px-0 w-full">
-          <div class="flex items-center gap-2 p-3 cursor-pointer rounded-full transition-all hover:bg-white/10" (click)="onSkip(false)">
+          <button type="button" class="flex items-center gap-2 p-3 cursor-pointer rounded-full transition-all hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:bg-white/20" (click)="onSkip(false)" tabindex="0">
             <span class="pi pi-replay"></span>
-          </div>
-          <div (click)="togglePlay()" class="flex items-center gap-2 p-3 cursor-pointer rounded-full transition-all hover:bg-white/10">
+          </button>
+          <button type="button" class="flex items-center gap-2 p-3 cursor-pointer rounded-full transition-all hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:bg-white/20" (click)="togglePlay()" tabindex="0" >
             <span class="pi" [class.pi-play-circle]="!isPlaying()" [class.pi-pause-circle]="isPlaying()"></span>
-          </div>
-          <div class="flex items-center gap-2 p-3 cursor-pointer rounded-full transition-all hover:bg-white/10" (click)="onSkip(true)">
+          </button>
+          <button type="button" class="flex items-center gap-2 p-3 cursor-pointer rounded-full transition-all hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:bg-white/20" (click)="onSkip(true)" tabindex="0">
             <span class="pi pi-refresh"></span>
-          </div>
+          </button>
 
           <!-- Volume -->
           <div class="group flex items-center">
 
             <!-- Icona Mute/Unmute -->
-            <div (click)="toggleMute()" class="flex items-center justify-center w-10 h-10 cursor-pointer rounded-full transition-all hover:bg-white/10 z-10">
+            <button type="button" class="flex items-center justify-center w-10 h-10 cursor-pointer rounded-full transition-all hover:bg-white/10 z-10 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:bg-white/20" (click)="toggleMute()" tabindex="0">
               <span class="pi" [class.pi-volume-up]="!isMuted()" [class.pi-volume-off]="isMuted()"></span>
-            </div>
+            </button>
 
             <!-- Contenitore Slider (Si espande orizzontalmente in hover) -->
             <div class="w-0 overflow-hidden opacity-0 group-hover:w-24 group-hover:opacity-100 transition-all duration-300 ease-in-out flex items-center">
@@ -93,20 +98,20 @@
         <!-- Right Side -->
         <div class="flex flex-row justify-end px-0 w-full">
           <!-- Time -->
-          <div class="flex items-center gap-2 p-3 cursor-pointer rounded-full transition-all hover:bg-white/10 text-sm font-mono">
+          <div class="flex items-center gap-2 p-3 rounded-full text-sm font-mono">
             <span class="pi pi-clock"></span>
             <span>{{ formattedTime() }}</span>
           </div>
 
           <!-- Fullscreen -->
-          <div class="flex items-center gap-2 p-3 cursor-pointer rounded-full transition-all hover:bg-white/10" (click)="toggleFullscreen()">
+          <button type="button" class="flex items-center gap-2 p-3 cursor-pointer rounded-full transition-all hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:bg-white/20" (click)="toggleFullscreen()" tabindex="0">
             <span class="pi pi-arrow-up-right-and-arrow-down-left-from-center"></span>
-          </div>
+          </button>
         </div>
 
       </div>
     </div>
-  }
+  </div>
 
   <!-- Player Video HTML5 nativo per Smart TV -->
   <video
@@ -121,7 +126,6 @@
     (loadedmetadata)="onLoadedMetadata()"
     [volume]="volume()"
     [muted]="isMuted()"
-    tabindex="0"
     class="w-full h-full object-contain cursor-pointer z-30">
   </video>
 
