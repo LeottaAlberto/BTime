@@ -116,9 +116,10 @@
   <!-- Player Video HTML5 nativo per Smart TV -->
   <video
     #videoPlayer
+    autoplay
+    playsinline
     [src]="episode()?.path"
     [poster]="episode()?.icon"
-    autoplay
     (click)="togglePlay()"
     (play)="onVideoPlay()"
     (pause)="onVideoPause()"
