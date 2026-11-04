@@ -29,4 +29,4 @@ jobs:
     runs-on: self-hosted
     steps:
       - name: Esegui aggiornamento BTime alla versione ufficiale
-        run: /bin/bash /home/bob/BTime/update_btime.sh ${{ needs.release-please.outputs.tag_name }}
+        run: /bin/bash /home/bob/update_btime.sh ${{ needs.release-please.outputs.tag_name }}
