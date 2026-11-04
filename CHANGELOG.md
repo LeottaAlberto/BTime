@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.1.0](https://github.com/LeottaAlberto/BTime/compare/v1.0.0...v1.1.0) (2026-11-03)
+
+
+### Features
+
+* implement custom video player component with enhanced controls and functionality ([9d7da19](https://github.com/LeottaAlberto/BTime/commit/9d7da1985b73091cbcb9b00216eb21ac6a29516d))
+* refactor g-custom-player component to use viewChild and improve accessibility with button elements ([4a08137](https://github.com/LeottaAlberto/BTime/commit/4a0813799f070151b0f8e704fcba52d74d03f63c))
+
 ## 1.0.0 (2026-11-02)
 
 
