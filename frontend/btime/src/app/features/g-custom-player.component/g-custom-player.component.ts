@@ -1,4 +1,4 @@
-import { Component, computed, ElementRef, input, output, signal, viewChild, WritableSignal } from "@angular/core";
+import { Component, computed, ElementRef, HostListener, input, output, signal, viewChild, WritableSignal } from "@angular/core";
 import { EpisodeDetail } from "../../core/interfaces/dashboard/movies/seriesDetail.interface";
 
 @Component({
@@ -23,6 +23,11 @@ export class GCustomPlayerComponent {
   public isDragging = signal<boolean>(false);
 
   private hideTimer: any;
+
+  @HostListener("window:keydown")
+  public onWindowKeyDown(): void {
+    this.onUserActivity();
+  }
 
   onBackClick = output<void>();
 
