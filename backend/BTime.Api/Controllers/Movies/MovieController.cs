@@ -227,85 +227,112 @@ namespace BTime.Api.Controllers.Dashboard
         [HttpGet("series/{id}")]
         public async Task<ActionResult<SeriesDetailRes>> GetSeriesDetail(Guid id)
         {
-            var s = await _db.SeriesMs
-                .AsNoTracking()
-                .Include(s => s.RImagesM)
-                .Include(s => s.TagsDs)
-                    .ThenInclude(td => td.RTagM)
-                .Include(s => s.SeasonsMs)
-                    .ThenInclude(sea => sea.EpisodesMs)
-                        .ThenInclude(ep => ep.RImagesM)
-                .Where(s => s.Id == id && !s.IsDeleted)
-                .FirstOrDefaultAsync();
-
-            if (s == null)
-                return NotFound(new { message = "Serie non trovata." });
-
-            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            Guid.TryParse(userIdClaim, out var userId);
-
-            // Mappa della progressione di visione degli episodi per l'utente loggato
-            var allEpIds = s.SeasonsMs
-                .SelectMany(sea => sea.EpisodesMs)
-                .Where(e => !e.IsDeleted)
-                .Select(e => e.Id)
-                .ToList();
-
-            var watchedMap = userId != Guid.Empty
-                ? await _db.EpisodesDs
-                    .AsNoTracking()
-                    .Where(ed => ed.RUserId == userId && allEpIds.Contains(ed.REpisodeMid))
-                    .ToDictionaryAsync(ed => ed.REpisodeMid, ed => ed.StoppedAtSeconds ?? 0)
-                : [];
-
-            var res = new SeriesDetailRes
+            try
             {
-                Id = s.Id,
-                Title = s.Title,
-                Icon = FormatUrl(s.RImagesM?.Path),
-                Description = s.Description,
-                SeasonsCount = s.SeasonsMs.Count,
-                ReleaseYear = s.ReleaseYear,
-                Rating = s.Rating,
-                Tags = s.TagsDs
-                    .Where(td => td.RTagM != null)
-                    .Select(td => td.RTagM.Name)
-                    .ToList(),
-                Seasons = s.SeasonsMs
-                    .OrderBy(sea => sea.SeasonNumber)
-                    .Select(sea => new SeasonDetailRes
-                    {
-                        Id = sea.Id,
-                        SeasonNumber = sea.SeasonNumber,
-                        Title = sea.Title,
-                        EpisodesCount = sea.EpisodesMs.Count(e => !e.IsDeleted),
-                        Episodes = sea.EpisodesMs
-                            .Where(e => !e.IsDeleted)
-                            .OrderBy(e => e.EpisodeNumber)
-                            .Select(e =>
+                var s = await _db.SeriesMs
+                    .AsNoTracking()
+                    .Include(s => s.RImagesM)
+                    .Include(s => s.TagsDs)
+                        .ThenInclude(td => td.RTagM)
+                    .Include(s => s.SeasonsMs)
+                        .ThenInclude(sea => sea.EpisodesMs)
+                            .ThenInclude(ep => ep.RImagesM)
+                    .Where(s => s.Id == id && !s.IsDeleted)
+                    .FirstOrDefaultAsync();
+
+                if (s == null)
+                    return NotFound(new { message = "Serie non trovata." });
+
+                var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                Guid.TryParse(userIdClaim, out var userId);
+
+                // Mappa della progressione di visione degli episodi per l'utente loggato
+                var allEpIds = (s.SeasonsMs ?? [])
+                    .SelectMany(sea => sea.EpisodesMs ?? [])
+                    .Where(e => !e.IsDeleted)
+                    .Select(e => e.Id)
+                    .ToList();
+
+                var watchedMap = new Dictionary<Guid, int>();
+                if (userId != Guid.Empty && allEpIds.Count > 0)
+                {
+                    var watchedList = await _db.EpisodesDs
+                        .AsNoTracking()
+                        .Where(ed => ed.RUserId == userId && allEpIds.Contains(ed.REpisodeMid))
+                        .Select(ed => new { ed.REpisodeMid, Stopped = ed.StoppedAtSeconds ?? 0, ed.LastWatchedAt })
+                        .ToListAsync();
+
+                    // Raggruppa per REpisodeMid per evitare eccezioni di duplicazione chiavi
+                    watchedMap = watchedList
+                        .GroupBy(x => x.REpisodeMid)
+                        .ToDictionary(
+                            g => g.Key,
+                            g => g.OrderByDescending(x => x.LastWatchedAt ?? DateTime.MinValue).First().Stopped
+                        );
+                }
+
+                var res = new SeriesDetailRes
+                {
+                    Id = s.Id,
+                    Title = s.Title,
+                    Icon = FormatUrl(s.RImagesM?.Path),
+                    Description = s.Description,
+                    SeasonsCount = s.SeasonsMs?.Count ?? 0,
+                    ReleaseYear = s.ReleaseYear,
+                    Rating = s.Rating,
+                    Tags = (s.TagsDs ?? [])
+                        .Where(td => td.RTagM != null)
+                        .Select(td => td.RTagM.Name)
+                        .ToList(),
+                    Seasons = (s.SeasonsMs ?? [])
+                        .OrderBy(sea => sea.SeasonNumber)
+                        .Select(sea =>
+                        {
+                            var epList = (sea.EpisodesMs ?? [])
+                                .Where(e => !e.IsDeleted)
+                                .OrderBy(e => e.EpisodeNumber)
+                                .ToList();
+
+                            return new SeasonDetailRes
                             {
-                                var stoppedSec = watchedMap.TryGetValue(e.Id, out var sec) ? sec : 0;
-                                var durSec = (e.Duration ?? 0) > 300 ? (e.Duration ?? 0) : (e.Duration ?? 0) * 60;
-                                var progress = durSec > 0 ? (int)Math.Clamp(Math.Round((double)stoppedSec / durSec * 100), 0, 100) : 0;
-
-                                return new EpisodeDetailRes
+                                Id = sea.Id,
+                                SeasonNumber = sea.SeasonNumber,
+                                Title = sea.Title,
+                                EpisodesCount = epList.Count,
+                                Episodes = epList.Select(e =>
                                 {
-                                    Id = e.Id,
-                                    EpisodeNumber = e.EpisodeNumber,
-                                    Title = e.Title,
-                                    Description = e.Description,
-                                    Duration = e.Duration,
-                                    Path = FormatUrl(e.Path),
-                                    Icon = FormatUrl(e.RImagesM?.Path),
-                                    StoppedAtSeconds = stoppedSec,
-                                    Progress = progress,
-                                    IsCompleted = progress >= 90
-                                };
-                            }).ToList()
-                    }).ToList()
-            };
+                                    var stoppedSec = watchedMap.TryGetValue(e.Id, out var sec) ? sec : 0;
+                                    var durSec = (e.Duration ?? 0) > 300 ? (e.Duration ?? 0) : (e.Duration ?? 0) * 60;
+                                    var progress = durSec > 0 ? (int)Math.Clamp(Math.Round((double)stoppedSec / durSec * 100), 0, 100) : 0;
 
-            return Ok(res);
+                                    return new EpisodeDetailRes
+                                    {
+                                        Id = e.Id,
+                                        EpisodeNumber = e.EpisodeNumber,
+                                        Title = e.Title,
+                                        Description = e.Description,
+                                        Duration = e.Duration,
+                                        Path = FormatUrl(e.Path),
+                                        Icon = FormatUrl(e.RImagesM?.Path),
+                                        StoppedAtSeconds = stoppedSec,
+                                        Progress = progress,
+                                        IsCompleted = progress >= 90
+                                    };
+                                }).ToList()
+                            };
+                        }).ToList()
+                };
+
+                return Ok(res);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new
+                {
+                    message = "Errore durante il recupero dei dettagli della serie.",
+                    detail = ex.Message
+                });
+            }
         }
 
         [HttpGet("episodes/{id}")]
@@ -425,8 +452,18 @@ namespace BTime.Api.Controllers.Dashboard
             // Gestione EPISODI SERIE TV (Tabella EpisodesDs)
             else if (req.Type == MediaType.Episode)
             {
-                var record = await _db.EpisodesDs
-                    .FirstOrDefaultAsync(m => m.RUserId == userId && m.REpisodeMid == req.Id);
+                var records = await _db.EpisodesDs
+                    .Where(m => m.RUserId == userId && m.REpisodeMid == req.Id)
+                    .OrderByDescending(m => m.LastWatchedAt)
+                    .ToListAsync();
+
+                var record = records.FirstOrDefault();
+
+                // Pulisce eventuali duplicati storici per lo stesso utente ed episodio
+                if (records.Count > 1)
+                {
+                    _db.EpisodesDs.RemoveRange(records.Skip(1));
+                }
 
                 if (isCompleted)
                 {
