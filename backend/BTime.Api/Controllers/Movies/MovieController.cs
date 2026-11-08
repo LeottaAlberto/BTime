@@ -1,6 +1,8 @@
-using System.Security.Claims;
+    using System.Security.Claims;
 using BTime.Api.Data;
+using BTime.Api.Enums;
 using BTime.Api.Features.Dashboard.Movies;
+using BTime.Api.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -297,6 +299,103 @@ namespace BTime.Api.Controllers.Dashboard
             };
 
             return Ok(res);
+        }
+
+        [HttpPost("save-progress")]
+        public async Task<ActionResult> SaveProgress([FromBody] SaveProgressReq req)
+        {
+            // Identificazione dell'utente loggato dal JWT
+            var u = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (!Guid.TryParse(u, out var userId))
+                return Unauthorized();
+
+            // Protezione contro durata non valida o file non ancora pronto
+            if (req.Duration <= 0)
+                return Ok(new { message = "Durata non valida, progresso ignorato." });
+
+            // Controllo Soglia Minima
+            // Se l'utente ha solo aperto il video per sbaglio, non intasiamo la lista
+            if (req.ProgressSecond < 15)
+                return Ok(new { message = "Sotto la soglia minima di 15 secondi." });
+
+            // Calcolo percentuale con cast a double (evita troncamento da divisione intera C#)
+            var percent = (double)req.ProgressSecond / req.Duration * 100.0;
+
+            // Se l'utente ha guardato oltre il 90% (o titoli di coda), consideriamo il contenuto completato
+            var isCompleted = percent >= 90.0 || req.ProgressSecond >= (req.Duration - 30);
+
+            // Gestione FILM (Tabella MoviesDs)
+            if (req.Type == MediaType.Movie)
+            {
+                var record = await _db.MoviesDs
+                    .FirstOrDefaultAsync(m => m.RUserId == userId && m.RMoviesMid == req.Id);
+
+                if (isCompleted)
+                {
+                    // Rimuove dal Continue Watching se completato
+                    if (record != null)
+                        _db.MoviesDs.Remove(record);
+                }
+                else
+                {
+                    // Aggiorna record esistente o ne crea uno nuovo (Upsert)
+                    if (record != null)
+                    {
+                        record.StoppedAtSeconds = (short)req.ProgressSecond;
+                        record.LastWatchedAt = DateTime.UtcNow;
+                    }
+                    else
+                    {
+                        _db.MoviesDs.Add(new MoviesD
+                        {
+                            RUserId = userId,
+                            RMoviesMid = req.Id,
+                            StoppedAtSeconds = (short)req.ProgressSecond,
+                            LastWatchedAt = DateTime.UtcNow
+                        });
+                    }
+                }
+            }
+            
+            // Gestione EPISODI SERIE TV (Tabella EpisodesDs)
+            else if (req.Type == MediaType.Episode)
+            {
+                var record = await _db.EpisodesDs
+                    .FirstOrDefaultAsync(m => m.RUserId == userId && m.REpisodeMid == req.Id);
+
+                if (isCompleted)
+                {
+                    // Rimuove dal Continue Watching se completato
+                    if (record != null)
+                        _db.EpisodesDs.Remove(record);
+                }
+                else
+                {
+                    // Aggiorna record esistente o ne crea uno nuovo (Upsert)
+                    if (record != null)
+                    {
+                        record.StoppedAtSeconds = req.ProgressSecond;
+                        record.LastWatchedAt = DateTime.UtcNow;
+                    }
+                    else
+                    {
+                        _db.EpisodesDs.Add(new EpisodesD
+                        {
+                            RUserId = userId,
+                            REpisodeMid = req.Id,
+                            StoppedAtSeconds = req.ProgressSecond,
+                            LastWatchedAt = DateTime.UtcNow
+                        });
+                    }
+                }
+            }
+            else
+                return BadRequest(new { message = "Tipo media non supportato." });
+
+            // Salvataggio atomico delle modifiche nel Database
+            await _db.SaveChangesAsync();
+
+            return Ok(new { message = isCompleted ? "Contenuto completato." : "Progresso salvato." });
         }
 
         private string FormatUrl(string? path)
