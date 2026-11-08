@@ -106,7 +106,7 @@ if (!Directory.Exists(uploadsPath))
 }
 
 // Assicura l'esistenza di tutte le sottocartelle multimediali supportate
-string[] subdirs = ["covers", "videos", "photos", "files", "audio"];
+string[] subdirs = ["covers", "videos", "photos", "files", "audio", "wallpapers"];
 foreach (var sub in subdirs)
 {
     var p = Path.Combine(uploadsPath, sub);
