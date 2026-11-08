@@ -14,6 +14,27 @@ export class GEpisodeCardComponent {
 
   public play = output<EpisodeDetail>();
 
+  public isCompleted = input<boolean>(false);
+  public progress = input<number>(0);
+
+  // Calcola se l'episodio è visto tutto (completato o >= 90%)
+  public isWatched = computed(() => {
+    return (
+      this.isCompleted() || (this.episode() as any).isCompleted || this.progressPercent() >= 90
+    );
+  });
+
+  // Calcola la percentuale di avanzamento
+  public progressPercent = computed(() => {
+    const p = this.progress() || (this.episode() as any).progress || 0;
+    return Math.min(100, Math.max(0, p));
+  });
+
+  // È visto parzialmente se ha iniziato (progresso > 0) ma non l'ha ancora finito (< 90%)
+  public isPartiallyWatched = computed(() => {
+    return !this.isWatched() && this.progressPercent() > 0;
+  });
+
   public resolvedIcon = computed(() => {
     const raw = this.episode().icon || this.fallbackIcon();
     if (!raw) return "/hero-banner-fallback.jpg";

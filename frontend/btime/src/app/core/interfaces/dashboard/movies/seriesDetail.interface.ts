@@ -6,6 +6,9 @@ export interface EpisodeDetail {
   duration?: number;
   path: string;
   icon?: string;
+  stoppedAtSeconds?: number;
+  progress?: number;
+  isCompleted?: boolean;
 }
 
 export interface SeasonDetail {
