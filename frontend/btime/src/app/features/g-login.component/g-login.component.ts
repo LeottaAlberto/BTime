@@ -7,8 +7,12 @@ import { LoadingService } from "../../core/services/loading.service";
 import { firstValueFrom } from "rxjs";
 import { generateQrSvgData, QrSvgData } from "../../core/utils/qr-code.util";
 
+import { GTitleComponent } from "../g-title.component/g-title.component";
+import { GFormInputComponent } from "../g-form-input.component/g-form-input.component";
+import { GButtonComponent } from "../g-button.component/g-button.component";
+
 @Component({
-  imports: [],
+  imports: [GTitleComponent, GFormInputComponent, GButtonComponent],
   selector: "g-login",
   styleUrl: "./g-login.component.css",
   templateUrl: "./g-login.component.html",
@@ -270,5 +274,9 @@ export class GLoginComponent implements OnInit, OnDestroy {
         );
       }
     }
+  }
+
+  public onClickRegister() {
+    this.router.navigate(["/register"]);
   }
 }
