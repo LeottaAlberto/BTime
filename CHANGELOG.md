@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.0](https://github.com/LeottaAlberto/BTime/compare/v1.3.0...v1.4.0) (2026-11-08)
+
+
+### Features
+
+* add global exception handler for consistent error responses ([049903d](https://github.com/LeottaAlberto/BTime/commit/049903d19750fda18dcaf3a2c26082ca14a3f923))
+
 ## [1.3.0](https://github.com/LeottaAlberto/BTime/compare/v1.2.0...v1.3.0) (2026-11-08)
 
 
