@@ -1,5 +1,28 @@
 # Changelog
 
+## [1.2.0](https://github.com/LeottaAlberto/BTime/compare/v1.1.0...v1.2.0) (2026-11-08)
+
+
+### Features
+
+* add g-form-input component with template, styles, and unit tests ([ca919a5](https://github.com/LeottaAlberto/BTime/commit/ca919a5d8287299418f27bc0e1843ced00ee490f))
+* add g-player-btn component with template, styles, and unit tests ([da53b54](https://github.com/LeottaAlberto/BTime/commit/da53b5474cfd94020746add3e58954dad1a41e6e))
+* add g-register component with template, styles, and unit tests ([70b8fba](https://github.com/LeottaAlberto/BTime/commit/70b8fba8c2059c582f31f842efb442d851b6bba7))
+* add g-title component with template, styles, and unit tests ([311c25a](https://github.com/LeottaAlberto/BTime/commit/311c25abbeb6396244c1329969e9deda480e2daf))
+* add register method to AuthService for user registration ([8df8212](https://github.com/LeottaAlberto/BTime/commit/8df8212ce1ca62591531493a8f0cf0ec982d2a50))
+* add registration route and integrate GRegisterComponent ([88e7277](https://github.com/LeottaAlberto/BTime/commit/88e727721ebc50c90943d8249d75edaf7531879d))
+* enhance g-custom-player component with autoplay and playsinline attributes, and add keydown event listener for user activity ([e28decb](https://github.com/LeottaAlberto/BTime/commit/e28decbb3044664e9ace57b2a2be8dd95d497243))
+* enhance g-form-input component with input handling, password visibility toggle, and styling adjustments ([a059588](https://github.com/LeottaAlberto/BTime/commit/a05958831b8c6df2dc5c20abfd491ca8134c4e5e))
+* implement g-button component with dynamic properties, event handling, and loading state ([a908c12](https://github.com/LeottaAlberto/BTime/commit/a908c12983a147bcd63ca2a9adfa0b6b5d75afcd))
+* implement registration component with form inputs, validation, and submission logic ([e5711d8](https://github.com/LeottaAlberto/BTime/commit/e5711d8e56c6390447db94fdfc8a4a8011edadb6))
+* update g-login component with enhanced layout and integrate g-form-input and g-button components ([6fc0596](https://github.com/LeottaAlberto/BTime/commit/6fc0596dc1fb7a074f725ae71fa3a5d9d2ed9210))
+* update g-title component with new layout and structure ([efe8a9e](https://github.com/LeottaAlberto/BTime/commit/efe8a9eb440d913ff3db45c0c20c97a1d4be5450))
+
+
+### Bug Fixes
+
+* **docker-compose.yml:** change admin email ([f3724b1](https://github.com/LeottaAlberto/BTime/commit/f3724b18cecbf2dcbd37c606722cd703d4da9db1))
+
 ## [1.1.0](https://github.com/LeottaAlberto/BTime/compare/v1.0.0...v1.1.0) (2026-11-03)
 
 
