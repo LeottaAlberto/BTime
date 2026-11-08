@@ -1,1 +1,38 @@
-<p>g-form-input.component works!</p>
+<div class="text-left flex flex-col gap-1 relative text-white/50">
+
+  <div
+    [class]="(isSpecial())
+      ? 'focus-within:border-yellow-400 focus-within:ring-1 focus-within:ring-yellow-400 border-amber-400'
+      : 'focus-within:border-purple-400 focus-within:ring-1 focus-within:ring-purple-400 border-neutral-800'"
+    class="relative flex items-center bg-neutral-950 rounded-xl border transition-all">
+
+    @if (!inputValue()) {
+      <label [for]="cName() || 'inputComponent'" class="text-sm absolute left-10 pointer-events-none select-none z-10">{{ label() }}</label>
+    }
+
+    <span [class]="'pi-' + (icon() || 'pi-lock')" class="pi absolute left-3 pointer-events-none text-sm z-30"></span>
+    <input
+      #inputComponent
+      [id]="cName() || 'inputComponent'"
+      [type]="isPassword() ? (showPassword() ? 'text' : 'password') : 'text'"
+      [name]="cName() || 'inputComponent'"
+      tabindex="0"
+      class="w-full bg-transparent outline-none pl-10 pr-10 py-1.5 text-sm z-20 rounded-xl"
+      [value]="inputValue() ?? ''"
+      (input)="inputValue.set($any($event.target).value)"
+      (change)="inputValue.set($any($event.target).value)"
+      [required]="isRequired()"
+    />
+
+    @if (isPassword()) {
+      <button
+        type="button"
+        tabindex="-1"
+        (click)="togglePasswordVisibility($event)"
+        [title]="showPassword() ? 'Nascondi password' : 'Mostra password'"
+        class="absolute right-3 z-30 p-1 flex items-center justify-center text-neutral-400 hover:text-white transition-colors cursor-pointer select-none">
+        <span class="pi text-base" [class.pi-eye]="!showPassword()" [class.pi-eye-slash]="showPassword()"></span>
+      </button>
+    }
+  </div>
+</div>
