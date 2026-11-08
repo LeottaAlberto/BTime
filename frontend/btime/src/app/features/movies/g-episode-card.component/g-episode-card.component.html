@@ -1,1 +1,59 @@
-<p>g-episode-card.component works!</p>
+<div
+  tabindex="0"
+  role="button"
+  [attr.aria-label]="'Episodio ' + episode().episodeNumber + ': ' + episode().title"
+  (click)="onPlay()"
+  (keydown.enter)="onPlay()"
+  (keydown.space)="onPlay()"
+  class="group relative flex flex-col bg-neutral-900/70 border border-neutral-800/80 hover:border-purple-600/50 rounded-xl overflow-hidden hover:scale-[1.02] transition-all duration-300 shadow-md cursor-pointer focus:outline-none focus:ring-4 focus:ring-purple-500 focus:scale-[1.04] focus:border-purple-500 focus:shadow-2xl focus:shadow-purple-950/80"
+>
+  <!-- Thumbnail 16:9 con Overlay -->
+  <div class="relative aspect-video w-full bg-neutral-950 overflow-hidden">
+    <div
+      class="absolute inset-0 bg-no-repeat bg-center bg-cover group-hover:scale-105 group-focus:scale-105 transition-transform duration-500"
+      [style.backgroundImage]="'url(' + resolvedIcon() + ')'"
+    ></div>
+
+    <!-- Overlay Play hover e focus telecomando -->
+    <div
+      class="absolute inset-0 bg-black/40 group-hover:bg-purple-950/40 group-focus:bg-purple-950/40 opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity duration-300 flex items-center justify-center"
+    >
+      <div
+        class="w-10 h-10 rounded-full bg-purple-600 text-white flex items-center justify-center shadow-lg shadow-purple-600/50"
+      >
+        <i class="pi pi-play text-sm ml-0.5"></i>
+      </div>
+    </div>
+
+    <!-- Badge Numero Episodio -->
+    <div class="absolute top-2 left-2 z-10">
+      <span class="px-2 py-0.5 rounded-md bg-purple-600/90 text-white font-bold text-[11px] shadow">
+        EP. {{ episode().episodeNumber }}
+      </span>
+    </div>
+
+    <!-- Durata -->
+    @if (episode().duration) {
+      <div class="absolute bottom-2 right-2 z-10">
+        <span class="px-1.5 py-0.5 rounded bg-black/75 text-neutral-200 text-[11px] font-medium">
+          {{ episode().duration }}m
+        </span>
+      </div>
+    }
+  </div>
+
+  <!-- Dettagli Episodio -->
+  <div class="p-3.5 flex flex-col gap-1 flex-1">
+    <h4
+      class="text-sm font-semibold text-white group-hover:text-purple-300 group-focus:text-purple-300 transition truncate"
+      [title]="episode().title"
+    >
+      {{ episode().title }}
+    </h4>
+    @if (episode().description) {
+      <p class="text-xs text-neutral-400 line-clamp-2 leading-relaxed">
+        {{ episode().description }}
+      </p>
+    }
+  </div>
+</div>
