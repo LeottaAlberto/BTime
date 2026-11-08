@@ -27,7 +27,7 @@ export class GWatchPlayerComponent implements OnInit {
     const targetId = this.id() || this.route.snapshot.paramMap.get("id") || "";
 
     const stateTime = history.state?.stoppedAtSeconds;
-    if (stateTime && typeof stateTime === "number") {
+    if (typeof stateTime === "number" && stateTime > 0) {
       this.initialTime.set(stateTime);
     }
 
@@ -37,6 +37,9 @@ export class GWatchPlayerComponent implements OnInit {
     if (stateEp && typeof stateEp === "object" && typeof stateEp.id === "string") {
       if (!targetId || stateEp.id.toLowerCase() === targetId.toLowerCase()) {
         this.setEpisodeData(stateEp as EpisodeDetail);
+        if (stateTime === undefined && !stateEp.isCompleted && stateEp.stoppedAtSeconds && stateEp.stoppedAtSeconds > 0) {
+          this.initialTime.set(stateEp.stoppedAtSeconds);
+        }
         this.isLoading.set(false);
         return;
       }
@@ -47,6 +50,9 @@ export class GWatchPlayerComponent implements OnInit {
       this.movS.getEpisodeById(targetId).subscribe({
         next: (ep) => {
           this.setEpisodeData(ep);
+          if (this.initialTime() === 0 && !ep.isCompleted && ep.stoppedAtSeconds && ep.stoppedAtSeconds > 0) {
+            this.initialTime.set(ep.stoppedAtSeconds);
+          }
           this.isLoading.set(false);
         },
         error: (err) => {

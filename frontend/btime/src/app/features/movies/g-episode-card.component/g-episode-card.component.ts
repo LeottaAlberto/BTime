@@ -16,17 +16,20 @@ export class GEpisodeCardComponent {
 
   public isCompleted = input<boolean>(false);
   public progress = input<number>(0);
+  public stoppedAtSeconds = input<number | undefined>(undefined);
 
   // Calcola se l'episodio è visto tutto (completato o >= 90%)
   public isWatched = computed(() => {
     return (
-      this.isCompleted() || (this.episode() as any).isCompleted || this.progressPercent() >= 90
+      this.isCompleted() ||
+      Boolean((this.episode() as any)?.isCompleted) ||
+      this.progressPercent() >= 90
     );
   });
 
   // Calcola la percentuale di avanzamento
   public progressPercent = computed(() => {
-    const p = this.progress() || (this.episode() as any).progress || 0;
+    const p = this.progress() || (this.episode() as any)?.progress || 0;
     return Math.min(100, Math.max(0, p));
   });
 
