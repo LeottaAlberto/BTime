@@ -113,7 +113,7 @@
     @if (selectedSeason() && selectedSeason()!.episodes.length > 0) {
       <div class="w-full pt-2 pb-12">
         <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
-          <span>Episodi</span>
+          <span>Episodes</span>
           <span class="text-xs font-normal text-neutral-400">({{ selectedSeason()!.episodes.length }})</span>
         </h3>
 
@@ -121,6 +121,9 @@
           @for (ep of selectedSeason()!.episodes; track ep.id) {
             <g-episode-card
               [episode]="ep"
+              [isCompleted]="ep.isCompleted ?? false"
+              [progress]="ep.progress ?? 0"
+              [stoppedAtSeconds]="ep.stoppedAtSeconds"
               [fallbackIcon]="resolvedIcon()"
               (play)="playEpisode($event)" />
           }

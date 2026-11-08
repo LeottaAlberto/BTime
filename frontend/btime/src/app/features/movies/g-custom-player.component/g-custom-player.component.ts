@@ -1,4 +1,4 @@
-import { Component, computed, ElementRef, HostListener, inject, input, OnDestroy, OnInit, output, signal, viewChild, WritableSignal } from "@angular/core";
+import { Component, computed, effect, ElementRef, HostListener, inject, input, OnDestroy, OnInit, output, signal, viewChild, WritableSignal } from "@angular/core";
 import { EpisodeDetail } from "../../../core/interfaces/dashboard/movies/seriesDetail.interface";
 import { SaveProgressReq } from "../../../core/interfaces/dashboard/movies/saveProgressReq.interface";
 import { MediaType } from "../../../core/enums/mediaType.enum";
@@ -31,6 +31,19 @@ export class GCustomPlayerComponent implements OnInit, OnDestroy {
   private hideTimer: any;
 
   private saveTimer: any;
+
+  constructor() {
+    effect(() => {
+      const init = this.initialTime();
+      const video = this.videoRef()?.nativeElement;
+      if (video && init > 0 && video.readyState >= 1) {
+        if (Math.abs(video.currentTime - init) > 2) {
+          video.currentTime = init;
+          this.currentTime.set(init);
+        }
+      }
+    });
+  }
 
   public ngOnInit(): void {
     if (this.saveTimer) {

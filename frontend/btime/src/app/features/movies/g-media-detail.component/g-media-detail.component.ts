@@ -75,8 +75,16 @@ export class GMediaDetailComponent implements OnInit {
   }
 
   public playEpisode(ep: EpisodeDetail): void {
+    const resumeTime =
+      !ep.isCompleted && ep.stoppedAtSeconds && ep.stoppedAtSeconds > 0
+        ? ep.stoppedAtSeconds
+        : 0;
+
     this.router.navigate(["/dashboard/movies/watch", ep.id], {
-      state: { episode: ep },
+      state: {
+        episode: ep,
+        stoppedAtSeconds: resumeTime,
+      },
     });
   }
 
