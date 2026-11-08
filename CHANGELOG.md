@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.3.0](https://github.com/LeottaAlberto/BTime/compare/v1.2.0...v1.3.0) (2026-11-08)
+
+
+### Features
+
+* add 'wallpapers' subdirectory to media upload structure ([41c7764](https://github.com/LeottaAlberto/BTime/commit/41c7764338032060132aa828720f1b6257dc1ae6))
+* add GEpisodeCardComponent with template, styles, and tests ([f60cdd2](https://github.com/LeottaAlberto/BTime/commit/f60cdd232e264996852bc777de5b5b823c7f7412))
+* add GSeasonTabComponent with template, styles, and tests ([4eb63f3](https://github.com/LeottaAlberto/BTime/commit/4eb63f30aa5475979b4f5c456530c939704caa97))
+* add new shared components including GPhotos, GAction, GButton, GFormInput, GGlobalError, GLoadingScreen, GPill, GSearchInput, GShowMessage, GShowToast, GTag, and GTitle ([d1d0364](https://github.com/LeottaAlberto/BTime/commit/d1d0364e8c64d3e9aff9d6424da0c6c9c04e221b))
+* add support for episode resume functionality with stoppedAtSeconds input ([98fbce6](https://github.com/LeottaAlberto/BTime/commit/98fbce6609921bf83f24bf9ad1664e8ef33e138e))
+* enhance episode tracking with progress and completion status in movie components ([cc2ddd3](https://github.com/LeottaAlberto/BTime/commit/cc2ddd320d57774d1518456af0fb54671a7be720))
+* implement GEpisodeCardComponent with episode details, play functionality, and styles ([06b5020](https://github.com/LeottaAlberto/BTime/commit/06b50209befb5dbeaa4150c3fc3fd96815487166))
+* implement GSeasonTabComponent with button functionality and styles ([78c65dc](https://github.com/LeottaAlberto/BTime/commit/78c65dc83364a946364bb49d6481b7fd57d8ce34))
+* implement save progress functionality for movies and episodes ([b897110](https://github.com/LeottaAlberto/BTime/commit/b8971106c6132061cfd2532eaa905aa5f9d2489f))
+* replace season buttons and episode details with GSeasonTabComponent and GEpisodeCardComponent ([8b8c898](https://github.com/LeottaAlberto/BTime/commit/8b8c898b84accc440dc8332d6f0e0af7413aeaa5))
+
 ## [1.2.0](https://github.com/LeottaAlberto/BTime/compare/v1.1.0...v1.2.0) (2026-11-08)
 
 
