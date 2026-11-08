@@ -1,10 +1,10 @@
 import { Routes } from '@angular/router';
-import { GLoginComponent } from './features/g-login.component/g-login.component';
+import { GLoginComponent } from './features/auth/g-login.component/g-login.component';
 import { authGuard } from './core/auth/auth.guard';
 import { adminGuard } from './core/auth/admin.guard';
-import { GDashboardComponent } from './features/g-dashboard.component/g-dashboard.component';
+import { GDashboardComponent } from './features/dashboard/g-dashboard.component/g-dashboard.component';
 import { guestGuard } from './core/auth/guest.guard';
-import { GRegisterComponent } from './features/g-register.component/g-register.component';
+import { GRegisterComponent } from './features/auth/g-register.component/g-register.component';
 
 export const routes: Routes = [
   { path: "", redirectTo: "dashboard", pathMatch: "full" },
@@ -13,7 +13,7 @@ export const routes: Routes = [
   {
     path: "qr-auth",
     loadComponent: () =>
-      import("./features/g-qr-authorize.component/g-qr-authorize.component").then(
+      import("./features/auth/g-qr-authorize.component/g-qr-authorize.component").then(
         (c) => c.GQrAuthorizeComponent,
       ),
   },
@@ -25,54 +25,47 @@ export const routes: Routes = [
       {
         path: "",
         loadComponent: () =>
-          import("./features/g-dash-overview.component/g-dash-overview.component").then(
+          import("./features/dashboard/g-dash-overview.component/g-dash-overview.component").then(
             (c) => c.GDashOverviewComponent,
           ),
       },
       {
         path: "cloud",
         loadComponent: () =>
-          import("./features/g-cloud.component/g-cloud.component").then((c) => c.GCloudComponent),
+          import("./features/cloud/g-cloud.component/g-cloud.component").then((c) => c.GCloudComponent),
       },
       {
         path: "photos",
         loadComponent: () =>
-          import("./features/g-photos.component/g-photos.component").then(
+          import("./features/photos/g-photos.component/g-photos.component").then(
             (c) => c.GPhotosComponent,
           ),
       },
       {
         path: "movies",
         loadComponent: () =>
-          import("./features/g-movies.component/g-movies.component").then(
+          import("./features/movies/g-movies.component/g-movies.component").then(
             (c) => c.GMoviesComponent,
           ),
       },
       {
         path: "movies/media-details/:id",
         loadComponent: () =>
-          import("./features/g-media-detail.component/g-media-detail.component").then(
+          import("./features/movies/g-media-detail.component/g-media-detail.component").then(
             (c) => c.GMediaDetailComponent,
           ),
       },
       {
         path: "movies/media-details",
         loadComponent: () =>
-          import("./features/g-media-detail.component/g-media-detail.component").then(
-            (c) => c.GMediaDetailComponent,
-          ),
-      },
-      {
-        path: "movies/media-details",
-        loadComponent: () =>
-          import("./features/g-media-detail.component/g-media-detail.component").then(
+          import("./features/movies/g-media-detail.component/g-media-detail.component").then(
             (c) => c.GMediaDetailComponent,
           ),
       },
       {
         path: "movies/watch/:id",
         loadComponent: () =>
-          import("./features/g-watch-player.component/g-watch-player.component").then(
+          import("./features/movies/g-watch-player.component/g-watch-player.component").then(
             (c) => c.GWatchPlayerComponent,
           ),
       },
@@ -80,7 +73,7 @@ export const routes: Routes = [
         path: "admin",
         canActivate: [adminGuard],
         loadComponent: () =>
-          import("./features/g-admin.component/g-admin.component").then((c) => c.GAdminComponent),
+          import("./features/admin/g-admin.component/g-admin.component").then((c) => c.GAdminComponent),
       },
     ],
   },
