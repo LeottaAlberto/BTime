@@ -123,6 +123,8 @@
     (click)="togglePlay()"
     (play)="onVideoPlay()"
     (pause)="onVideoPause()"
+    (close)="saveProgress()"
+    (ended)="onVideoEnded()"
     (timeupdate)="onTimeUpdate()"
     (loadedmetadata)="onLoadedMetadata()"
     [volume]="volume()"

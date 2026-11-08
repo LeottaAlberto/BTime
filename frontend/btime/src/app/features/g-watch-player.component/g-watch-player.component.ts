@@ -21,12 +21,19 @@ export class GWatchPlayerComponent implements OnInit {
   public iconUrl: WritableSignal<string> = signal("");
   public episode: WritableSignal<EpisodeDetail | null> = signal(null);
   public isLoading: WritableSignal<boolean> = signal(true);
+  public initialTime: WritableSignal<number> = signal(0);
 
   public ngOnInit(): void {
     const targetId = this.id() || this.route.snapshot.paramMap.get("id") || "";
 
+    const stateTime = history.state?.stoppedAtSeconds;
+    if (stateTime && typeof stateTime === "number") {
+      this.initialTime.set(stateTime);
+    }
+
     // Prova a leggere l'episodio passato tramite Router State (istantaneo, 0 attesa)
     const stateEp = history.state?.episode as EpisodeDetail | undefined;
+
     if (stateEp && (!targetId || stateEp.id.toLowerCase() === targetId.toLowerCase())) {
       this.setEpisodeData(stateEp);
       this.isLoading.set(false);

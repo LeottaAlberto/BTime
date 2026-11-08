@@ -1,5 +1,8 @@
-import { Component, computed, ElementRef, HostListener, input, output, signal, viewChild, WritableSignal } from "@angular/core";
+import { Component, computed, ElementRef, HostListener, inject, input, OnDestroy, OnInit, output, signal, viewChild, WritableSignal } from "@angular/core";
 import { EpisodeDetail } from "../../core/interfaces/dashboard/movies/seriesDetail.interface";
+import { SaveProgressReq } from "../../core/interfaces/dashboard/movies/saveProgressReq.interface";
+import { MediaType } from "../../core/enums/mediaType.enum";
+import { MovieService } from "../../core/services/dashboard/movies.service";
 
 @Component({
   imports: [],
@@ -7,13 +10,16 @@ import { EpisodeDetail } from "../../core/interfaces/dashboard/movies/seriesDeta
   styleUrl: "./g-custom-player.component.css",
   templateUrl: "./g-custom-player.component.html",
 })
-export class GCustomPlayerComponent {
+export class GCustomPlayerComponent implements OnInit, OnDestroy {
   public videoRef = viewChild<ElementRef<HTMLVideoElement>>("videoPlayer");
   public playerContainer = viewChild<ElementRef<HTMLElement>>("playerContainer");
 
   private readonly skipSeconds = 15;
 
+  private movS = inject(MovieService);
+
   public episode = input<EpisodeDetail | null>(null);
+  public initialTime = input<number>(0);
   public isPlaying: WritableSignal<boolean> = signal(false);
   public isMuted: WritableSignal<boolean> = signal(false);
   public showControls: WritableSignal<boolean> = signal(false);
@@ -23,6 +29,24 @@ export class GCustomPlayerComponent {
   public isDragging = signal<boolean>(false);
 
   private hideTimer: any;
+
+  private saveTimer: any;
+
+  public ngOnInit(): void {
+    clearTimeout(this.saveTimer);
+
+    this.saveTimer = setTimeout(() => {
+      this.saveProgress();
+    }, 10000);
+  }
+
+  public ngOnDestroy(): void {
+    if (this.saveTimer) {
+      clearInterval(this.saveTimer);
+    }
+
+    this.saveProgress();
+  }
 
   @HostListener("window:keydown")
   public onWindowKeyDown(): void {
@@ -61,14 +85,21 @@ export class GCustomPlayerComponent {
   public onVideoPause() {
     this.isPlaying.set(false);
     this.showControls.set(true);
+    this.saveProgress();
   }
 
   // Metodo chiamato dall'evento (loadedmetadata)
   public onLoadedMetadata() {
     const video = this.videoRef()?.nativeElement;
     if (video) {
-      // Quando i metadati public sono caricati, la durata effettiva del file è disponibile
+      // 1. La durata totale è sempre quella del file video
       this.duration.set(video.duration);
+
+      // 2. Se abbiamo un tempo iniziale valido, spostiamo la testina di riproduzione
+      if (this.initialTime() > 0 && this.initialTime() < video.duration) {
+        video.currentTime = this.initialTime();
+        this.currentTime.set(this.initialTime());
+      }
     }
   }
 
@@ -89,6 +120,12 @@ export class GCustomPlayerComponent {
     } else {
       this.isMuted.set(false);
     }
+  }
+
+  public onVideoEnded(): void {
+    this.isPlaying.set(false);
+    this.currentTime.set(this.duration());
+    this.saveProgress();
   }
 
   public onUserActivity() {
@@ -160,5 +197,20 @@ export class GCustomPlayerComponent {
 
   private progressPercent(): number {
     return this.duration() > 0 ? (this.currentTime() / this.duration()) * 100 : 0;
+  }
+
+  private saveProgress(): void {
+    if (!this.episode()?.id || this.duration() <= 0) return;
+
+    const req: SaveProgressReq = {
+      Id: this.episode()?.id ?? "",
+      ProgressSecond: Math.floor(this.currentTime()),
+      Duration: Math.floor(this.duration()),
+      Type: MediaType.Episode,
+    };
+
+    this.movS.saveProgress(req).subscribe({
+      error: (err) => console.error("Errore salvataggio progresso:", err),
+    });
   }
 }

@@ -7,6 +7,7 @@ import { WatchingMovies } from "../../interfaces/dashboard/movies/watchingMovies
 import { MovieCard } from "../../interfaces/dashboard/movies/movieCard.interface";
 import { SeriesCard } from "../../interfaces/dashboard/movies/seriesCard.interface";
 import { EpisodeDetail, SeriesDetail } from "../../interfaces/dashboard/movies/seriesDetail.interface";
+import { SaveProgressReq } from "../../interfaces/dashboard/movies/saveProgressReq.interface";
 
 @Injectable({ providedIn: "root" })
 export class MovieService {
@@ -75,5 +76,9 @@ export class MovieService {
 
   public getEpisodeById(id: string): Observable<EpisodeDetail> {
     return this.http.get<EpisodeDetail>(`${environment.apiUrl}/dashboard/movies/episodes/${id}`);
+  }
+
+  public saveProgress(req: SaveProgressReq): Observable<any> {
+    return this.http.post<any>(`${environment.apiUrl}/dashboard/movies/save-progress`, req);
   }
 }

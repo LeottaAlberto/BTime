@@ -36,7 +36,12 @@ export class GResumeCardComponent {
   public onClick(): void {
     if (!this.id()) return;
     if (this.mediaType() === "episode" || (this.season() && this.episode())) {
-      this.router.navigate(["/dashboard/movies/watch", this.id()]);
+      this.router.navigate(['/dashboard/movies/watch', this.id()], {
+      state: {
+        episode: this.episode(),
+        stoppedAtSeconds: (this.totMinute() - this.minuteLeft()) * 60
+      }
+    });
     } else {
       this.router.navigate(["/dashboard/movies/media-details", this.id()]);
     }
