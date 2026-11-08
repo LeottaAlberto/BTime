@@ -38,11 +38,10 @@ export class GResumeCardComponent {
     if (!this.id()) return;
     if (this.mediaType() === "episode" || (this.season() && this.episode())) {
       this.router.navigate(['/dashboard/movies/watch', this.id()], {
-      state: {
-        episode: this.episode(),
-        stoppedAtSeconds: this.stoppedAtSeconds() ?? ((this.totMinute() - this.minuteLeft()) * 60)
-      }
-    });
+        state: {
+          stoppedAtSeconds: this.stoppedAtSeconds() ?? ((this.totMinute() - this.minuteLeft()) * 60)
+        }
+      });
     } else {
       this.router.navigate(["/dashboard/movies/media-details", this.id()]);
     }

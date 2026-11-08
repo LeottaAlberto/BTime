@@ -31,13 +31,15 @@ export class GWatchPlayerComponent implements OnInit {
       this.initialTime.set(stateTime);
     }
 
-    // Prova a leggere l'episodio passato tramite Router State (istantaneo, 0 attesa)
-    const stateEp = history.state?.episode as EpisodeDetail | undefined;
+    // Prova a leggere l'episodio passato tramite Router State (istantaneo, 0 attesa se è un EpisodeDetail valido)
+    const stateEp = history.state?.episode;
 
-    if (stateEp && (!targetId || stateEp.id.toLowerCase() === targetId.toLowerCase())) {
-      this.setEpisodeData(stateEp);
-      this.isLoading.set(false);
-      return;
+    if (stateEp && typeof stateEp === "object" && typeof stateEp.id === "string") {
+      if (!targetId || stateEp.id.toLowerCase() === targetId.toLowerCase()) {
+        this.setEpisodeData(stateEp as EpisodeDetail);
+        this.isLoading.set(false);
+        return;
+      }
     }
 
     // Se non presente nello state (es. refresh F5), recupera dal backend via API

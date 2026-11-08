@@ -49,5 +49,11 @@ public class EpisodeDetailRes
     public string Path { get; set; } = string.Empty;
 
     public string Icon { get; set; } = string.Empty;
+
+    public int StoppedAtSeconds { get; set; }
+
+    public int Progress { get; set; }
+
+    public bool IsCompleted { get; set; }
 }
 

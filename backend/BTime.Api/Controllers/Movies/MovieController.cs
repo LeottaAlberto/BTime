@@ -93,6 +93,9 @@ namespace BTime.Api.Controllers.Dashboard
                 var minuteLeft = Math.Max(0, totMin - stoppedMin);
                 var progress = totMin > 0 ? (int)Math.Clamp(Math.Round((double)stoppedMin / totMin * 100), 0, 100) : 0;
 
+                // Non mostrare nel Continue Watching se il film è già stato completato
+                if (progress >= 90) continue;
+
                 list.Add(new WatchingMoviesRes
                 {
                     Id = item.RMoviesM.Id,
@@ -116,6 +119,9 @@ namespace BTime.Api.Controllers.Dashboard
                 var stoppedMin = stopped / 60;
                 var minuteLeft = Math.Max(0, totMin - stoppedMin);
                 var progress = totMin > 0 ? (int)Math.Clamp(Math.Round((double)stoppedMin / totMin * 100), 0, 100) : 0;
+
+                // Non mostrare nel Continue Watching se l'episodio è già stato completato
+                if (progress >= 90) continue;
 
                 var icon = FormatUrl(item.REpisodeM.RImagesM?.Path
                            ?? item.REpisodeM.RSeasonM?.RSeriesM?.RImagesM?.Path);
@@ -235,6 +241,23 @@ namespace BTime.Api.Controllers.Dashboard
             if (s == null)
                 return NotFound(new { message = "Serie non trovata." });
 
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            Guid.TryParse(userIdClaim, out var userId);
+
+            // Mappa della progressione di visione degli episodi per l'utente loggato
+            var allEpIds = s.SeasonsMs
+                .SelectMany(sea => sea.EpisodesMs)
+                .Where(e => !e.IsDeleted)
+                .Select(e => e.Id)
+                .ToList();
+
+            var watchedMap = userId != Guid.Empty
+                ? await _db.EpisodesDs
+                    .AsNoTracking()
+                    .Where(ed => ed.RUserId == userId && allEpIds.Contains(ed.REpisodeMid))
+                    .ToDictionaryAsync(ed => ed.REpisodeMid, ed => ed.StoppedAtSeconds ?? 0)
+                : [];
+
             var res = new SeriesDetailRes
             {
                 Id = s.Id,
@@ -259,15 +282,25 @@ namespace BTime.Api.Controllers.Dashboard
                         Episodes = sea.EpisodesMs
                             .Where(e => !e.IsDeleted)
                             .OrderBy(e => e.EpisodeNumber)
-                            .Select(e => new EpisodeDetailRes
+                            .Select(e =>
                             {
-                                Id = e.Id,
-                                EpisodeNumber = e.EpisodeNumber,
-                                Title = e.Title,
-                                Description = e.Description,
-                                Duration = e.Duration,
-                                Path = FormatUrl(e.Path),
-                                Icon = FormatUrl(e.RImagesM?.Path)
+                                var stoppedSec = watchedMap.TryGetValue(e.Id, out var sec) ? sec : 0;
+                                var durSec = (e.Duration ?? 0) > 300 ? (e.Duration ?? 0) : (e.Duration ?? 0) * 60;
+                                var progress = durSec > 0 ? (int)Math.Clamp(Math.Round((double)stoppedSec / durSec * 100), 0, 100) : 0;
+
+                                return new EpisodeDetailRes
+                                {
+                                    Id = e.Id,
+                                    EpisodeNumber = e.EpisodeNumber,
+                                    Title = e.Title,
+                                    Description = e.Description,
+                                    Duration = e.Duration,
+                                    Path = FormatUrl(e.Path),
+                                    Icon = FormatUrl(e.RImagesM?.Path),
+                                    StoppedAtSeconds = stoppedSec,
+                                    Progress = progress,
+                                    IsCompleted = progress >= 90
+                                };
                             }).ToList()
                     }).ToList()
             };
@@ -287,6 +320,22 @@ namespace BTime.Api.Controllers.Dashboard
             if (ep == null)
                 return NotFound(new { message = "Episodio non trovato." });
 
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            Guid.TryParse(userIdClaim, out var userId);
+
+            var stoppedSec = 0;
+            if (userId != Guid.Empty)
+            {
+                var record = await _db.EpisodesDs
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(ed => ed.RUserId == userId && ed.REpisodeMid == id);
+                if (record != null)
+                    stoppedSec = record.StoppedAtSeconds ?? 0;
+            }
+
+            var durSec = (ep.Duration ?? 0) > 300 ? (ep.Duration ?? 0) : (ep.Duration ?? 0) * 60;
+            var progress = durSec > 0 ? (int)Math.Clamp(Math.Round((double)stoppedSec / durSec * 100), 0, 100) : 0;
+
             var res = new EpisodeDetailRes
             {
                 Id = ep.Id,
@@ -295,7 +344,10 @@ namespace BTime.Api.Controllers.Dashboard
                 Description = ep.Description,
                 Duration = ep.Duration,
                 Path = FormatUrl(ep.Path),
-                Icon = FormatUrl(ep.RImagesM?.Path)
+                Icon = FormatUrl(ep.RImagesM?.Path),
+                StoppedAtSeconds = stoppedSec,
+                Progress = progress,
+                IsCompleted = progress >= 90
             };
 
             return Ok(res);
@@ -332,9 +384,22 @@ namespace BTime.Api.Controllers.Dashboard
 
                 if (isCompleted)
                 {
-                    // Rimuove dal Continue Watching se completato
+                    var finalSec = (short)Math.Max(req.ProgressSecond, req.Duration);
                     if (record != null)
-                        _db.MoviesDs.Remove(record);
+                    {
+                        record.StoppedAtSeconds = finalSec;
+                        record.LastWatchedAt = DateTime.UtcNow;
+                    }
+                    else
+                    {
+                        _db.MoviesDs.Add(new MoviesD
+                        {
+                            RUserId = userId,
+                            RMoviesMid = req.Id,
+                            StoppedAtSeconds = finalSec,
+                            LastWatchedAt = DateTime.UtcNow
+                        });
+                    }
                 }
                 else
                 {
@@ -365,9 +430,22 @@ namespace BTime.Api.Controllers.Dashboard
 
                 if (isCompleted)
                 {
-                    // Rimuove dal Continue Watching se completato
+                    var finalSec = Math.Max(req.ProgressSecond, req.Duration);
                     if (record != null)
-                        _db.EpisodesDs.Remove(record);
+                    {
+                        record.StoppedAtSeconds = finalSec;
+                        record.LastWatchedAt = DateTime.UtcNow;
+                    }
+                    else
+                    {
+                        _db.EpisodesDs.Add(new EpisodesD
+                        {
+                            RUserId = userId,
+                            REpisodeMid = req.Id,
+                            StoppedAtSeconds = finalSec,
+                            LastWatchedAt = DateTime.UtcNow
+                        });
+                    }
                 }
                 else
                 {
