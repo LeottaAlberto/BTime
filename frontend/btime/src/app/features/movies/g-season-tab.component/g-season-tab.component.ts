@@ -1,4 +1,5 @@
-import { Component } from "@angular/core";
+import { Component, input, output } from "@angular/core";
+import { SeasonDetail } from "../../../core/interfaces/dashboard/movies/seriesDetail.interface";
 
 @Component({
   imports: [],
@@ -6,4 +7,13 @@ import { Component } from "@angular/core";
   styleUrl: "./g-season-tab.component.css",
   templateUrl: "./g-season-tab.component.html",
 })
-export class GSeasonTabComponent {}
+export class GSeasonTabComponent {
+  public season = input.required<SeasonDetail>();
+  public isActive = input<boolean>(false);
+
+  public tabClick = output<SeasonDetail>();
+
+  public onClick(): void {
+    this.tabClick.emit(this.season());
+  }
+}
