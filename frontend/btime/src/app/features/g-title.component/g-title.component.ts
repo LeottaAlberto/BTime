@@ -6,4 +6,6 @@ import { Component } from "@angular/core";
   styleUrl: "./g-title.component.css",
   templateUrl: "./g-title.component.html",
 })
-export class GTitleComponent {}
+export class GTitleComponent {
+
+}
