@@ -116,6 +116,11 @@ export class GDashboardComponent implements AfterViewInit, OnDestroy {
 
     if (!isRight && !isLeft && !isUp && !isDown && !isSelect) return;
 
+    // Se siamo nel player (a schermo intero o sulla rotta di riproduzione), lascia la gestione completa al player!
+    if (document.fullscreenElement || this.router.url.includes("/watch")) {
+      return;
+    }
+
     this.pendingAutoFocus = false;
 
     const navbar = document.getElementById("app-navbar");

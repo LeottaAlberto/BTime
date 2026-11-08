@@ -84,6 +84,13 @@ export class GWatchPlayerComponent implements OnInit {
   }
 
   public close(): void {
+    if (document.fullscreenElement) {
+      if (document.exitFullscreen) {
+        document.exitFullscreen().catch(() => {});
+      } else if ((document as any).webkitExitFullscreen) {
+        (document as any).webkitExitFullscreen();
+      }
+    }
     this.location.back();
   }
 }
