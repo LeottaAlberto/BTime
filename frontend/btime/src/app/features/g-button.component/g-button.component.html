@@ -1,1 +1,28 @@
-<p>g-button.component works!</p>
+<button
+  [type]="type()"
+  [disabled]="disabled() || loading()"
+  [class.w-full]="fullWidth()"
+  (click)="handleClick($event)"
+  class="relative inline-flex items-center justify-center gap-2 py-2.5 px-5 rounded-xl font-semibold text-sm transition-all duration-200 cursor-pointer select-none focus:outline-none focus:ring-2 focus:ring-purple-400 focus:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none {{ customClass() }}"
+  [class.bg-purple-600]="variant() === 'primary'"
+  [class.hover:bg-purple-500]="variant() === 'primary'"
+  [class.text-white]="variant() === 'primary'"
+  [class.shadow-lg]="variant() === 'primary'"
+  [class.shadow-purple-900/40]="variant() === 'primary'"
+  [class.bg-neutral-800/80]="variant() === 'secondary'"
+  [class.hover:bg-neutral-700/80]="variant() === 'secondary'"
+  [class.text-neutral-200]="variant() === 'secondary'"
+  [class.border]="variant() === 'secondary' || variant() === 'outline'"
+  [class.border-white/10]="variant() === 'secondary'"
+  [class.border-purple-500/40]="variant() === 'outline'"
+  [class.hover:bg-purple-950/30]="variant() === 'outline'"
+  [class.text-purple-300]="variant() === 'outline'"
+  tabindex="0"
+>
+  @if (loading()) {
+    <span class="pi pi-spin pi-spinner text-sm"></span>
+  } @else if (icon()) {
+    <span [class]="'pi pi-' + icon() + ' text-sm'"></span>
+  }
+  <span>{{ label() }}</span>
+</button>
