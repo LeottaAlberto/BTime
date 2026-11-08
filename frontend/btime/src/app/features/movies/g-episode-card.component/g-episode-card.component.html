@@ -32,9 +32,10 @@
 
     <!-- 1. BADGE "VISTO" (In alto a destra, solo se completato) -->
     @if (isWatched()) {
-      <div class="absolute top-2 right-2 z-10 flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-600/90 text-white font-bold text-[10px] shadow backdrop-blur-xs">
-        <i class="pi pi-check text-[9px]"></i>
-        <span>Visto</span>
+      <div class="absolute top-2 -right-10 z-10 flex items-center justify-center w-30 h-7 rotate-45 bg-emerald-600/90 text-white backdrop-blur-xs rounded-sm shadow-xl shadow-black/50">
+        <div class="rotate-45">
+          <!-- <i class="pi pi-check text-[11px] -rotate-45"> Seen</i> -->
+        </div>
       </div>
     }
 
