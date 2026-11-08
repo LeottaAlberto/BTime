@@ -4,9 +4,11 @@ import { MovieService } from "../../../core/services/dashboard/movies.service";
 import { SeriesCard } from "../../../core/interfaces/dashboard/movies/seriesCard.interface";
 import { SeriesDetail, SeasonDetail, EpisodeDetail } from "../../../core/interfaces/dashboard/movies/seriesDetail.interface";
 import { environment } from "../../../../environments/environment";
+import { GSeasonTabComponent } from "../g-season-tab.component/g-season-tab.component";
+import { GEpisodeCardComponent } from "../g-episode-card.component/g-episode-card.component";
 
 @Component({
-  imports: [],
+  imports: [GSeasonTabComponent, GEpisodeCardComponent],
   selector: "g-media-detail",
   styleUrl: "./g-media-detail.component.css",
   templateUrl: "./g-media-detail.component.html",
