@@ -4,7 +4,7 @@
     tabindex="0"
     role="button"
     aria-label="Home Dashboard"
-    class="flex items-center gap-2 sm:gap-3 md:pb-4 md:border-b border-neutral-800/80 cursor-pointer rounded-xl p-1 transition-all shrink-0 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:bg-neutral-800/50"
+    class="flex items-center gap-2 sm:gap-3 md:pb-4 md:border-b border-neutral-800/80 cursor-pointer rounded-xl p-1 transition-all shrink-0 focus:outline-none focus:ring-1 focus:ring-purple-500 focus:bg-neutral-800/50"
     (click)="router.navigate(['/dashboard'])"
     (keydown.enter)="router.navigate(['/dashboard'])"
     (keydown.space)="router.navigate(['/dashboard'])">
@@ -53,7 +53,7 @@
             aria-label="Dettagli profilo"
             class="w-8 h-8 md:w-9 md:h-9 rounded-full overflow-hidden ring-1 ring-neutral-600
                    bg-[url('https://imgs.search.brave.com/Nt1z2ObBrGxK-9i_PJ6ioz7PbFpYm1yCo7tbltrIVV0/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9pLnBp/bmltZy5jb20vb3Jp/Z2luYWxzL2M4LzA5/L2MzL2M4MDljM2Fh/MjI1N2I2ZTEwM2Zl/OGIzNzcwMWMwZDAw/LmpwZw')]
-                   bg-no-repeat bg-center bg-cover cursor-pointer hover:opacity-90 transition-all focus:outline-none focus:ring-2 focus:ring-purple-400 focus:scale-105"
+                   bg-no-repeat bg-center bg-cover cursor-pointer hover:opacity-90 transition-all focus:outline-none focus:ring-1 focus:ring-purple-400 focus:scale-105"
             title="Dettagli profilo"
             (click)="onClick()"
             (keydown.enter)="onClick()"
@@ -78,7 +78,7 @@
         type="button"
         tabindex="0"
         aria-label="Disconnetti"
-        class="p-1.5 md:p-2 rounded-lg text-neutral-400 hover:text-red-400 hover:bg-red-500/10 cursor-pointer transition-all shrink-0 focus:outline-none focus:ring-2 focus:ring-red-500 focus:text-red-400 focus:bg-red-500/20"
+        class="p-1.5 md:p-2 rounded-lg text-neutral-400 hover:text-red-400 hover:bg-red-500/10 cursor-pointer transition-all shrink-0 focus:outline-none focus:ring-1 focus:ring-red-500 focus:text-red-400 focus:bg-red-500/20"
         title="Disconnetti"
         (click)="onClickLogout()">
         <i class="pi pi-sign-out text-sm"></i>
