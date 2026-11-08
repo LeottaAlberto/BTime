@@ -143,6 +143,21 @@ app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "BTime.Api v
 // CORS
 app.UseCors("AllowAngularApp");
 
+// Global Exception Handler che preserva gli header CORS e restituisce JSON
+app.UseExceptionHandler(exceptionHandlerApp =>
+{
+    exceptionHandlerApp.Run(async context =>
+    {
+        context.Response.StatusCode = StatusCodes.Status500InternalServerError;
+        context.Response.ContentType = "application/json";
+        await context.Response.WriteAsJsonAsync(new
+        {
+            message = "Si è verificato un errore interno del server.",
+            statusCode = 500
+        });
+    });
+});
+
 // Authentication & Authorization
 app.UseAuthentication();
 app.UseAuthorization();
