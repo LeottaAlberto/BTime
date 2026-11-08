@@ -1,0 +1,11 @@
+/* Sovrascrive lo sfondo bianco/giallognolo e il testo nero dell'autofill del browser */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  box-shadow: 0 0 0 1000px #0a0a0a inset !important;
+  -webkit-text-fill-color: #fafafa !important;
+  caret-color: #fafafa !important;
+  border-radius: inherit;
+  transition: background-color 5000s ease-in-out 0s;
+}
