@@ -4,6 +4,8 @@ import { Router } from "@angular/router";
 import { LoginResponse } from "../interfaces/login/loginResponse.interface";
 import { jwtDecode } from "jwt-decode";
 import { LoginRequest } from "../interfaces/login/loginRequest.interface";
+import { RegisterRequest } from "../interfaces/register/registerRequest.interface";
+import { RegisterResponse } from "../interfaces/register/registerResponse.interface";
 import { Observable, tap } from "rxjs";
 import { RefreshTokenResponse } from "../interfaces/refreshToken/refreshTokenResponse.interface";
 import { RefreshTokenRequest } from "../interfaces/refreshToken/refreshTokenRequest.interface";
@@ -89,6 +91,10 @@ export class AuthService {
         this.saveTokens(res);
       }),
     );
+  }
+
+  public register(req: RegisterRequest): Observable<RegisterResponse> {
+    return this.http.post<RegisterResponse>(`${environment.apiUrl}/auth/register`, req);
   }
 
   public refreshToken(): Observable<RefreshTokenResponse> {
