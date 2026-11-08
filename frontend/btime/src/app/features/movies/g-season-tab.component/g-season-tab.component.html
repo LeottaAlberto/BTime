@@ -1,20 +1,22 @@
-<button
-  (click)="onClick()"
-  type="button"
-  tabindex="0"
-  [attr.aria-label]="season().title || ('Stagione ' + season().seasonNumber)"
-  class="px-5 py-2.5 rounded-xl font-medium text-sm transition-all duration-200 cursor-pointer flex items-center gap-2 shrink-0 border focus:outline-none focus:ring-4 focus:ring-purple-400 focus:scale-105"
-  [class.bg-purple-600]="isActive()"
-  [class.text-white]="isActive()"
-  [class.border-purple-500]="isActive()"
-  [class.shadow-lg]="isActive()"
-  [class.shadow-purple-600/30]="isActive()"
-  [class.bg-neutral-900/80]="!isActive()"
-  [class.text-neutral-400]="!isActive()"
-  [class.border-neutral-800]="!isActive()"
-  [class.hover:text-white]="!isActive()"
-  [class.hover:border-neutral-700]="!isActive()"
->
-  <span>{{ season().title || ('Stagione ' + season().seasonNumber) }}</span>
-  <span class="text-xs opacity-75">({{ season().episodesCount }} ep)</span>
-</button>
+<div class="py-1 px-2">
+    <button
+    (click)="onClick()"
+    class="px-5 py-2.5 rounded-xl font-medium text-sm transition-all duration-200 cursor-pointer flex items-center gap-2 shrink-0 border focus:outline-none focus:ring-1 focus:ring-purple-400 focus:scale-105"
+    type="button"
+    tabindex="0"
+    [attr.aria-label]="season().title || ('Stagione ' + season().seasonNumber)"
+    [class.bg-purple-600]="isActive()"
+    [class.text-white]="isActive()"
+    [class.border-purple-500]="isActive()"
+    [class.shadow-lg]="isActive()"
+    [class.shadow-purple-600/30]="isActive()"
+    [class.bg-neutral-900/80]="!isActive()"
+    [class.text-neutral-400]="!isActive()"
+    [class.border-neutral-800]="!isActive()"
+    [class.hover:text-white]="!isActive()"
+    [class.hover:border-neutral-700]="!isActive()"
+  >
+    <span>{{ season().title || ('Stagione ' + season().seasonNumber) }}</span>
+    <span class="text-xs opacity-75">({{ season().episodesCount }} ep)</span>
+  </button>
+</div>
