@@ -1,4 +1,4 @@
-import { HttpClient } from "@angular/common/http";
+import { HttpClient, HttpContext } from "@angular/common/http";
 import { inject, Injectable, signal, WritableSignal } from "@angular/core";
 import { Observable, tap } from "rxjs";
 import { HeroBannerRes } from "../../interfaces/dashboard/movies/heroBanner.interface";
@@ -8,6 +8,7 @@ import { MovieCard } from "../../interfaces/dashboard/movies/movieCard.interface
 import { SeriesCard } from "../../interfaces/dashboard/movies/seriesCard.interface";
 import { EpisodeDetail, SeriesDetail } from "../../interfaces/dashboard/movies/seriesDetail.interface";
 import { SaveProgressReq } from "../../interfaces/dashboard/movies/saveProgressReq.interface";
+import { SKIP_LOADING } from "../../http/http-context.tokens";
 
 @Injectable({ providedIn: "root" })
 export class MovieService {
@@ -32,16 +33,18 @@ export class MovieService {
   }
 
   public getContinueWatchingMovies(): Observable<WatchingMovies[]> {
-    return this.http.get<WatchingMovies[]>(`${environment.apiUrl}/dashboard/movies/watching-movies`).pipe(
-      tap({
-        next: (res) => {
-          this.watMovs.set(res);
-        },
-        error: () => {
-          this.watMovs.set([]);
-        },
-      }),
-    );
+    return this.http
+      .get<WatchingMovies[]>(`${environment.apiUrl}/dashboard/movies/watching-movies`)
+      .pipe(
+        tap({
+          next: (res) => {
+            this.watMovs.set(res);
+          },
+          error: () => {
+            this.watMovs.set([]);
+          },
+        }),
+      );
   }
 
   public getFilms(): Observable<MovieCard[]> {
@@ -79,6 +82,6 @@ export class MovieService {
   }
 
   public saveProgress(req: SaveProgressReq): Observable<any> {
-    return this.http.post<any>(`${environment.apiUrl}/dashboard/movies/save-progress`, req);
+    return this.http.post<any>(`${environment.apiUrl}/dashboard/movies/save-progress`, req, {context: new HttpContext().set(SKIP_LOADING, true)});
   }
 }

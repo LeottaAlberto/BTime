@@ -4,6 +4,7 @@ import { AuthService } from "./auth.service";
 import { catchError, finalize, switchMap, throwError, Observable } from "rxjs";
 import { LoadingService } from "../services/loading.service";
 import { isTvAppBTimeClient } from "../services/deviceInfo/parseUserAgent.service";
+import { SKIP_LOADING } from "../http/http-context.tokens";
 
 const ERROR401 = 401;
 
@@ -14,11 +15,14 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   // Evita l'overlay full-screen durante il polling silenzioso del QR Code sulla TV
   const skipGlobalLoading = req.url.includes("/auth/qr/");
 
+  const toSkip = req.context.get(SKIP_LOADING);
+
   const appendLoading = <T>(func: () => Observable<T>): Observable<T> => {
-    if (skipGlobalLoading) {
+    if (skipGlobalLoading || toSkip)
       return func();
-    }
+
     aLoading.show();
+
     return func().pipe(finalize(() => aLoading.hide()));
   };
 

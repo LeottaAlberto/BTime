@@ -2,9 +2,16 @@ import { HttpErrorResponse, HttpInterceptorFn } from "@angular/common/http";
 import { inject } from "@angular/core";
 import { catchError, throwError } from "rxjs";
 import { GlobalService } from "../services/globalError/global.service";
+import { SKIP_LOADING } from "../http/http-context.tokens";
+
 
 export const errorInterceptor: HttpInterceptorFn = (req, next) => {
   const errorService = inject(GlobalService);
+
+  const toSkip = req.context.get(SKIP_LOADING);
+
+  if (toSkip)
+    return next(req);
 
   return next(req).pipe(
     catchError((err: HttpErrorResponse) => {
