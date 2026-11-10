@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.6.0](https://github.com/LeottaAlberto/BTime/compare/v1.5.0...v1.6.0) (2026-11-10)
+
+
+### Features
+
+* implement Watch Party functionality with interfaces and service integration ([a66e115](https://github.com/LeottaAlberto/BTime/commit/a66e115671215eaeba63f3647714b376e40d9888))
+
 ## [1.5.0](https://github.com/LeottaAlberto/BTime/compare/v1.4.0...v1.5.0) (2026-11-10)
 
 
