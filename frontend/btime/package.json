@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve --hmr",
+    "start": "ng serve --hmr --host 0.0.0.0",
     "start:prod": "ng serve --configuration production --host 0.0.0.0 --port 4200",
     "serve:dist": "npx serve -s dist/btime/browser -l 4200",
     "build": "ng build",
@@ -19,6 +19,7 @@
     "@angular/forms": "22.2.1",
     "@angular/platform-browser": "22.2.1",
     "@angular/router": "22.2.1",
+    "@microsoft/signalr": "11.0.0",
     "@tailwindcss/postcss": "4.3.3",
     "jwt-decode": "4.0.0",
     "primeicons": "8.0.2",
