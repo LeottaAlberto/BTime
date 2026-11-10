@@ -5,6 +5,7 @@ import { EpisodeDetail } from "../../../core/interfaces/dashboard/movies/seriesD
 import { environment } from "../../../../environments/environment";
 import { GCustomPlayerComponent } from "../g-custom-player.component/g-custom-player.component";
 import { Location } from "@angular/common";
+import { WatchPartyService } from "../../../core/services/watchParty/watchParty.service";
 
 @Component({
   imports: [GCustomPlayerComponent],
@@ -17,6 +18,7 @@ export class GWatchPlayerComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private location = inject(Location);
   public movS = inject(MovieService);
+  public partyS = inject(WatchPartyService);
   public videoUrl: WritableSignal<string> = signal("");
   public iconUrl: WritableSignal<string> = signal("");
   public episode: WritableSignal<EpisodeDetail | null> = signal(null);
@@ -26,8 +28,13 @@ export class GWatchPlayerComponent implements OnInit {
   public ngOnInit(): void {
     const targetId = this.id() || this.route.snapshot.paramMap.get("id") || "";
 
+    const activeRoom = this.partyS.room();
+    if (activeRoom && activeRoom.mediaId.toLowerCase() === targetId.toLowerCase()) {
+      this.initialTime.set(activeRoom.currentTimeSeconds);
+    }
+
     const stateTime = history.state?.stoppedAtSeconds;
-    if (typeof stateTime === "number" && stateTime > 0) {
+    if (!activeRoom && typeof stateTime === "number" && stateTime > 0) {
       this.initialTime.set(stateTime);
     }
 
@@ -37,7 +44,7 @@ export class GWatchPlayerComponent implements OnInit {
     if (stateEp && typeof stateEp === "object" && typeof stateEp.id === "string") {
       if (!targetId || stateEp.id.toLowerCase() === targetId.toLowerCase()) {
         this.setEpisodeData(stateEp as EpisodeDetail);
-        if (stateTime === undefined && !stateEp.isCompleted && stateEp.stoppedAtSeconds && stateEp.stoppedAtSeconds > 0) {
+        if (!activeRoom && stateTime === undefined && !stateEp.isCompleted && stateEp.stoppedAtSeconds && stateEp.stoppedAtSeconds > 0) {
           this.initialTime.set(stateEp.stoppedAtSeconds);
         }
         this.isLoading.set(false);
@@ -50,7 +57,7 @@ export class GWatchPlayerComponent implements OnInit {
       this.movS.getEpisodeById(targetId).subscribe({
         next: (ep) => {
           this.setEpisodeData(ep);
-          if (this.initialTime() === 0 && !ep.isCompleted && ep.stoppedAtSeconds && ep.stoppedAtSeconds > 0) {
+          if (!this.partyS.room() && this.initialTime() === 0 && !ep.isCompleted && ep.stoppedAtSeconds && ep.stoppedAtSeconds > 0) {
             this.initialTime.set(ep.stoppedAtSeconds);
           }
           this.isLoading.set(false);
@@ -84,6 +91,9 @@ export class GWatchPlayerComponent implements OnInit {
   }
 
   public close(): void {
+    if (this.partyS.room()) {
+      this.partyS.leaveParty();
+    }
     if (document.fullscreenElement) {
       if (document.exitFullscreen) {
         document.exitFullscreen().catch(() => {});

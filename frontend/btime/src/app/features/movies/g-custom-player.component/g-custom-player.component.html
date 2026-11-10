@@ -30,34 +30,122 @@
     [class.pointer-events-auto]="showControls()">
 
     <!-- Barra Superiore (Gradiente scuro) -->
-    <div class="flex flex-row justify-start items-center gap-3 w-full p-4 bg-gradient-to-b from-black/90 via-black/50 to-transparent pointer-events-auto">
-      <button
-        #backBtn
-        type="button"
-        class="flex items-center justify-center w-11 h-11 cursor-pointer rounded-full transition-all hover:bg-white/15 focus:outline-none focus:ring-1 focus:ring-purple-500 focus:bg-white/25 focus:scale-110 text-white"
-        (click)="onBackClick.emit()"
-        tabindex="0"
-        aria-label="Torna indietro">
-        <span class="pi pi-arrow-left text-lg"></span>
-      </button>
-      <h1 class="text-white text-base md:text-xl font-bold truncate drop-shadow-md">
-        {{ episode()?.title }}
-      </h1>
+    <div class="flex flex-row justify-between items-center gap-3 w-full p-4 bg-gradient-to-b from-black/90 via-black/50 to-transparent pointer-events-auto">
+      <div class="flex items-center gap-3 min-w-0">
+        <button
+          #backBtn
+          type="button"
+          class="flex items-center justify-center w-11 h-11 cursor-pointer rounded-full transition-all hover:bg-white/15 focus:outline-none focus:ring-1 focus:ring-purple-500 focus:bg-white/25 focus:scale-110 text-white shrink-0"
+          (click)="onBackClick.emit()"
+          tabindex="0"
+          aria-label="Torna indietro">
+          <span class="pi pi-arrow-left text-lg"></span>
+        </button>
+        <h1 class="text-white text-base md:text-xl font-bold truncate drop-shadow-md">
+          {{ episode()?.title }}
+        </h1>
+      </div>
+
+      <!-- Pulsante / Badge stato Watch Party -->
+      @if (partyS.room(); as room) {
+        <button
+          type="button"
+          (click)="showPartyPanel.set(!showPartyPanel())"
+          tabindex="0"
+          class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-purple-600/40 hover:bg-purple-600/60 border border-purple-400/40 text-xs font-semibold text-purple-100 shrink-0 cursor-pointer focus:outline-none focus:ring-2 focus:ring-purple-400">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span>Party: {{ room.roomCode }}</span>
+          <span class="text-purple-200/80">· {{ room.participants.length }}</span>
+        </button>
+      } @else {
+        <button
+          type="button"
+          (click)="onStartParty()"
+          tabindex="0"
+          class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 hover:bg-purple-600/60 border border-white/20 text-xs font-semibold text-white shrink-0 cursor-pointer focus:outline-none focus:ring-2 focus:ring-purple-400">
+          <span class="pi pi-users text-xs"></span>
+          <span>Avvia Party</span>
+        </button>
+      }
     </div>
+
+    <!-- Pannello Essenziale Watch Party (Overlay) -->
+    @if (showPartyPanel() && partyS.room(); as room) {
+      <div class="absolute top-16 right-4 z-50 w-72 max-w-[90vw] p-4 rounded-xl bg-neutral-900/95 border border-neutral-700 text-white shadow-2xl pointer-events-auto flex flex-col gap-3">
+        <div class="flex items-center justify-between border-b border-neutral-800 pb-2">
+          <div>
+            <p class="text-[11px] uppercase tracking-wider text-neutral-400">Codice Stanza</p>
+            <p class="text-lg font-mono font-bold text-purple-300 select-text">{{ room.roomCode }}</p>
+          </div>
+          <button
+            type="button"
+            (click)="showPartyPanel.set(false)"
+            class="p-1.5 rounded-lg hover:bg-white/10 cursor-pointer text-neutral-400 hover:text-white">
+            <span class="pi pi-times text-xs"></span>
+          </button>
+        </div>
+
+        <div class="flex flex-col gap-2 max-h-48 overflow-y-auto">
+          <p class="text-xs font-semibold text-neutral-400">Partecipanti ({{ room.participants.length }})</p>
+          @for (p of room.participants; track p.userId) {
+            <div class="flex items-center justify-between gap-2 text-sm py-1 border-b border-neutral-800/60 last:border-none">
+              <span class="truncate">
+                {{ p.username }}
+                @if (p.isHost) {
+                  <span class="text-[11px] text-purple-400 ml-1">(Host)</span>
+                }
+              </span>
+
+              @if (partyS.isHost() && !p.isHost) {
+                <button
+                  type="button"
+                  (click)="partyS.toggleParticipantControl(p.userId, !p.canControl)"
+                  class="px-2 py-1 rounded text-xs font-medium cursor-pointer shrink-0"
+                  [class.bg-emerald-600/30]="p.canControl"
+                  [class.text-emerald-300]="p.canControl"
+                  [class.bg-neutral-800]="!p.canControl"
+                  [class.text-neutral-300]="!p.canControl">
+                  {{ p.canControl ? 'Togli comandi' : 'Dai comandi' }}
+                </button>
+              } @else if (!p.isHost && p.canControl) {
+                <span class="text-[11px] text-emerald-400 shrink-0">Può controllare</span>
+              }
+            </div>
+          }
+        </div>
+
+        <button
+          type="button"
+          (click)="partyS.leaveParty(); showPartyPanel.set(false)"
+          class="w-full py-1.5 rounded-lg bg-red-600/20 hover:bg-red-600/40 border border-red-500/30 text-red-300 text-xs font-semibold cursor-pointer">
+          Esci dal Party
+        </button>
+      </div>
+    }
 
     <!-- Barra Inferiore e Controlli Riproduzione -->
     <div class="flex flex-col justify-center items-center w-full px-4 sm:px-6 py-4 gap-3 bg-gradient-to-t from-black/95 via-black/60 to-transparent pointer-events-auto">
 
+      <!-- Avviso Spettatore senza permessi di controllo -->
+      @if (!canControlPlayback()) {
+        <div class="px-3 py-1 rounded-full bg-neutral-900/80 border border-neutral-700/80 text-xs text-neutral-300 flex items-center gap-2">
+          <i class="pi pi-lock text-purple-400 text-[11px]"></i>
+          <span>Solo gli utenti abilitati possono controllare la riproduzione</span>
+        </div>
+      }
+
       <!-- Barra di Avanzamento (Timeline) -->
       <div
-        (mousedown)="isDragging.set(true); seekTo($event)"
+        (mousedown)="isDragging.set(canControlPlayback()); seekTo($event)"
         (mousemove)="isDragging() && seekTo($event)"
         (mouseup)="isDragging.set(false)"
         (mouseleave)="isDragging.set(false)"
-        tabindex="0"
+        [attr.tabindex]="canControlPlayback() ? 0 : -1"
         aria-label="Barra di avanzamento"
         (keydown.arrowleft)="onSkip(false); $event.stopPropagation()"
         (keydown.arrowright)="onSkip(true); $event.stopPropagation()"
+        [class.opacity-50]="!canControlPlayback()"
+        [class.pointer-events-none]="!canControlPlayback()"
         class="group relative w-full h-2 hover:h-3 bg-neutral-700/80 rounded-full cursor-pointer flex items-center focus:h-3.5 focus:ring-1 focus:ring-purple-500 focus:outline-none transition-all">
         <!-- Parte già vista (Viola) -->
         <div
@@ -79,9 +167,12 @@
           <!-- Riavvolgi 15s -->
           <button
             type="button"
+            [disabled]="!canControlPlayback()"
+            [class.opacity-35]="!canControlPlayback()"
+            [class.pointer-events-none]="!canControlPlayback()"
             class="flex items-center justify-center w-11 h-11 cursor-pointer rounded-full transition-all hover:bg-white/15 focus:outline-none focus:ring-1 focus:ring-purple-500 focus:bg-white/25 focus:scale-110"
             (click)="onSkip(false)"
-            tabindex="0"
+            [attr.tabindex]="canControlPlayback() ? 0 : -1"
             aria-label="Riavvolgi 15 secondi">
             <span class="pi pi-replay text-lg"></span>
           </button>
@@ -90,9 +181,12 @@
           <button
             #playBtn
             type="button"
+            [disabled]="!canControlPlayback()"
+            [class.opacity-35]="!canControlPlayback()"
+            [class.pointer-events-none]="!canControlPlayback()"
             class="flex items-center justify-center w-12 h-12 cursor-pointer rounded-full transition-all bg-purple-600/30 hover:bg-purple-600/60 focus:outline-none focus:ring-1 focus:ring-purple-400 focus:bg-purple-600 focus:scale-115 shadow-lg"
             (click)="togglePlay()"
-            tabindex="0"
+            [attr.tabindex]="canControlPlayback() ? 0 : -1"
             aria-label="Riproduci o metti in pausa">
             <span class="pi text-xl ml-0.5" [class.pi-play]="!isPlaying()" [class.pi-pause]="isPlaying()"></span>
           </button>
@@ -100,9 +194,12 @@
           <!-- Avanza 15s -->
           <button
             type="button"
+            [disabled]="!canControlPlayback()"
+            [class.opacity-35]="!canControlPlayback()"
+            [class.pointer-events-none]="!canControlPlayback()"
             class="flex items-center justify-center w-11 h-11 cursor-pointer rounded-full transition-all hover:bg-white/15 focus:outline-none focus:ring-1 focus:ring-purple-500 focus:bg-white/25 focus:scale-110"
             (click)="onSkip(true)"
-            tabindex="0"
+            [attr.tabindex]="canControlPlayback() ? 0 : -1"
             aria-label="Avanza 15 secondi">
             <span class="pi pi-refresh text-lg"></span>
           </button>
