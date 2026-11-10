@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.5.0](https://github.com/LeottaAlberto/BTime/compare/v1.4.0...v1.5.0) (2026-11-10)
+
+
+### Features
+
+* add SKIP_LOADING context token and update interceptors for loading behavior ([833e5b8](https://github.com/LeottaAlberto/BTime/commit/833e5b8436d5a604114a153f03710c1e5c07bad7))
+* implement Watch Party service and hub for real-time video synchronization ([e5820c4](https://github.com/LeottaAlberto/BTime/commit/e5820c42836be6804b1b98cad48f395966e63094))
+* update auth interceptor to skip loading for background requests and modify QR session methods to use SKIP_LOADING context ([1ba3e52](https://github.com/LeottaAlberto/BTime/commit/1ba3e52a3c8c6f92c0f793d8138325b3bda7e47c))
+
 ## [1.4.0](https://github.com/LeottaAlberto/BTime/compare/v1.3.0...v1.4.0) (2026-11-08)
 
 
