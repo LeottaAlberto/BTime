@@ -2,6 +2,7 @@ using System.Security.Claims;
 using System.Text;
 using BTime.Api.Data;
 using BTime.Api.Features.Services;
+using BTime.Api.Hubs;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.HttpOverrides;
@@ -32,6 +33,8 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 // Registrazione Servizi Applicativi
 builder.Services.AddScoped<JwtService>();
 builder.Services.AddSingleton<QrLoginService>();
+builder.Services.AddSignalR();
+builder.Services.AddSingleton<WatchPartyService>();
 
 // Configurazione Autenticazione & Autorizzazione JWT
 var jwtSettings = builder.Configuration.GetSection("Jwt");
@@ -63,6 +66,24 @@ builder.Services.AddAuthentication(options =>
 
         RoleClaimType = ClaimTypes.Role,
         NameClaimType = ClaimTypes.Name
+    };
+
+    options.Events = new JwtBearerEvents
+    {
+        // Questo evento scatta OGNI volta che arriva una richiesta da autenticare
+        OnMessageReceived = context =>
+        {
+            // Leggiamo il token dalla query string (?access_token=...)
+            var accessToken = context.Request.Query["access_token"];
+
+            // Verifichiamo se la richiesta è diretta al nostro Hub SignalR
+            var path = context.HttpContext.Request.Path;
+
+            if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/hubs/watch-party"))
+                context.Token = accessToken; // Consegniamo il token al middleware JWT che lo validerà normalmente
+
+            return Task.CompletedTask;
+        }
     };
 });
 
@@ -180,5 +201,8 @@ app.MapGet("/health", async (AppDbContext db) =>
 
 // Controllers
 app.MapControllers();
+
+// Mappa l'endpoint WebSocket/SignalR per le Watch Party
+app.MapHub<WatchPartyHub>("/hubs/watch-party");
 
 app.Run();
