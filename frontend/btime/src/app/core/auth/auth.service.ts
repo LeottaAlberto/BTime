@@ -1,4 +1,4 @@
-import { HttpClient } from "@angular/common/http";
+import { HttpClient, HttpContext } from "@angular/common/http";
 import { computed, inject, Injectable, signal } from "@angular/core";
 import { Router } from "@angular/router";
 import { LoginResponse } from "../interfaces/login/loginResponse.interface";
@@ -19,6 +19,7 @@ import {
   QrInfoResponse,
   QrStatusResponse,
 } from "../interfaces/qrLogin/qrLogin.interface";
+import { SKIP_LOADING } from "../http/http-context.tokens";
 
 @Injectable({ providedIn: "root" }) // Questo decoratore permette di creare una sola instanza di questa classe per tutte l'app
 export class AuthService {
@@ -112,7 +113,7 @@ export class AuthService {
   // ==================== QR CODE LOGIN ====================
 
   public createQrSession(req: QrCreateRequest): Observable<QrCreateResponse> {
-    return this.http.post<QrCreateResponse>(`${environment.apiUrl}/auth/qr/create`, req);
+    return this.http.post<QrCreateResponse>(`${environment.apiUrl}/auth/qr/create`, req, { context: new HttpContext().set(SKIP_LOADING, true) });
   }
 
   public getQrSessionInfo(code: string): Observable<QrInfoResponse> {
@@ -124,6 +125,7 @@ export class AuthService {
   public pollQrSessionStatus(code: string): Observable<QrStatusResponse> {
     return this.http.get<QrStatusResponse>(
       `${environment.apiUrl}/auth/qr/status/${encodeURIComponent(code)}`,
+      { context: new HttpContext().set(SKIP_LOADING, true) },
     );
   }
 

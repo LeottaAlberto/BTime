@@ -12,13 +12,11 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const auth = inject(AuthService);
   const aLoading = inject(LoadingService);
 
-  // Evita l'overlay full-screen durante il polling silenzioso del QR Code sulla TV
-  const skipGlobalLoading = req.url.includes("/auth/qr/");
-
+  // Evita di mostrare il caricamento per chiamare che devono essere fatta in background e non mostrare all'utente
   const toSkip = req.context.get(SKIP_LOADING);
 
   const appendLoading = <T>(func: () => Observable<T>): Observable<T> => {
-    if (skipGlobalLoading || toSkip)
+    if (toSkip)
       return func();
 
     aLoading.show();
