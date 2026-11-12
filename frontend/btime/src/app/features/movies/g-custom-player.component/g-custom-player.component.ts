@@ -24,6 +24,7 @@ export class GCustomPlayerComponent implements OnInit, OnDestroy {
   public partyS = inject(WatchPartyService);
 
   public episode = input<EpisodeDetail | null>(null);
+  public mediaType = input<MediaType>(MediaType.Episode);
   public initialTime = input<number>(0);
   public isPlaying: WritableSignal<boolean> = signal(false);
   public isMuted: WritableSignal<boolean> = signal(false);
@@ -34,6 +35,8 @@ export class GCustomPlayerComponent implements OnInit, OnDestroy {
   public currentTime = signal<number>(0);
   public duration = signal<number>(0);
   public isDragging = signal<boolean>(false);
+  public partyNotice = signal<string | null>("");
+  public partyNoticeIcon = signal<string | null>("");
 
   private isRemoteSync = false;
   private syncSub?: Subscription;
@@ -109,12 +112,34 @@ export class GCustomPlayerComponent implements OnInit, OnDestroy {
       this.currentTime.set(sync.currentTime);
     }
 
-    if (sync.isPlaying && video.paused)
-      video.play().catch(() => {});
-    else if (!sync.isPlaying && !video.paused)
-      video.pause();
+    if (sync.action !== "heartbeat") {
+      const label =
+        sync.action === "play"
+          ? "started the video"
+          : sync.action === "pause"
+            ? "stopped the video"
+            : "moved the video";
 
-    setTimeout(() => this.isRemoteSync = false, 250);
+      const icon =
+        sync.action === "play"
+          ? "play"
+          : sync.action === "pause"
+            ? "pause"
+            : "arrow-down";
+
+      this.partyNotice.set(`${sync.triggeredBy} ${label}`);
+      this.partyNoticeIcon.set(`pi-${icon}`);
+      setTimeout(() => this.partyNotice.set(null), 2500);
+    }
+
+    if (sync.isPlaying && video.paused) video.play().catch(() => {});
+    else if (!sync.isPlaying && !video.paused) video.pause();
+
+    setTimeout(() => (this.isRemoteSync = false), 250);
+  }
+
+  public async copyOnBoard(): Promise<void> {
+    await navigator.clipboard.writeText(this.partyS.room()?.roomCode ?? "");
   }
 
   // ==========================================================
@@ -170,13 +195,12 @@ export class GCustomPlayerComponent implements OnInit, OnDestroy {
     if (isBack) {
       event.preventDefault();
       event.stopPropagation();
-      if (this.showControls()) {
-        this.showControls.set(false);
-      } else if (this.isFullscreen()) {
-        this.toggleFullscreen();
-      } else {
-        this.onBackClick.emit();
-      }
+
+      if (this.showPartyPanel()) this.showPartyPanel.set(false);
+      else if (this.showControls()) this.showControls.set(false);
+      else if (this.isFullscreen()) this.toggleFullscreen();
+      else this.onBackClick.emit();
+
       return;
     }
 
@@ -302,7 +326,6 @@ export class GCustomPlayerComponent implements OnInit, OnDestroy {
   }
 
   public onVideoPlay(): void {
-
     if (this.partyS.room() && !this.isRemoteSync) {
       const time = this.videoRef()?.nativeElement.currentTime ?? this.currentTime();
       this.partyS.sendSyncAction("play", time, true);
@@ -314,12 +337,10 @@ export class GCustomPlayerComponent implements OnInit, OnDestroy {
   }
 
   public onVideoPause(): void {
-
     if (this.partyS.room() && !this.isRemoteSync) {
       const time = this.videoRef()?.nativeElement.currentTime ?? this.currentTime();
       this.partyS.sendSyncAction("pause", time, false);
     }
-
 
     this.isPlaying.set(false);
     this.showControls.set(true);
@@ -409,7 +430,7 @@ export class GCustomPlayerComponent implements OnInit, OnDestroy {
     const epId = this.episode()?.id;
     if (!epId) return;
 
-    await this.partyS.createParty(epId, MediaType.Episode);
+    await this.partyS.createParty(epId, this.mediaType());
     await this.partyS.sendSyncAction("seek", this.currentTime(), this.isPlaying());
     this.showPartyPanel.set(true);
     this.onUserActivity();
@@ -455,7 +476,6 @@ export class GCustomPlayerComponent implements OnInit, OnDestroy {
       const time = this.videoRef()?.nativeElement.currentTime ?? this.currentTime();
       this.partyS.sendSyncAction("seek", time, this.isPlaying());
     }
-
   }
 
   public seekTo(event: MouseEvent): void {
@@ -475,7 +495,6 @@ export class GCustomPlayerComponent implements OnInit, OnDestroy {
       const time = this.videoRef()?.nativeElement.currentTime ?? this.currentTime();
       this.partyS.sendSyncAction("seek", time, this.isPlaying());
     }
-
   }
 
   private formatSeconds(seconds: number): string {
@@ -502,7 +521,7 @@ export class GCustomPlayerComponent implements OnInit, OnDestroy {
       Id: this.episode()?.id ?? "",
       ProgressSecond: Math.floor(this.currentTime()),
       Duration: Math.floor(this.duration()),
-      Type: MediaType.Episode,
+      Type: this.mediaType(),
     };
 
     this.movS.saveProgress(req).subscribe({

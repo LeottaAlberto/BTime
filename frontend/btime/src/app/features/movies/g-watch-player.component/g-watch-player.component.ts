@@ -1,4 +1,4 @@
-import { Component, inject, input, OnInit, signal, WritableSignal } from "@angular/core";
+import { Component, inject, input, OnDestroy, OnInit, signal, WritableSignal } from "@angular/core";
 import { MovieService } from "../../../core/services/dashboard/movies.service";
 import { ActivatedRoute, Router } from "@angular/router";
 import { EpisodeDetail } from "../../../core/interfaces/dashboard/movies/seriesDetail.interface";
@@ -6,6 +6,7 @@ import { environment } from "../../../../environments/environment";
 import { GCustomPlayerComponent } from "../g-custom-player.component/g-custom-player.component";
 import { Location } from "@angular/common";
 import { WatchPartyService } from "../../../core/services/watchParty/watchParty.service";
+import { MediaType } from "../../../core/enums/mediaType.enum";
 
 @Component({
   imports: [GCustomPlayerComponent],
@@ -13,7 +14,7 @@ import { WatchPartyService } from "../../../core/services/watchParty/watchParty.
   styleUrl: "./g-watch-player.component.css",
   templateUrl: "./g-watch-player.component.html",
 })
-export class GWatchPlayerComponent implements OnInit {
+export class GWatchPlayerComponent implements OnInit, OnDestroy {
   public readonly id = input<string>();
   private route = inject(ActivatedRoute);
   private location = inject(Location);
@@ -22,6 +23,7 @@ export class GWatchPlayerComponent implements OnInit {
   public videoUrl: WritableSignal<string> = signal("");
   public iconUrl: WritableSignal<string> = signal("");
   public episode: WritableSignal<EpisodeDetail | null> = signal(null);
+  public mediaType: WritableSignal<MediaType> = signal(MediaType.Episode);
   public isLoading: WritableSignal<boolean> = signal(true);
   public initialTime: WritableSignal<number> = signal(0);
 
@@ -32,6 +34,12 @@ export class GWatchPlayerComponent implements OnInit {
     if (activeRoom && activeRoom.mediaId.toLowerCase() === targetId.toLowerCase()) {
       this.initialTime.set(activeRoom.currentTimeSeconds);
     }
+
+    const isMovie =
+      activeRoom?.mediaType === MediaType.Movie ||
+      String(activeRoom?.mediaType).toLowerCase() === "movie" ||
+      history.state?.mediaType === MediaType.Movie;
+    this.mediaType.set(isMovie ? MediaType.Movie : MediaType.Episode);
 
     const stateTime = history.state?.stoppedAtSeconds;
     if (!activeRoom && typeof stateTime === "number" && stateTime > 0) {
@@ -52,9 +60,14 @@ export class GWatchPlayerComponent implements OnInit {
       }
     }
 
-    // Se non presente nello state (es. refresh F5), recupera dal backend via API
+    // Se non presente nello state (es. refresh F5 o Film singolo), recupera dal backend via API
     if (targetId) {
-      this.movS.getEpisodeById(targetId).subscribe({
+      const request$ =
+        this.mediaType() === MediaType.Movie
+          ? this.movS.getFilmById(targetId)
+          : this.movS.getEpisodeById(targetId);
+
+      request$.subscribe({
         next: (ep) => {
           this.setEpisodeData(ep);
           if (!this.partyS.room() && this.initialTime() === 0 && !ep.isCompleted && ep.stoppedAtSeconds && ep.stoppedAtSeconds > 0) {
@@ -63,12 +76,18 @@ export class GWatchPlayerComponent implements OnInit {
           this.isLoading.set(false);
         },
         error: (err) => {
-          console.error("Errore recupero episodio:", err);
+          console.error("Errore recupero contenuto:", err);
           this.isLoading.set(false);
         },
       });
     } else {
       this.isLoading.set(false);
+    }
+  }
+
+  public ngOnDestroy(): void {
+    if (this.partyS.room()) {
+      this.partyS.leaveParty();
     }
   }
 
