@@ -1,6 +1,7 @@
 import { Component, computed, inject, input, InputSignal } from "@angular/core";
 import { environment } from "../../../../environments/environment";
 import { Router } from "@angular/router";
+import { MediaType } from "../../../core/enums/mediaType.enum";
 
 @Component({
   imports: [],
@@ -36,11 +37,22 @@ export class GResumeCardComponent {
 
   public onClick(): void {
     if (!this.id()) return;
+
+    const resumeSeconds = this.stoppedAtSeconds() ?? (this.totMinute() - this.minuteLeft()) * 60;
+
     if (this.mediaType() === "episode" || (this.season() && this.episode())) {
-      this.router.navigate(['/dashboard/movies/watch', this.id()], {
+      this.router.navigate(["/dashboard/movies/watch", this.id()], {
         state: {
-          stoppedAtSeconds: this.stoppedAtSeconds() ?? ((this.totMinute() - this.minuteLeft()) * 60)
-        }
+          stoppedAtSeconds: resumeSeconds,
+          mediaType: MediaType.Episode,
+        },
+      });
+    } else if (this.mediaType() === "movie") {
+      this.router.navigate(["/dashboard/movies/watch", this.id()], {
+        state: {
+          stoppedAtSeconds: resumeSeconds,
+          mediaType: MediaType.Movie,
+        },
       });
     } else {
       this.router.navigate(["/dashboard/movies/media-details", this.id()]);
