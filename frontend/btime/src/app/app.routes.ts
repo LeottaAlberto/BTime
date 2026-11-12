@@ -75,6 +75,13 @@ export const routes: Routes = [
         loadComponent: () =>
           import("./features/admin/g-admin.component/g-admin.component").then((c) => c.GAdminComponent),
       },
+      {
+        path: "profile",
+        loadComponent: () =>
+          import("./features/user/g-user-profile.component/g-user-profile.component").then(
+            (c) => c.GUserProfileComponent,
+          ),
+      },
     ],
   },
   { path: "admin", redirectTo: "dashboard/admin", pathMatch: "full" },
