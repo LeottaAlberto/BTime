@@ -9,24 +9,24 @@
     <!-- Hero Banner -->
     <g-hero-banner/>
 
-    <!-- Box Essenziale Watch Party -->
+    <!-- Box Watch Party -->
     <div class="flex flex-wrap items-center gap-3 px-4 py-3 rounded-xl bg-neutral-900/70 border border-neutral-800">
       <span class="text-sm font-semibold text-white flex items-center gap-2">
         <i class="pi pi-users text-purple-400"></i>
-        Unisciti a un Watch Party
+        Join Party
       </span>
       <input
         #partyCodeInput
         type="text"
         maxlength="10"
-        placeholder="Codice stanza (es. AB12CD)"
+        placeholder="Room Code (es. AB12CD)"
         (keydown.enter)="joinWatchParty(partyCodeInput.value)"
         class="px-3 py-1.5 rounded-lg bg-neutral-950 border border-neutral-700 text-sm text-white uppercase placeholder:normal-case focus:outline-none focus:border-purple-500" />
       <button
         type="button"
         (click)="joinWatchParty(partyCodeInput.value)"
         class="px-4 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-500 text-white text-sm font-semibold cursor-pointer">
-        Entra
+        Enter
       </button>
       @if (partyS.error(); as err) {
         <span class="text-xs text-red-400">{{ err }}</span>
