@@ -1,6 +1,7 @@
 import { Component, computed, inject, input, InputSignal } from "@angular/core";
 import { environment } from "../../../../environments/environment";
 import { Router } from "@angular/router";
+import { MediaType } from "../../../core/enums/mediaType.enum";
 
 @Component({
   imports: [],
@@ -32,10 +33,19 @@ export class GPosterCardComponent {
   });
 
   public onClick(): void {
-    if (this.id()) {
+    if (!this.id()) {
+      this.router.navigate(["/dashboard/movies/media-details"]);
+      return;
+    }
+
+    // Se ha una stagione definita è una Serie TV -> apri dettagli stagioni/episodi
+    if (this.season() !== undefined) {
       this.router.navigate(["/dashboard/movies/media-details", this.id()]);
     } else {
-      this.router.navigate(["/dashboard/movies/media-details"]);
+      // Altrimenti è un Film singolo -> apri direttamente il player
+      this.router.navigate(["/dashboard/movies/watch", this.id()], {
+        state: { mediaType: MediaType.Movie },
+      });
     }
   }
 }
