@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.7.0](https://github.com/LeottaAlberto/BTime/compare/v1.6.0...v1.7.0) (2026-11-12)
+
+
+### Features
+
+* add GetFilmById endpoint and corresponding service method for film details retrieval ([3899ad0](https://github.com/LeottaAlberto/BTime/commit/3899ad0a07b6e9793736308e447b0911654e1299))
+* enhance GResumeCardComponent to handle media type and resume seconds in navigation ([70f3a1d](https://github.com/LeottaAlberto/BTime/commit/70f3a1d65fdf1f68d89cbe006ab3459a20af5dcc))
+* enhance Watch Party functionality with media type handling and UI improvements ([37f2a31](https://github.com/LeottaAlberto/BTime/commit/37f2a317cbbc1fd24abc74676124eb1b3b4de7dc))
+* update GPosterCardComponent to improve navigation logic for media details and player ([3c203a8](https://github.com/LeottaAlberto/BTime/commit/3c203a89edae24eb30d96392a023c1619aefbfd6))
+* update start script to bind to all network interfaces and add @microsoft/signalr dependency ([24c63b9](https://github.com/LeottaAlberto/BTime/commit/24c63b92bfe589f9d6ec8c75d433c47b7b5be3e0))
+
 ## [1.6.0](https://github.com/LeottaAlberto/BTime/compare/v1.5.0...v1.6.0) (2026-11-10)
 
 
