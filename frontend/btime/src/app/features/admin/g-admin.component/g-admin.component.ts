@@ -13,6 +13,7 @@ import {
   SeriesEpisodeNode,
   SeriesSeasonNode,
   SeriesTreeNode,
+  TagItem,
 } from "../../../core/interfaces/admin/admin.interface";
 
 @Component({
@@ -107,6 +108,34 @@ export class GAdminComponent implements OnInit {
   public newStandaloneTagName = signal<string>("");
 
   // ---------------------------------------------------------------------------
+  // EDIT MODAL STATE (Film, Serie, Stagioni, Episodi, Tag)
+  // ---------------------------------------------------------------------------
+  public editingMode = signal<"movie" | "series" | "season" | "episode" | "tag" | null>(null);
+  public editingId = signal<string>("");
+  public editTitle = signal<string>("");
+  public editDesc = signal<string>("");
+  public editNumber = signal<number>(1);
+  public editSeasonId = signal<string>("");
+  public editAvailableSeasons = signal<SeriesSeasonNode[]>([]);
+  public editYear = signal<number | null>(null);
+  public editRating = signal<number | null>(null);
+  public editDuration = signal<number | null>(null);
+
+  public editCoverMode = signal<"keep" | "upload" | "url">("keep");
+  public editCoverFile: File | null = null;
+  public editCoverPreview = signal<string | null>(null);
+  public editCoverUrl = signal<string>("");
+
+  public editVideoMode = signal<"keep" | "upload" | "path">("keep");
+  public editVideoFile: File | null = null;
+  public editVideoFileName = signal<string>("");
+  public editVideoPath = signal<string>("");
+
+  public editSelectedTagIds = signal<string[]>([]);
+  public editNewTagInput = signal<string>("");
+  public editNewTagsList = signal<string[]>([]);
+
+  // ---------------------------------------------------------------------------
   // COMPUTED PROPERTIES
   // ---------------------------------------------------------------------------
   public availableSeasonsForSelectedSeries = computed(() => {
@@ -196,6 +225,10 @@ export class GAdminComponent implements OnInit {
       const file = input.files[0];
       this.movieVideoFile = file;
       this.movieVideoFileName.set(file.name);
+      this.movieDuration.set(null);
+      this.extractVideoDurationMinutes(file).then((mins) => {
+        if (mins !== null) this.movieDuration.set(mins);
+      });
     }
   }
 
@@ -227,11 +260,44 @@ export class GAdminComponent implements OnInit {
       const file = input.files[0];
       this.epVideoFile = file;
       this.epVideoFileName.set(file.name);
+      this.epDuration.set(null);
+      this.extractVideoDurationMinutes(file).then((mins) => {
+        if (mins !== null) this.epDuration.set(mins);
+      });
     }
   }
 
+  private extractVideoDurationMinutes(file: File): Promise<number | null> {
+    return new Promise((resolve) => {
+      const video = document.createElement("video");
+      video.preload = "metadata";
+      const objectUrl = URL.createObjectURL(file);
+
+      const cleanup = () => {
+        URL.revokeObjectURL(objectUrl);
+        video.remove();
+      };
+
+      video.onloadedmetadata = () => {
+        const mins =
+          video.duration && isFinite(video.duration) && video.duration > 0
+            ? Math.max(1, Math.round(video.duration / 60))
+            : null;
+        cleanup();
+        resolve(mins);
+      };
+
+      video.onerror = () => {
+        cleanup();
+        resolve(null);
+      };
+
+      video.src = objectUrl;
+    });
+  }
+
   // Helper per upload video con progress bar
-  private uploadVideoWithProgress(file: File): Promise<string> {
+  private uploadVideoWithProgress(file: File): Promise<{ path: string; durationMinutes?: number | null }> {
     return new Promise((resolve, reject) => {
       this.adminService.uploadVideo(file).subscribe({
         next: (event) => {
@@ -241,7 +307,7 @@ export class GAdminComponent implements OnInit {
           } else if (event.type === HttpEventType.Response) {
             this.uploadProgress.set(100);
             const body = event.body as any;
-            resolve(body.path);
+            resolve({ path: body.path, durationMinutes: body.durationMinutes ?? null });
           }
         },
         error: (err) => reject(err),
@@ -297,8 +363,11 @@ export class GAdminComponent implements OnInit {
 
       // 2. Upload Video se impostato su file
       let videoPath = "";
+      let detectedDuration = this.movieDuration();
       if (this.movieVideoMode() === "upload" && this.movieVideoFile) {
-        videoPath = await this.uploadVideoWithProgress(this.movieVideoFile);
+        const upRes = await this.uploadVideoWithProgress(this.movieVideoFile);
+        videoPath = upRes.path;
+        detectedDuration ??= upRes.durationMinutes ?? null;
       } else {
         videoPath = this.movieVideoPath().trim();
       }
@@ -308,7 +377,7 @@ export class GAdminComponent implements OnInit {
         this.adminService.createMovie({
           title: this.movieTitle().trim(),
           description: this.movieDesc().trim() || undefined,
-          duration: this.movieDuration() ?? undefined,
+          duration: detectedDuration ?? undefined,
           coverImageId,
           coverUrl,
           videoPath,
@@ -576,8 +645,11 @@ export class GAdminComponent implements OnInit {
       }
 
       let videoPath = "";
+      let detectedDuration = this.epDuration();
       if (this.epVideoMode() === "upload" && this.epVideoFile) {
-        videoPath = await this.uploadVideoWithProgress(this.epVideoFile);
+        const upRes = await this.uploadVideoWithProgress(this.epVideoFile);
+        videoPath = upRes.path;
+        detectedDuration ??= upRes.durationMinutes ?? null;
       } else {
         videoPath = this.epVideoPath().trim();
       }
@@ -588,7 +660,7 @@ export class GAdminComponent implements OnInit {
           episodeNumber: this.epNumber(),
           title: this.epTitle().trim(),
           description: this.epDesc().trim() || undefined,
-          duration: this.epDuration() ?? undefined,
+          duration: detectedDuration ?? undefined,
           videoPath,
           coverImageId,
           coverUrl,
@@ -685,6 +757,261 @@ export class GAdminComponent implements OnInit {
       return `${backendOrigin}${path}`;
     }
     return path;
+  }
+
+  // ---------------------------------------------------------------------------
+  // EDIT MODAL HANDLERS (Film, Serie, Stagione, Episodio)
+  // ---------------------------------------------------------------------------
+  private resetEditCommon(): void {
+    this.editCoverMode.set("keep");
+    this.editCoverFile = null;
+    this.editCoverPreview.set(null);
+    this.editCoverUrl.set("");
+    this.editVideoMode.set("keep");
+    this.editVideoFile = null;
+    this.editVideoFileName.set("");
+    this.editVideoPath.set("");
+    this.editSelectedTagIds.set([]);
+    this.editNewTagInput.set("");
+    this.editNewTagsList.set([]);
+  }
+
+  public openEditMovie(movie: AdminMovieItem): void {
+    this.resetEditCommon();
+    this.editingMode.set("movie");
+    this.editingId.set(movie.id);
+    this.editTitle.set(movie.title);
+    this.editDesc.set(movie.description ?? "");
+    this.editDuration.set(movie.duration ?? null);
+    this.editVideoPath.set(movie.path ?? "");
+    this.editSelectedTagIds.set([...(movie.tagIds ?? [])]);
+  }
+
+  public openEditSeries(series: SeriesTreeNode): void {
+    this.resetEditCommon();
+    this.editingMode.set("series");
+    this.editingId.set(series.id);
+    this.editTitle.set(series.title);
+    this.editDesc.set(series.description ?? "");
+    this.editYear.set(series.releaseYear ?? null);
+    this.editRating.set(series.rating ?? null);
+    this.editSelectedTagIds.set([...(series.tagIds ?? [])]);
+  }
+
+  public openEditSeason(season: SeriesSeasonNode): void {
+    this.resetEditCommon();
+    this.editingMode.set("season");
+    this.editingId.set(season.id);
+    this.editNumber.set(season.seasonNumber);
+    this.editTitle.set(season.title ?? `Stagione ${season.seasonNumber}`);
+    this.editDesc.set(season.description ?? "");
+    this.editYear.set(season.releaseYear ?? null);
+  }
+
+  public openEditEpisode(ep: SeriesEpisodeNode, series?: SeriesTreeNode, seasonId?: string): void {
+    this.resetEditCommon();
+    this.editingMode.set("episode");
+    this.editingId.set(ep.id);
+    this.editNumber.set(ep.episodeNumber);
+    this.editTitle.set(ep.title);
+    this.editDesc.set(ep.description ?? "");
+    this.editDuration.set(ep.duration ?? null);
+    this.editVideoPath.set(ep.path ?? "");
+    this.editAvailableSeasons.set(series?.seasons ?? []);
+    this.editSeasonId.set(seasonId ?? "");
+  }
+
+  public openEditTag(tag: TagItem): void {
+    this.resetEditCommon();
+    this.editingMode.set("tag");
+    this.editingId.set(tag.id);
+    this.editTitle.set(tag.name);
+  }
+
+  public deleteTag(tag: TagItem): void {
+    if (confirm(`Sei sicuro di voler eliminare il tag "${tag.name}"?`)) {
+      this.adminService.deleteTag(tag.id).subscribe({
+        next: () => {
+          this.alertService.show({
+            title: "Tag Eliminato",
+            message: `Il tag "${tag.name}" è stato rimosso.`,
+            status: StatusType.Good,
+          });
+          this.adminService.loadMoviesList().subscribe();
+          this.adminService.loadSeriesTree().subscribe();
+        },
+        error: (err) => {
+          this.alertService.show({
+            title: "Errore",
+            message: err.error?.message || "Impossibile eliminare il tag.",
+            status: StatusType.Bad,
+          });
+        },
+      });
+    }
+  }
+
+  public closeEditModal(): void {
+    this.editingMode.set(null);
+    this.editingId.set("");
+  }
+
+  public toggleEditTag(tagId: string): void {
+    this.editSelectedTagIds.update((current) =>
+      current.includes(tagId) ? current.filter((id) => id !== tagId) : [...current, tagId],
+    );
+  }
+
+  public addEditCustomTag(): void {
+    const name = this.editNewTagInput().trim();
+    if (!name) return;
+    if (!this.editNewTagsList().includes(name)) {
+      this.editNewTagsList.update((list) => [...list, name]);
+    }
+    this.editNewTagInput.set("");
+  }
+
+  public removeEditCustomTag(name: string): void {
+    this.editNewTagsList.update((list) => list.filter((t) => t !== name));
+  }
+
+  public onEditCoverFileChange(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files[0]) {
+      const file = input.files[0];
+      this.editCoverFile = file;
+      const reader = new FileReader();
+      reader.onload = () => this.editCoverPreview.set(reader.result as string);
+      reader.readAsDataURL(file);
+    }
+  }
+
+  public onEditVideoFileChange(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files[0]) {
+      const file = input.files[0];
+      this.editVideoFile = file;
+      this.editVideoFileName.set(file.name);
+      this.extractVideoDurationMinutes(file).then((mins) => {
+        if (mins !== null) this.editDuration.set(mins);
+      });
+    }
+  }
+
+  public async submitEdit(): Promise<void> {
+    const mode = this.editingMode();
+    const id = this.editingId();
+    if (!mode || !id) return;
+
+    if (mode !== "season" && !this.editTitle().trim()) {
+      this.alertService.show({
+        title: "Titolo mancante",
+        message: "Il titolo è obbligatorio.",
+        status: StatusType.Bad,
+      });
+      return;
+    }
+
+    this.isSubmitting.set(true);
+    this.uploadProgress.set(null);
+
+    try {
+      let coverImageId: string | undefined;
+      let coverUrl: string | undefined;
+
+      if (this.editCoverMode() === "upload" && this.editCoverFile) {
+        const coverRes = await firstValueFrom(this.adminService.uploadCover(this.editCoverFile));
+        coverImageId = coverRes.imageId;
+      } else if (this.editCoverMode() === "url" && this.editCoverUrl().trim()) {
+        coverUrl = this.editCoverUrl().trim();
+      }
+
+      let videoPath: string | undefined;
+      let detectedDuration = this.editDuration();
+      if (this.editVideoMode() === "upload" && this.editVideoFile) {
+        const upRes = await this.uploadVideoWithProgress(this.editVideoFile);
+        videoPath = upRes.path;
+        detectedDuration ??= upRes.durationMinutes ?? null;
+      } else if (this.editVideoMode() === "path" && this.editVideoPath().trim()) {
+        videoPath = this.editVideoPath().trim();
+      }
+
+      if (mode === "movie") {
+        await firstValueFrom(
+          this.adminService.updateMovie(id, {
+            title: this.editTitle().trim(),
+            description: this.editDesc().trim() || undefined,
+            duration: detectedDuration ?? undefined,
+            coverImageId,
+            coverUrl,
+            videoPath,
+            tagIds: this.editSelectedTagIds(),
+            newTags: this.editNewTagsList(),
+          }),
+        );
+        this.adminService.loadMoviesList().subscribe();
+        this.adminService.loadTags().subscribe();
+      } else if (mode === "series") {
+        await firstValueFrom(
+          this.adminService.updateSeries(id, {
+            title: this.editTitle().trim(),
+            description: this.editDesc().trim() || undefined,
+            releaseYear: this.editYear() ?? undefined,
+            rating: this.editRating() ?? undefined,
+            coverImageId,
+            coverUrl,
+            tagIds: this.editSelectedTagIds(),
+            newTags: this.editNewTagsList(),
+          }),
+        );
+        this.adminService.loadSeriesTree().subscribe();
+        this.adminService.loadTags().subscribe();
+      } else if (mode === "season") {
+        await firstValueFrom(
+          this.adminService.updateSeason(id, {
+            seasonNumber: this.editNumber(),
+            title: this.editTitle().trim() || `Stagione ${this.editNumber()}`,
+            description: this.editDesc().trim() || undefined,
+            releaseYear: this.editYear() ?? undefined,
+          }),
+        );
+        this.adminService.loadSeriesTree().subscribe();
+      } else if (mode === "episode") {
+        await firstValueFrom(
+          this.adminService.updateEpisode(id, {
+            seasonId: this.editSeasonId() || undefined,
+            episodeNumber: this.editNumber(),
+            title: this.editTitle().trim(),
+            description: this.editDesc().trim() || undefined,
+            duration: detectedDuration ?? undefined,
+            videoPath,
+            coverImageId,
+            coverUrl,
+          }),
+        );
+        await firstValueFrom(this.adminService.loadSeriesTree());
+      } else if (mode === "tag") {
+        await firstValueFrom(this.adminService.updateTag(id, this.editTitle().trim()));
+        this.adminService.loadMoviesList().subscribe();
+        this.adminService.loadSeriesTree().subscribe();
+      }
+
+      this.alertService.show({
+        title: "Modifiche Salvate",
+        message: "Elemento aggiornato con successo!",
+        status: StatusType.Good,
+      });
+      this.closeEditModal();
+    } catch (err: any) {
+      this.alertService.show({
+        title: "Errore",
+        message: err.error?.message || "Errore durante l'aggiornamento.",
+        status: StatusType.Bad,
+      });
+    } finally {
+      this.isSubmitting.set(false);
+      this.uploadProgress.set(null);
+    }
   }
 
   // ---------------------------------------------------------------------------

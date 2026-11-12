@@ -116,13 +116,15 @@
             </div>
 
             <div class="flex flex-col gap-1.5">
-              <label class="text-xs font-semibold text-neutral-300">Durata (in minuti)</label>
-              <input
-                type="number"
-                placeholder="es. 148"
-                [value]="movieDuration() ?? ''"
-                (input)="movieDuration.set($any($event.target).value ? +$any($event.target).value : null)"
-                class="w-full px-3.5 py-2.5 rounded-xl bg-neutral-800/80 border border-neutral-700/80 text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-violet-500 transition-colors" />
+              <label class="text-xs font-semibold text-neutral-300">Durata (estratta automaticamente)</label>
+              <div class="w-full px-3.5 py-2.5 rounded-xl bg-neutral-900/60 border border-neutral-800 text-xs text-neutral-300 flex items-center gap-2">
+                <span class="pi pi-clock text-violet-400"></span>
+                @if (movieDuration()) {
+                  <span class="text-emerald-300 font-semibold">{{ movieDuration() }} min rilevati dal file video</span>
+                } @else {
+                  <span class="text-neutral-400">Verrà estratta automaticamente dal file video caricato</span>
+                }
+              </div>
             </div>
           </div>
 
@@ -358,12 +360,22 @@
                   <div class="flex flex-col gap-1">
                     <div class="flex items-start justify-between gap-2">
                       <h4 class="text-xs font-bold text-white truncate" [title]="movie.title">{{ movie.title }}</h4>
-                      <button
-                        (click)="deleteMovie(movie)"
-                        title="Elimina film"
-                        class="text-neutral-500 hover:text-red-400 text-xs transition cursor-pointer">
-                        <span class="pi pi-trash"></span>
-                      </button>
+                      <div class="flex items-center gap-1.5 shrink-0">
+                        <button
+                          type="button"
+                          (click)="openEditMovie(movie)"
+                          title="Modifica film"
+                          class="text-neutral-500 hover:text-violet-400 text-xs transition cursor-pointer">
+                          <span class="pi pi-pencil"></span>
+                        </button>
+                        <button
+                          type="button"
+                          (click)="deleteMovie(movie)"
+                          title="Elimina film"
+                          class="text-neutral-500 hover:text-red-400 text-xs transition cursor-pointer">
+                          <span class="pi pi-trash"></span>
+                        </button>
+                      </div>
                     </div>
                     <p class="text-[11px] text-neutral-400 line-clamp-2">{{ movie.description || 'Nessuna descrizione' }}</p>
                   </div>
@@ -700,13 +712,15 @@
 
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div class="flex flex-col gap-1.5">
-              <label class="text-xs font-semibold text-neutral-300">Durata (minuti)</label>
-              <input
-                type="number"
-                placeholder="es. 48"
-                [value]="epDuration() ?? ''"
-                (input)="epDuration.set($any($event.target).value ? +$any($event.target).value : null)"
-                class="w-full px-3.5 py-2.5 rounded-xl bg-neutral-800 border border-neutral-700 text-sm text-white focus:outline-none focus:border-violet-500" />
+              <label class="text-xs font-semibold text-neutral-300">Durata (automatica)</label>
+              <div class="w-full px-3.5 py-2.5 rounded-xl bg-neutral-900/60 border border-neutral-800 text-xs text-neutral-300 flex items-center gap-2">
+                <span class="pi pi-clock text-violet-400"></span>
+                @if (epDuration()) {
+                  <span class="text-emerald-300 font-semibold">{{ epDuration() }} min rilevati</span>
+                } @else {
+                  <span class="text-neutral-400">Estratta dal file</span>
+                }
+              </div>
             </div>
 
             <div class="md:col-span-2 flex flex-col gap-1.5">
@@ -839,11 +853,20 @@
                     <!-- Scorciatoie Serie -->
                     <div class="flex items-center gap-2">
                       <button
+                        type="button"
                         (click)="quickAddSeasonToSeries(series.id)"
                         class="px-3 py-1.5 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-xs font-semibold text-neutral-200 border border-neutral-700 transition cursor-pointer flex items-center gap-1.5">
                         <span class="pi pi-plus"></span> Stagione
                       </button>
                       <button
+                        type="button"
+                        (click)="openEditSeries(series)"
+                        title="Modifica serie"
+                        class="p-2 rounded-lg text-neutral-400 hover:text-violet-400 hover:bg-violet-500/10 transition cursor-pointer">
+                        <span class="pi pi-pencil"></span>
+                      </button>
+                      <button
+                        type="button"
                         (click)="deleteSeries(series)"
                         title="Elimina serie e stagioni"
                         class="p-2 rounded-lg text-neutral-500 hover:text-red-400 hover:bg-red-500/10 transition cursor-pointer">
@@ -861,16 +884,26 @@
                     } @else {
                       @for (season of series.seasons; track season.id) {
                         <div class="flex flex-col rounded-lg bg-neutral-950/50 border border-neutral-800/80 p-3 gap-2.5">
-                          <div class="flex items-center justify-between">
+                          <div class="flex items-center justify-between gap-2">
                             <span class="text-xs font-bold text-violet-300 flex items-center gap-2">
                               <span class="pi pi-folder text-violet-400"></span>
                               Stagione {{ season.seasonNumber }}: {{ season.title }} ({{ season.episodesCount }} episodi)
                             </span>
-                            <button
-                              (click)="quickAddEpisodeToSeason(series.id, season.id, season)"
-                              class="text-[11px] font-semibold text-violet-400 hover:text-violet-300 flex items-center gap-1 cursor-pointer">
-                              <span class="pi pi-plus"></span> Aggiungi Episodio
-                            </button>
+                            <div class="flex items-center gap-3 shrink-0">
+                              <button
+                                type="button"
+                                (click)="openEditSeason(season)"
+                                title="Modifica stagione"
+                                class="text-neutral-400 hover:text-violet-400 text-xs transition cursor-pointer">
+                                <span class="pi pi-pencil"></span>
+                              </button>
+                              <button
+                                type="button"
+                                (click)="quickAddEpisodeToSeason(series.id, season.id, season)"
+                                class="text-[11px] font-semibold text-violet-400 hover:text-violet-300 flex items-center gap-1 cursor-pointer">
+                                <span class="pi pi-plus"></span> Aggiungi Episodio
+                              </button>
+                            </div>
                           </div>
 
                           <!-- Episodi della stagione -->
@@ -891,6 +924,14 @@
                                       <span class="text-[10px] text-neutral-500">{{ ep.duration }}m</span>
                                     }
                                     <button
+                                      type="button"
+                                      (click)="openEditEpisode(ep, series, season.id)"
+                                      title="Modifica episodio"
+                                      class="text-neutral-500 hover:text-violet-400 text-xs transition cursor-pointer">
+                                      <span class="pi pi-pencil"></span>
+                                    </button>
+                                    <button
+                                      type="button"
                                       (click)="deleteEpisode(ep)"
                                       title="Elimina episodio"
                                       class="text-neutral-500 hover:text-red-400 text-xs transition cursor-pointer">
@@ -989,13 +1030,226 @@
             @for (tag of adminService.tags(); track tag.id) {
               <div class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-neutral-800/80 border border-neutral-700 text-xs font-medium text-neutral-200">
                 <span class="pi pi-tag text-violet-400 text-[10px]"></span>
-                {{ tag.name }}
+                <span>{{ tag.name }}</span>
+                <button
+                  type="button"
+                  (click)="openEditTag(tag)"
+                  title="Modifica tag"
+                  class="text-neutral-400 hover:text-violet-400 transition cursor-pointer ml-1">
+                  <span class="pi pi-pencil text-[10px]"></span>
+                </button>
+                <button
+                  type="button"
+                  (click)="deleteTag(tag)"
+                  title="Elimina tag"
+                  class="text-neutral-500 hover:text-red-400 transition cursor-pointer">
+                  <span class="pi pi-trash text-[10px]"></span>
+                </button>
               </div>
             }
           </div>
         </div>
       </div>
 
+    </div>
+  }
+
+  <!-- ========================================================================= -->
+  <!-- MODALE MODIFICA (Film, Serie, Stagione, Episodio)                         -->
+  <!-- ========================================================================= -->
+  @if (editingMode(); as mode) {
+    <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-xs p-4">
+      <div class="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl bg-neutral-900 border border-neutral-700/80 shadow-2xl p-6 flex flex-col gap-5 text-white">
+        <div class="flex items-center justify-between border-b border-neutral-800 pb-3">
+          <h3 class="text-base font-bold flex items-center gap-2">
+            <span class="pi pi-pencil text-violet-400"></span>
+            @if (mode === 'movie') { Modifica Film }
+            @else if (mode === 'series') { Modifica Serie TV }
+            @else if (mode === 'season') { Modifica Stagione }
+            @else if (mode === 'tag') { Modifica Tag }
+            @else { Modifica Episodio }
+          </h3>
+          <button
+            type="button"
+            (click)="closeEditModal()"
+            class="p-1.5 rounded-lg text-neutral-400 hover:text-white hover:bg-neutral-800 cursor-pointer">
+            <span class="pi pi-times"></span>
+          </button>
+        </div>
+
+        <div class="flex flex-col gap-4">
+          @if (mode === 'episode' && editAvailableSeasons().length > 0) {
+            <div class="flex flex-col gap-1.5">
+              <label class="text-xs font-semibold text-neutral-300">Stagione</label>
+              <select
+                [ngModel]="editSeasonId()"
+                (ngModelChange)="editSeasonId.set($event)"
+                class="w-full px-3.5 py-2.5 rounded-xl bg-neutral-800 border border-neutral-700 text-sm text-white focus:outline-none focus:border-violet-500">
+                @for (s of editAvailableSeasons(); track s.id) {
+                  <option [ngValue]="s.id">
+                    Stagione {{ s.seasonNumber }}{{ s.title ? ' — ' + s.title : '' }}
+                  </option>
+                }
+              </select>
+            </div>
+          }
+
+          @if (mode === 'season' || mode === 'episode') {
+            <div class="flex flex-col gap-1.5">
+              <label class="text-xs font-semibold text-neutral-300">
+                {{ mode === 'season' ? 'Numero Stagione' : 'Numero Episodio' }}
+              </label>
+              <input
+                type="number"
+                min="1"
+                [value]="editNumber()"
+                (input)="editNumber.set(+$any($event.target).value || 1)"
+                class="w-full px-3.5 py-2.5 rounded-xl bg-neutral-800 border border-neutral-700 text-sm text-white focus:outline-none focus:border-violet-500" />
+            </div>
+          }
+
+          <div class="flex flex-col gap-1.5">
+            <label class="text-xs font-semibold text-neutral-300">{{ mode === 'tag' ? 'Nome Tag *' : 'Titolo *' }}</label>
+            <input
+              type="text"
+              [value]="editTitle()"
+              (input)="editTitle.set($any($event.target).value)"
+              class="w-full px-3.5 py-2.5 rounded-xl bg-neutral-800 border border-neutral-700 text-sm text-white focus:outline-none focus:border-violet-500" />
+          </div>
+
+          @if (mode !== 'tag') {
+            <div class="flex flex-col gap-1.5">
+              <label class="text-xs font-semibold text-neutral-300">Descrizione</label>
+              <textarea
+                rows="3"
+                [value]="editDesc()"
+                (input)="editDesc.set($any($event.target).value)"
+                class="w-full px-3.5 py-2.5 rounded-xl bg-neutral-800 border border-neutral-700 text-sm text-white focus:outline-none focus:border-violet-500 resize-none"></textarea>
+            </div>
+          }
+
+          @if (mode === 'series' || mode === 'season') {
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div class="flex flex-col gap-1.5">
+                <label class="text-xs font-semibold text-neutral-300">Anno di uscita</label>
+                <input
+                  type="number"
+                  [value]="editYear() ?? ''"
+                  (input)="editYear.set($any($event.target).value ? +$any($event.target).value : null)"
+                  class="w-full px-3.5 py-2.5 rounded-xl bg-neutral-800 border border-neutral-700 text-sm text-white focus:outline-none focus:border-violet-500" />
+              </div>
+
+              @if (mode === 'series') {
+                <div class="flex flex-col gap-1.5">
+                  <label class="text-xs font-semibold text-neutral-300">Valutazione (Rating)</label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    [value]="editRating() ?? ''"
+                    (input)="editRating.set($any($event.target).value ? +$any($event.target).value : null)"
+                    class="w-full px-3.5 py-2.5 rounded-xl bg-neutral-800 border border-neutral-700 text-sm text-white focus:outline-none focus:border-violet-500" />
+                </div>
+              }
+            </div>
+          }
+
+          @if (mode !== 'season' && mode !== 'tag') {
+            <!-- Aggiornamento Copertina Opzionale -->
+            <div class="flex flex-col gap-2 p-3.5 rounded-xl bg-neutral-950/50 border border-neutral-800">
+              <div class="flex items-center justify-between">
+                <label class="text-xs font-bold text-neutral-300">Copertina</label>
+                <div class="flex items-center gap-1 bg-neutral-900 p-0.5 rounded-lg border border-neutral-800 text-[11px]">
+                  <button type="button" (click)="editCoverMode.set('keep')" [class.bg-violet-600]="editCoverMode() === 'keep'" class="px-2 py-1 rounded cursor-pointer">Mantieni</button>
+                  <button type="button" (click)="editCoverMode.set('upload')" [class.bg-violet-600]="editCoverMode() === 'upload'" class="px-2 py-1 rounded cursor-pointer">Carica</button>
+                  <button type="button" (click)="editCoverMode.set('url')" [class.bg-violet-600]="editCoverMode() === 'url'" class="px-2 py-1 rounded cursor-pointer">URL</button>
+                </div>
+              </div>
+              @if (editCoverMode() === 'upload') {
+                <input type="file" accept="image/*" (change)="onEditCoverFileChange($event)" class="text-xs text-neutral-300" />
+              } @else if (editCoverMode() === 'url') {
+                <input type="text" placeholder="URL copertina..." [value]="editCoverUrl()" (input)="editCoverUrl.set($any($event.target).value)" class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-xs text-white" />
+              }
+            </div>
+          }
+
+          @if (mode === 'movie' || mode === 'episode') {
+            <!-- Aggiornamento Video Opzionale -->
+            <div class="flex flex-col gap-2 p-3.5 rounded-xl bg-neutral-950/50 border border-neutral-800">
+              <div class="flex items-center justify-between">
+                <label class="text-xs font-bold text-neutral-300">File Video (Durata attuale: {{ editDuration() ? editDuration() + ' min' : 'N/D' }})</label>
+                <div class="flex items-center gap-1 bg-neutral-900 p-0.5 rounded-lg border border-neutral-800 text-[11px]">
+                  <button type="button" (click)="editVideoMode.set('keep')" [class.bg-violet-600]="editVideoMode() === 'keep'" class="px-2 py-1 rounded cursor-pointer">Mantieni</button>
+                  <button type="button" (click)="editVideoMode.set('upload')" [class.bg-violet-600]="editVideoMode() === 'upload'" class="px-2 py-1 rounded cursor-pointer">Carica</button>
+                  <button type="button" (click)="editVideoMode.set('path')" [class.bg-violet-600]="editVideoMode() === 'path'" class="px-2 py-1 rounded cursor-pointer">Percorso</button>
+                </div>
+              </div>
+              @if (editVideoMode() === 'upload') {
+                <input type="file" accept="video/*,.mkv" (change)="onEditVideoFileChange($event)" class="text-xs text-neutral-300" />
+              } @else if (editVideoMode() === 'path') {
+                <input type="text" placeholder="/uploads/videos/..." [value]="editVideoPath()" (input)="editVideoPath.set($any($event.target).value)" class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-xs text-white" />
+              }
+            </div>
+          }
+
+          @if (mode === 'movie' || mode === 'series') {
+            <!-- Tag -->
+            <div class="flex flex-col gap-2">
+              <label class="text-xs font-semibold text-neutral-300">Tag</label>
+              <div class="flex flex-wrap gap-1.5">
+                @for (tag of adminService.tags(); track tag.id) {
+                  <button
+                    type="button"
+                    (click)="toggleEditTag(tag.id)"
+                    [class.bg-violet-600]="editSelectedTagIds().includes(tag.id)"
+                    [class.text-white]="editSelectedTagIds().includes(tag.id)"
+                    [class.bg-neutral-800]="!editSelectedTagIds().includes(tag.id)"
+                    [class.text-neutral-400]="!editSelectedTagIds().includes(tag.id)"
+                    class="px-2.5 py-1 rounded-lg text-xs border border-neutral-700 cursor-pointer">
+                    {{ tag.name }}
+                  </button>
+                }
+              </div>
+              <div class="flex items-center gap-2 mt-1">
+                <input
+                  type="text"
+                  placeholder="Nuovo tag..."
+                  [value]="editNewTagInput()"
+                  (input)="editNewTagInput.set($any($event.target).value)"
+                  (keydown.enter)="$event.preventDefault(); addEditCustomTag()"
+                  class="flex-1 px-3 py-1.5 rounded-lg bg-neutral-800 border border-neutral-700 text-xs text-white" />
+                <button type="button" (click)="addEditCustomTag()" class="px-3 py-1.5 rounded-lg bg-neutral-700 text-xs font-semibold cursor-pointer">Aggiungi</button>
+              </div>
+              @if (editNewTagsList().length > 0) {
+                <div class="flex flex-wrap gap-1.5">
+                  @for (t of editNewTagsList(); track t) {
+                    <span class="px-2 py-0.5 rounded bg-violet-500/20 text-violet-300 text-xs flex items-center gap-1">
+                      {{ t }}
+                      <button type="button" (click)="removeEditCustomTag(t)" class="hover:text-white cursor-pointer">&times;</button>
+                    </span>
+                  }
+                </div>
+              }
+            </div>
+          }
+        </div>
+
+        <div class="flex items-center justify-end gap-3 pt-3 border-t border-neutral-800">
+          <button
+            type="button"
+            (click)="closeEditModal()"
+            class="px-4 py-2 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-xs font-semibold text-neutral-300 cursor-pointer">
+            Annulla
+          </button>
+          <button
+            type="button"
+            [disabled]="isSubmitting()"
+            (click)="submitEdit()"
+            class="px-5 py-2 rounded-xl bg-violet-600 hover:bg-violet-500 disabled:opacity-50 text-xs font-bold text-white cursor-pointer flex items-center gap-2">
+            <span class="pi pi-check"></span>
+            {{ isSubmitting() ? 'Salvataggio...' : 'Salva Modifiche' }}
+          </button>
+        </div>
+      </div>
     </div>
   }
 

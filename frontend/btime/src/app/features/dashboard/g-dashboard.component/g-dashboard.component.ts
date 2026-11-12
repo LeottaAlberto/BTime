@@ -30,6 +30,7 @@ export class GDashboardComponent implements AfterViewInit, OnDestroy {
     const main = document.getElementById("app-main");
     if (main) {
       this.mutationObserver = new MutationObserver(() => {
+        if (this.router.url.includes("/admin")) return;
         const active = document.activeElement as HTMLElement | null;
         const hasNoFocus = !active || active === document.body;
         if (hasNoFocus || this.pendingAutoFocus) {
