@@ -9,6 +9,9 @@ export interface EpisodeDetail {
   stoppedAtSeconds?: number;
   progress?: number;
   isCompleted?: boolean;
+  nextEpisodeId?: string;
+  nextEpisodeTitle?: string;
+  seriesId?: string;
 }
 
 export interface SeasonDetail {

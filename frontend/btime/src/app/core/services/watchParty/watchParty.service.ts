@@ -16,6 +16,15 @@ export class WatchPartyService {
   private syncActionSubject = new Subject<ReceiveSyncAction>();
   public syncAction$ = this.syncActionSubject.asObservable();
 
+  private mediaChangedSubject = new Subject<{
+    mediaId: string;
+    mediaType: MediaType;
+    currentTimeSeconds: number;
+    isPlaying: boolean;
+    triggeredBy: string;
+  }>();
+  public mediaChanged$ = this.mediaChangedSubject.asObservable();
+
   public room: WritableSignal<WatchPartyRoom | null> = signal(null);
   public isConnected: WritableSignal<boolean> = signal(false);
   public error: WritableSignal<string | null> = signal(null);
@@ -86,6 +95,13 @@ export class WatchPartyService {
     await this.hubConnection.invoke("ToggleParticipantControl", code, targetUserId, allowControl);
   }
 
+  public async changeMedia(newMediaId: string, newMediaType: MediaType): Promise<void> {
+    const code = this.room()?.roomCode;
+    if (!code || this.hubConnection?.state !== signalR.HubConnectionState.Connected) return;
+
+    await this.hubConnection.invoke("ChangeMedia", code, newMediaId, newMediaType);
+  }
+
   private registerListeners(): void {
     this.hubConnection?.on("PartyJoined", (room: WatchPartyRoom) => {
       this.room.set(room);
@@ -103,6 +119,30 @@ export class WatchPartyService {
     this.hubConnection?.on("ReceiveSyncAction", (payload: ReceiveSyncAction) => {
       this.syncActionSubject.next(payload);
     });
+
+    this.hubConnection?.on(
+      "MediaChanged",
+      (payload: {
+        mediaId: string;
+        mediaType: MediaType;
+        currentTimeSeconds: number;
+        isPlaying: boolean;
+        triggeredBy: string;
+      }) => {
+        this.room.update((current) =>
+          current
+            ? {
+                ...current,
+                mediaId: payload.mediaId,
+                mediaType: payload.mediaType,
+                currentTimeSeconds: payload.currentTimeSeconds,
+                isPlaying: payload.isPlaying,
+              }
+            : null,
+        );
+        this.mediaChangedSubject.next(payload);
+      },
+    );
 
     this.hubConnection?.onclose(() => {
       this.isConnected.set(false);

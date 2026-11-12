@@ -1,4 +1,5 @@
 import { Component, computed, effect, ElementRef, HostListener, inject, input, OnDestroy, OnInit, output, signal, viewChild, WritableSignal} from "@angular/core";
+import { Router } from "@angular/router";
 import { Subscription } from "rxjs";
 import { EpisodeDetail } from "../../../core/interfaces/dashboard/movies/seriesDetail.interface";
 import { SaveProgressReq } from "../../../core/interfaces/dashboard/movies/saveProgressReq.interface";
@@ -21,6 +22,7 @@ export class GCustomPlayerComponent implements OnInit, OnDestroy {
 
   private readonly skipSeconds = 15;
   private movS = inject(MovieService);
+  private router = inject(Router);
   public partyS = inject(WatchPartyService);
 
   public episode = input<EpisodeDetail | null>(null);
@@ -40,6 +42,7 @@ export class GCustomPlayerComponent implements OnInit, OnDestroy {
 
   private isRemoteSync = false;
   private syncSub?: Subscription;
+  private lastEpisodeId?: string;
 
   private hideTimer: any;
   private saveTimer: any;
@@ -48,7 +51,24 @@ export class GCustomPlayerComponent implements OnInit, OnDestroy {
     return !this.partyS.room() || this.partyS.canControl();
   });
 
+  public showNextEpisodeButton = computed(() => {
+    const hasNext = Boolean(this.episode()?.nextEpisodeId);
+    const dur = this.duration();
+    if (!hasNext || dur <= 0) return false;
+    return this.progressPercent() >= 95;
+  });
+
   constructor() {
+    effect(() => {
+      const epId = this.episode()?.id;
+      if (epId && epId !== this.lastEpisodeId) {
+        this.lastEpisodeId = epId;
+        this.currentTime.set(0);
+        this.duration.set(0);
+        this.isPlaying.set(false);
+      }
+    });
+
     effect(() => {
       const init = this.initialTime();
       const video = this.videoRef()?.nativeElement;
@@ -434,6 +454,21 @@ export class GCustomPlayerComponent implements OnInit, OnDestroy {
     await this.partyS.sendSyncAction("seek", this.currentTime(), this.isPlaying());
     this.showPartyPanel.set(true);
     this.onUserActivity();
+  }
+
+  public async goToNextEpisode(): Promise<void> {
+    if (!this.canControlPlayback()) return;
+
+    const nextId = this.episode()?.nextEpisodeId;
+    if (!nextId) return;
+
+    this.saveProgress();
+
+    if (this.partyS.room()) {
+      await this.partyS.changeMedia(nextId, MediaType.Episode);
+    } else {
+      this.router.navigate(["/dashboard/movies/watch", nextId]);
+    }
   }
 
   public toggleFullscreen(): void {
