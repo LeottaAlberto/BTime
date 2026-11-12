@@ -81,6 +81,10 @@ export class MovieService {
     return this.http.get<EpisodeDetail>(`${environment.apiUrl}/dashboard/movies/episodes/${id}`);
   }
 
+  public getFilmById(id: string): Observable<EpisodeDetail> {
+    return this.http.get<EpisodeDetail>(`${environment.apiUrl}/dashboard/movies/films/${id}`);
+  }
+
   public saveProgress(req: SaveProgressReq): Observable<any> {
     return this.http.post<any>(`${environment.apiUrl}/dashboard/movies/save-progress`, req, {context: new HttpContext().set(SKIP_LOADING, true)});
   }

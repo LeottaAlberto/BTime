@@ -106,7 +106,9 @@ public class WatchPartyService
     // Permette all'Host di dare o togliere i comandi a un altro partecipante
     public WatchPartyRoom? SetControlPermission(string roomCode, string callerUserId, string targetUserId, bool allowControl)
     {
-        if (!_rooms.TryGetValue(roomCode, out var room))
+        var normalizedCode = roomCode.Trim().ToUpperInvariant();
+
+        if (!_rooms.TryGetValue(normalizedCode, out var room))
             return null;
 
         lock (room)

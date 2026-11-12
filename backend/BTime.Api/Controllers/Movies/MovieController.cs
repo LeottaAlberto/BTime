@@ -380,6 +380,53 @@ namespace BTime.Api.Controllers.Dashboard
             return Ok(res);
         }
 
+        [HttpGet("films/{id}")]
+        [HttpGet("movies/{id}")]
+        public async Task<ActionResult<EpisodeDetailRes>> GetFilmById(Guid id)
+        {
+            var film = await _db.MoviesMs
+                .AsNoTracking()
+                .Include(m => m.RImagesM)
+                .Where(m => m.Id == id && !m.IsDeleted)
+                .FirstOrDefaultAsync();
+
+            if (film == null)
+                return NotFound(new { message = "Film non trovato." });
+
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            Guid.TryParse(userIdClaim, out var userId);
+
+            var stoppedSec = 0;
+            if (userId != Guid.Empty)
+            {
+                var record = await _db.MoviesDs
+                    .AsNoTracking()
+                    .OrderByDescending(md => md.LastWatchedAt)
+                    .FirstOrDefaultAsync(md => md.RUserId == userId && md.RMoviesMid == id);
+                if (record != null)
+                    stoppedSec = record.StoppedAtSeconds ?? 0;
+            }
+
+            var durSec = (film.Duration ?? 0) > 300 ? (film.Duration ?? 0) : (film.Duration ?? 0) * 60;
+            var progress = durSec > 0 ? (int)Math.Clamp(Math.Round((double)stoppedSec / durSec * 100), 0, 100) : 0;
+
+            var res = new EpisodeDetailRes
+            {
+                Id = film.Id,
+                EpisodeNumber = 0,
+                Title = film.Title,
+                Description = film.Description,
+                Duration = film.Duration,
+                Path = FormatUrl(film.Path),
+                Icon = FormatUrl(film.RImagesM?.Path),
+                StoppedAtSeconds = stoppedSec,
+                Progress = progress,
+                IsCompleted = progress >= 90
+            };
+
+            return Ok(res);
+        }
+
         [HttpPost("save-progress")]
         public async Task<ActionResult> SaveProgress([FromBody] SaveProgressReq req)
         {
