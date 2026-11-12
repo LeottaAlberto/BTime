@@ -34,6 +34,21 @@
     </button>
   }
 
+  <!-- Pulsante Prossimo Episodio (appare quando manca ~15% alla fine) -->
+  @if (showNextEpisodeButton() && canControlPlayback()) {
+    <button
+      type="button"
+      tabindex="0"
+      (click)="goToNextEpisode()"
+      class="absolute bottom-24 right-6 z-40 flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-semibold text-sm shadow-2xl border border-purple-400/50 transition-all hover:scale-105 focus:outline-none focus:ring-4 focus:ring-purple-400 cursor-pointer">
+      <span>Prossimo episodio</span>
+      @if (episode()?.nextEpisodeTitle; as nextTitle) {
+        <span class="text-xs text-purple-200 max-w-40 truncate">· {{ nextTitle }}</span>
+      }
+      <span class="pi pi-step-forward text-sm"></span>
+    </button>
+  }
+
   <!-- 2. Overlay Controlli (Layer Z-40 - Sopra il video in tutte le modalità) -->
   <div
     class="controls-overlay absolute inset-0 z-40 flex flex-col justify-between transition-opacity duration-300 pointer-events-none"

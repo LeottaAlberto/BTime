@@ -7,6 +7,7 @@ import { GCustomPlayerComponent } from "../g-custom-player.component/g-custom-pl
 import { Location } from "@angular/common";
 import { WatchPartyService } from "../../../core/services/watchParty/watchParty.service";
 import { MediaType } from "../../../core/enums/mediaType.enum";
+import { Subscription } from "rxjs";
 
 @Component({
   imports: [GCustomPlayerComponent],
@@ -17,6 +18,7 @@ import { MediaType } from "../../../core/enums/mediaType.enum";
 export class GWatchPlayerComponent implements OnInit, OnDestroy {
   public readonly id = input<string>();
   private route = inject(ActivatedRoute);
+  private router = inject(Router);
   private location = inject(Location);
   public movS = inject(MovieService);
   public partyS = inject(WatchPartyService);
@@ -27,8 +29,27 @@ export class GWatchPlayerComponent implements OnInit, OnDestroy {
   public isLoading: WritableSignal<boolean> = signal(true);
   public initialTime: WritableSignal<number> = signal(0);
 
+  private routeSub?: Subscription;
+  private mediaChangedSub?: Subscription;
+
   public ngOnInit(): void {
-    const targetId = this.id() || this.route.snapshot.paramMap.get("id") || "";
+    // Ascolta i cambi di episodio sulla stessa rotta (/watch/:id -> /watch/:nextId)
+    this.routeSub = this.route.paramMap.subscribe((params) => {
+      const targetId = params.get("id") || this.id() || "";
+      this.loadMedia(targetId);
+    });
+
+    // Ascolta i cambi episodio decisi dal Watch Party senza chiudere la stanza
+    this.mediaChangedSub = this.partyS.mediaChanged$.subscribe((payload) => {
+      if (payload.mediaId && payload.mediaId.toLowerCase() !== this.episode()?.id?.toLowerCase()) {
+        this.router.navigate(["/dashboard/movies/watch", payload.mediaId]);
+      }
+    });
+  }
+
+  private loadMedia(targetId: string): void {
+    this.isLoading.set(true);
+    this.initialTime.set(0);
 
     const activeRoom = this.partyS.room();
     if (activeRoom && activeRoom.mediaId.toLowerCase() === targetId.toLowerCase()) {
@@ -46,11 +67,11 @@ export class GWatchPlayerComponent implements OnInit, OnDestroy {
       this.initialTime.set(stateTime);
     }
 
-    // Prova a leggere l'episodio passato tramite Router State (istantaneo, 0 attesa se è un EpisodeDetail valido)
+    // Prova a leggere l'episodio passato tramite Router State (solo se l'ID coincide con targetId!)
     const stateEp = history.state?.episode;
 
     if (stateEp && typeof stateEp === "object" && typeof stateEp.id === "string") {
-      if (!targetId || stateEp.id.toLowerCase() === targetId.toLowerCase()) {
+      if (targetId && stateEp.id.toLowerCase() === targetId.toLowerCase()) {
         this.setEpisodeData(stateEp as EpisodeDetail);
         if (!activeRoom && stateTime === undefined && !stateEp.isCompleted && stateEp.stoppedAtSeconds && stateEp.stoppedAtSeconds > 0) {
           this.initialTime.set(stateEp.stoppedAtSeconds);
@@ -60,7 +81,7 @@ export class GWatchPlayerComponent implements OnInit, OnDestroy {
       }
     }
 
-    // Se non presente nello state (es. refresh F5 o Film singolo), recupera dal backend via API
+    // Recupera dal backend via API (include anche NextEpisodeId / NextEpisodeTitle)
     if (targetId) {
       const request$ =
         this.mediaType() === MediaType.Movie
@@ -86,7 +107,10 @@ export class GWatchPlayerComponent implements OnInit, OnDestroy {
   }
 
   public ngOnDestroy(): void {
-    if (this.partyS.room()) {
+    this.routeSub?.unsubscribe();
+    this.mediaChangedSub?.unsubscribe();
+    // Esce dal Party solo se stiamo davvero lasciando il player (non cambiando episodio)
+    if (this.partyS.room() && !this.router.url.includes("/watch")) {
       this.partyS.leaveParty();
     }
   }
@@ -120,6 +144,12 @@ export class GWatchPlayerComponent implements OnInit, OnDestroy {
         (document as any).webkitExitFullscreen();
       }
     }
-    this.location.back();
+
+    const seriesId = this.episode()?.seriesId;
+    if (this.mediaType() === MediaType.Episode && seriesId) {
+      this.router.navigate(["/dashboard/movies/media-details", seriesId]);
+    } else {
+      this.router.navigate(["/dashboard/movies"]);
+    }
   }
 }
