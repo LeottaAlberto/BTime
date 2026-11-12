@@ -30,6 +30,7 @@ export class AuthService {
 
   private readonly JWT_KEY = "jwt";
   private readonly REFRESH_KEY = "refreshToken";
+  private readonly AVATAR_KEY = "avatarUrl";
 
   constructor() {
     const jwt = this.getJwt();
@@ -57,6 +58,7 @@ export class AuthService {
           jwtDec["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"] ??
           jwtDec["role"] ??
           "",
+        avatarUrl: typeof window !== "undefined" ? (localStorage.getItem(this.AVATAR_KEY) ?? undefined) : undefined,
       };
 
       // Verifica scadenza token: se è scaduto ma abbiamo un RefreshToken valido (es. TvAppBTime),
@@ -149,8 +151,23 @@ export class AuthService {
   public logout(): void {
     localStorage.removeItem(this.JWT_KEY);
     localStorage.removeItem(this.REFRESH_KEY);
+    localStorage.removeItem(this.AVATAR_KEY);
     this.currentUser.set(null);
     this.router.navigate(["/login"]);
+  }
+
+  public updateCurrentUser(partial: Partial<LoginResponse>): void {
+    if (partial.token) {
+      localStorage.setItem(this.JWT_KEY, partial.token);
+    }
+    if ("avatarUrl" in partial) {
+      if (partial.avatarUrl) {
+        localStorage.setItem(this.AVATAR_KEY, partial.avatarUrl);
+      } else {
+        localStorage.removeItem(this.AVATAR_KEY);
+      }
+    }
+    this.currentUser.update((user) => (user ? { ...user, ...partial } : null));
   }
 
   private saveTokens(res: LoginResponse | RefreshTokenResponse): void {
@@ -165,12 +182,20 @@ export class AuthService {
 
     // Se è un LoginResponse abbiamo già tutti i dati dell'utente
     if ("username" in anyRes || "Username" in anyRes) {
+      const avatar = anyRes.avatarUrl || anyRes.AvatarUrl || undefined;
+      if (avatar) {
+        localStorage.setItem(this.AVATAR_KEY, avatar);
+      } else {
+        localStorage.removeItem(this.AVATAR_KEY);
+      }
+
       this.currentUser.set({
         token: jwt,
         refreshToken: refresh,
         username: anyRes.username || anyRes.Username || "",
         email: anyRes.email || anyRes.Email || "",
         role: anyRes.role || anyRes.Role || "",
+        avatarUrl: avatar,
       });
     } else {
       // Se è un refresh-token, aggiorniamo solo i token mantenendo username, email e role
