@@ -35,6 +35,8 @@ builder.Services.AddScoped<JwtService>();
 builder.Services.AddSingleton<QrLoginService>();
 builder.Services.AddSignalR();
 builder.Services.AddSingleton<WatchPartyService>();
+builder.Services.AddSingleton<EmailService>();
+builder.Services.AddSingleton<SensitiveChangeOtpService>();
 
 // Configurazione Autenticazione & Autorizzazione JWT
 var jwtSettings = builder.Configuration.GetSection("Jwt");
@@ -127,7 +129,7 @@ if (!Directory.Exists(uploadsPath))
 }
 
 // Assicura l'esistenza di tutte le sottocartelle multimediali supportate
-string[] subdirs = ["covers", "videos", "photos", "files", "audio", "wallpapers"];
+string[] subdirs = ["covers", "videos", "photos", "files", "audio", "wallpapers", "avatars"];
 foreach (var sub in subdirs)
 {
     var p = Path.Combine(uploadsPath, sub);
@@ -204,5 +206,20 @@ app.MapControllers();
 
 // Mappa l'endpoint WebSocket/SignalR per le Watch Party
 app.MapHub<WatchPartyHub>("/hubs/watch-party");
+
+// Assicura in modo idempotente la colonna AvatarUrl sulla tabella Users
+using (var scope = app.Services.CreateScope())
+{
+    try
+    {
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        await db.Database.ExecuteSqlRawAsync(
+            """ALTER TABLE "Users" ADD COLUMN IF NOT EXISTS "AvatarUrl" character varying(500);""");
+    }
+    catch
+    {
+        // Ignora se il DB non è raggiungibile all'avvio o gestito tramite migrazioni
+    }
+}
 
 app.Run();

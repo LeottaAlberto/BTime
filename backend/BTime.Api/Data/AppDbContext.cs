@@ -306,6 +306,7 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.Email).HasMaxLength(100);
             entity.Property(e => e.LastLoginAt).HasColumnType("timestamp without time zone");
             entity.Property(e => e.Password).HasMaxLength(255);
+            entity.Property(e => e.AvatarUrl).HasMaxLength(500);
             entity.Property(e => e.RRoleId).HasColumnName("R_RoleId");
             entity.Property(e => e.Username).HasMaxLength(50);
 
