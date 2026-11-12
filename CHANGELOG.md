@@ -1,5 +1,27 @@
 # Changelog
 
+## [1.9.0](https://github.com/LeottaAlberto/BTime/compare/v1.8.0...v1.9.0) (2026-11-12)
+
+
+### Features
+
+* add avatar URL handling in AuthService; update and remove avatar from local storage on login and logout ([8177dd0](https://github.com/LeottaAlberto/BTime/commit/8177dd0b162b3f1b3deccf5e819d8af8c2268341))
+* add route for user profile component ([d773785](https://github.com/LeottaAlberto/BTime/commit/d773785e7c58b7ce8ff8bc47ed4c56a0d279377a))
+* add update and delete functionality for movies, series, seasons, episodes, and tags; enhance video duration extraction ([fb594ac](https://github.com/LeottaAlberto/BTime/commit/fb594ac612e3660c0123e9f6a6ce9f285ce7c530))
+* add update and delete functionality for tags, movies, series, seasons, and episodes ([5769e7f](https://github.com/LeottaAlberto/BTime/commit/5769e7f5b7a902dbc11c0eb4ec986194ca4ef7ec))
+* add user profile interfaces for profile management and sensitive changes ([2293721](https://github.com/LeottaAlberto/BTime/commit/2293721520c94fd17a38ad966d846912a3978af3))
+* enhance navbar with user profile avatar handling and navigation updates ([55049c9](https://github.com/LeottaAlberto/BTime/commit/55049c91f252620fb8a1f27392570f8f729eaaf2))
+* implement user profile component with avatar upload and profile management features ([288b531](https://github.com/LeottaAlberto/BTime/commit/288b53177fe38d8396534eaf52245cf29ce0e752))
+* implement user profile management; add avatar upload and update functionality; integrate email service for notifications ([9b4c8e1](https://github.com/LeottaAlberto/BTime/commit/9b4c8e1deac0f77689ebd283e076815e96e00ab8))
+* implement user service with profile management, avatar upload, and sensitive change handling ([bd36b4f](https://github.com/LeottaAlberto/BTime/commit/bd36b4fa3007b6a063c9880989b6a43fa02b1ff9))
+
+
+### Bug Fixes
+
+* correct syntax in LoginResponse interface; ensure proper formatting for email and role properties ([6c992f1](https://github.com/LeottaAlberto/BTime/commit/6c992f173430bfbc79df6700a09617f8498db04f))
+* update applicationUrl in launchSettings.json to use 0.0.0.0 for development profiles ([f91b796](https://github.com/LeottaAlberto/BTime/commit/f91b79666d81ff79f17c239ed0754e7d35936f96))
+* update mutation observer to exclude profile route from auto-focus logic ([8df1e4d](https://github.com/LeottaAlberto/BTime/commit/8df1e4dcfcee7a65c70d791b4f3f71b98a6041a2))
+
 ## [1.8.0](https://github.com/LeottaAlberto/BTime/compare/v1.7.0...v1.8.0) (2026-11-12)
 
 
