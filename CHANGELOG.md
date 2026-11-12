@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.8.0](https://github.com/LeottaAlberto/BTime/compare/v1.7.0...v1.8.0) (2026-11-12)
+
+
+### Features
+
+* enhance episode navigation and media control in Watch Party functionality ([0469248](https://github.com/LeottaAlberto/BTime/commit/0469248ae16fc90da0d1ab9f8905cc2cc904ac07))
+* enhance episode navigation with next episode button and media change handling ([a5652c2](https://github.com/LeottaAlberto/BTime/commit/a5652c249c9ce2c00a29600140cb0944a8d6aae8))
+
 ## [1.7.0](https://github.com/LeottaAlberto/BTime/compare/v1.6.0...v1.7.0) (2026-11-12)
 
 
