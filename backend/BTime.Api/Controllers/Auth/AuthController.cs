@@ -72,7 +72,8 @@ public class AuthController(
             RefreshToken = await GenerateRefrashToken(user.Id, resolvedIp, resolvedDevice, isTvApp),
             Username = user.Username,
             Email = user.Email,
-            Role = roleName
+            Role = roleName,
+            AvatarUrl = user.AvatarUrl
         };
 
         return Ok(response);
@@ -280,7 +281,8 @@ public class AuthController(
             RefreshToken = refreshToken,
             Username = user.Username,
             Email = user.Email,
-            Role = roleName
+            Role = roleName,
+            AvatarUrl = user.AvatarUrl
         };
 
         if (!_qrService.TryApproveSession(pending.Code, loginResponse))

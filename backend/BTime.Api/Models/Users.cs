@@ -12,6 +12,8 @@ public partial class Users
 
     public string Password { get; set; } = null!;
 
+    public string? AvatarUrl { get; set; }
+
     public bool IsActive { get; set; }
 
     public DateTime CreatedAt { get; set; }
