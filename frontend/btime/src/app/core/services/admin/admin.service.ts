@@ -10,6 +10,10 @@ import {
   CreateSeriesPayload,
   SeriesTreeNode,
   TagItem,
+  UpdateEpisodePayload,
+  UpdateMoviePayload,
+  UpdateSeasonPayload,
+  UpdateSeriesPayload,
   UploadCoverRes,
   UploadVideoRes,
 } from "../../interfaces/admin/admin.interface";
@@ -36,6 +40,20 @@ export class AdminService {
           this.tags.update((list) => [...list, { id: res.id, name: res.name }]);
         }
       }),
+    );
+  }
+
+  public updateTag(id: string, name: string): Observable<{ message: string; id: string; name: string }> {
+    return this.http.put<{ message: string; id: string; name: string }>(`${this.baseUrl}/tag/${id}`, { name }).pipe(
+      tap((res) => {
+        this.tags.update((list) => list.map((t) => (t.id === id ? { ...t, name: res.name } : t)));
+      }),
+    );
+  }
+
+  public deleteTag(id: string): Observable<{ message: string }> {
+    return this.http.delete<{ message: string }>(`${this.baseUrl}/tag/${id}`).pipe(
+      tap(() => this.tags.update((list) => list.filter((t) => t.id !== id))),
     );
   }
 
@@ -66,6 +84,10 @@ export class AdminService {
     );
   }
 
+  public updateMovie(id: string, payload: UpdateMoviePayload): Observable<{ message: string }> {
+    return this.http.put<{ message: string }>(`${this.baseUrl}/movie/${id}`, payload);
+  }
+
   public deleteMovie(id: string): Observable<{ message: string }> {
     return this.http.delete<{ message: string }>(`${this.baseUrl}/movie/${id}`).pipe(
       tap(() => this.movies.update((list) => list.filter((m) => m.id !== id))),
@@ -76,12 +98,24 @@ export class AdminService {
     return this.http.post<{ message: string; seriesId: string }>(`${this.baseUrl}/create-series`, payload);
   }
 
+  public updateSeries(id: string, payload: UpdateSeriesPayload): Observable<{ message: string }> {
+    return this.http.put<{ message: string }>(`${this.baseUrl}/series/${id}`, payload);
+  }
+
   public createSeason(payload: CreateSeasonPayload): Observable<{ message: string; seasonId: string }> {
     return this.http.post<{ message: string; seasonId: string }>(`${this.baseUrl}/create-season`, payload);
   }
 
+  public updateSeason(id: string, payload: UpdateSeasonPayload): Observable<{ message: string }> {
+    return this.http.put<{ message: string }>(`${this.baseUrl}/season/${id}`, payload);
+  }
+
   public createEpisode(payload: CreateEpisodePayload): Observable<{ message: string; episodeId: string }> {
     return this.http.post<{ message: string; episodeId: string }>(`${this.baseUrl}/create-episode`, payload);
+  }
+
+  public updateEpisode(id: string, payload: UpdateEpisodePayload): Observable<{ message: string }> {
+    return this.http.put<{ message: string }>(`${this.baseUrl}/episode/${id}`, payload);
   }
 
   public loadSeriesTree(): Observable<SeriesTreeNode[]> {
