@@ -55,5 +55,11 @@ public class EpisodeDetailRes
     public int Progress { get; set; }
 
     public bool IsCompleted { get; set; }
+
+    public Guid? NextEpisodeId { get; set; }
+
+    public string? NextEpisodeTitle { get; set; }
+
+    public Guid? SeriesId { get; set; }
 }
 

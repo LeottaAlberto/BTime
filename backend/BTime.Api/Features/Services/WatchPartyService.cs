@@ -131,7 +131,8 @@ public class WatchPartyService
     // Verifica se un utente ha il permesso di inviare Play/Pausa/Seek e aggiorna lo stato della stanza
     public bool TryUpdatePlaybackState(string roomCode, string userId, double currentTime, bool isPlaying)
     {
-        if (!_rooms.TryGetValue(roomCode, out var room))
+        var normalizedCode = roomCode.Trim().ToUpperInvariant();
+        if (!_rooms.TryGetValue(normalizedCode, out var room))
             return false;
 
         lock (room)
@@ -145,6 +146,28 @@ public class WatchPartyService
             room.IsPlaying = isPlaying;
             room.LastUpdatedUtc = DateTime.UtcNow;
             return true;
+        }
+    }
+
+    // Permette a chi ha i comandi di cambiare episodio/film mantenendo intatta la stanza
+    public WatchPartyRoom? TryChangeMedia(string roomCode, string userId, string newMediaId, MediaType newMediaType)
+    {
+        var normalizedCode = roomCode.Trim().ToUpperInvariant();
+        if (!_rooms.TryGetValue(normalizedCode, out var room))
+            return null;
+
+        lock (room)
+        {
+            var participant = room.Participants.FirstOrDefault(p => p.UserId == userId);
+            if (participant == null || !participant.CanControl)
+                return null;
+
+            room.MediaId = newMediaId;
+            room.MediaType = newMediaType;
+            room.CurrentTimeSeconds = 0;
+            room.IsPlaying = true;
+            room.LastUpdatedUtc = DateTime.UtcNow;
+            return room;
         }
     }
 

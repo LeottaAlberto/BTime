@@ -316,12 +316,21 @@ namespace BTime.Api.Controllers.Dashboard
                                         Icon = FormatUrl(e.RImagesM?.Path),
                                         StoppedAtSeconds = stoppedSec,
                                         Progress = progress,
-                                        IsCompleted = progress >= 90
+                                        IsCompleted = progress >= 90,
+                                        SeriesId = s.Id
                                     };
                                 }).ToList()
                             };
                         }).ToList()
                 };
+
+                // Collega ogni episodio al successivo in ordine di stagione ed episodio
+                var allOrderedEpisodes = res.Seasons.SelectMany(sea => sea.Episodes).ToList();
+                for (int i = 0; i < allOrderedEpisodes.Count - 1; i++)
+                {
+                    allOrderedEpisodes[i].NextEpisodeId = allOrderedEpisodes[i + 1].Id;
+                    allOrderedEpisodes[i].NextEpisodeTitle = allOrderedEpisodes[i + 1].Title;
+                }
 
                 return Ok(res);
             }
@@ -341,6 +350,7 @@ namespace BTime.Api.Controllers.Dashboard
             var ep = await _db.EpisodesMs
                 .AsNoTracking()
                 .Include(e => e.RImagesM)
+                .Include(e => e.RSeasonM)
                 .Where(e => e.Id == id && !e.IsDeleted)
                 .FirstOrDefaultAsync();
 
@@ -355,9 +365,31 @@ namespace BTime.Api.Controllers.Dashboard
             {
                 var record = await _db.EpisodesDs
                     .AsNoTracking()
+                    .OrderByDescending(ed => ed.LastWatchedAt)
                     .FirstOrDefaultAsync(ed => ed.RUserId == userId && ed.REpisodeMid == id);
                 if (record != null)
                     stoppedSec = record.StoppedAtSeconds ?? 0;
+            }
+
+            // Cerca l'episodio successivo nella stessa stagione o nella stagione successiva della stessa serie
+            var nextEp = await _db.EpisodesMs
+                .AsNoTracking()
+                .Where(e => e.RSeasonMid == ep.RSeasonMid && e.EpisodeNumber > ep.EpisodeNumber && !e.IsDeleted)
+                .OrderBy(e => e.EpisodeNumber)
+                .Select(e => new { e.Id, e.Title })
+                .FirstOrDefaultAsync();
+
+            if (nextEp == null && ep.RSeasonM != null)
+            {
+                nextEp = await _db.EpisodesMs
+                    .AsNoTracking()
+                    .Where(e => e.RSeasonM.RSeriesMid == ep.RSeasonM.RSeriesMid
+                             && e.RSeasonM.SeasonNumber > ep.RSeasonM.SeasonNumber
+                             && !e.IsDeleted)
+                    .OrderBy(e => e.RSeasonM.SeasonNumber)
+                    .ThenBy(e => e.EpisodeNumber)
+                    .Select(e => new { e.Id, e.Title })
+                    .FirstOrDefaultAsync();
             }
 
             var durSec = (ep.Duration ?? 0) > 300 ? (ep.Duration ?? 0) : (ep.Duration ?? 0) * 60;
@@ -374,7 +406,10 @@ namespace BTime.Api.Controllers.Dashboard
                 Icon = FormatUrl(ep.RImagesM?.Path),
                 StoppedAtSeconds = stoppedSec,
                 Progress = progress,
-                IsCompleted = progress >= 90
+                IsCompleted = progress >= 90,
+                NextEpisodeId = nextEp?.Id,
+                NextEpisodeTitle = nextEp?.Title,
+                SeriesId = ep.RSeasonM?.RSeriesMid
             };
 
             return Ok(res);
