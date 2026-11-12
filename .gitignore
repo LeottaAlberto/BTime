@@ -127,6 +127,7 @@ pnpm-debug.log*
 # Local Docker Overrides & Environment Files
 .env
 .env.local
+docker-compose.yml
 docker-compose.override.yml
 backend/BTime.Api/Migrations/*
 .gitignore
@@ -141,3 +142,4 @@ backup_db.ps1
 .vscode/tasks.json
 .vscode/wait-for-backend.js
 backend/BTime.Api/appsettings.json
+backup_btime_full.sql
