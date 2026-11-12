@@ -88,7 +88,26 @@ public class WatchPartyHub(WatchPartyService partyService) : Hub
         });
     }
 
-    // Chiamato dall'Host per dare o togliere i comandi a un altro utente
+    // 4. Chiamato da chi ha i comandi per passare all'episodio successivo senza chiudere la stanza
+    public async Task ChangeMedia(string roomCode, string newMediaId, MediaType newMediaType)
+    {
+        var (userId, username) = GetCurrentUser();
+        var room = _partyService.TryChangeMedia(roomCode, userId, newMediaId, newMediaType);
+
+        if (room == null)
+            return;
+
+        await Clients.Group(room.RoomCode).SendAsync("MediaChanged", new
+        {
+            MediaId = room.MediaId,
+            MediaType = room.MediaType,
+            CurrentTimeSeconds = room.CurrentTimeSeconds,
+            IsPlaying = room.IsPlaying,
+            TriggeredBy = username
+        });
+    }
+
+    // 5. Chiamato dall'Host per dare o togliere i comandi a un altro utente
     public async Task ToggleParticipantControl(string roomCode, string targetUserId, bool allowControl)
     {
         var (callerUserId, _) = GetCurrentUser();
