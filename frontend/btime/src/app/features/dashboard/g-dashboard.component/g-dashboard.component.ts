@@ -102,7 +102,12 @@ export class GDashboardComponent implements AfterViewInit, OnDestroy {
     const desiredTop = Math.max(0, offsetTop - mainRect.height / 2 + targetRect.height / 2);
 
     main.scrollTo({ top: desiredTop, behavior: "smooth" });
-    target.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+
+    // Se l'elemento appartiene a una riga a scorrimento orizzontale, scrolla solo quel container
+    const horizontalRow = target.closest<HTMLElement>('.overflow-x-auto');
+    if (horizontalRow) {
+      target.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "nearest" });
+    }
   }
 
   private isSameRow(a: DOMRect, b: DOMRect): boolean {
