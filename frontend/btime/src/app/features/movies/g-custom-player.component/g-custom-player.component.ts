@@ -19,6 +19,7 @@ export class GCustomPlayerComponent implements OnInit, OnDestroy {
   public playerContainer = viewChild<ElementRef<HTMLElement>>("playerContainer");
   public playBtn = viewChild<ElementRef<HTMLButtonElement>>("playBtn");
   public backBtn = viewChild<ElementRef<HTMLButtonElement>>("backBtn");
+  public partyBtn = viewChild<ElementRef<HTMLButtonElement>>("partyBtn");
 
   private readonly skipSeconds = 15;
   private movS = inject(MovieService);
@@ -268,20 +269,40 @@ export class GCustomPlayerComponent implements OnInit, OnDestroy {
     // 5. Se i controlli sono già visibili:
     this.onUserActivity();
 
-    // Navigazione rapida Up / Down tra barra superiore (Back) e inferiore (Play)
+    const active = document.activeElement as HTMLElement | null;
+    const isBackFocused = active === this.backBtn()?.nativeElement;
+    const isPartyFocused = active === this.partyBtn()?.nativeElement;
+
+    // Spostamento orizzontale nella barra superiore tra Back e Start Party
+    if (isBackFocused && isRight) {
+      event.preventDefault();
+      this.partyBtn()?.nativeElement?.focus();
+      return;
+    }
+    if (isPartyFocused && isLeft) {
+      event.preventDefault();
+      this.backBtn()?.nativeElement?.focus();
+      return;
+    }
+
+    // Navigazione rapida Up / Down tra barra superiore (Back / Party) e inferiore (Play)
     if (isUp) {
-      const active = document.activeElement as HTMLElement | null;
       if (active && active.closest(".pointer-events-auto") && active.tagName === "BUTTON") {
-        // Se si trova già sui comandi inferiori, porta il focus sul tasto Back
-        if (active !== this.backBtn()?.nativeElement) {
+        // Se si trova sui comandi inferiori, sale verso la barra superiore
+        if (!isBackFocused && !isPartyFocused) {
           event.preventDefault();
-          this.backBtn()?.nativeElement?.focus();
+          // Se il focus era verso destra (es. fullscreen), vai a partyBtn, altrimenti a backBtn
+          const activeRect = active.getBoundingClientRect();
+          if (activeRect.left > window.innerWidth / 2 && this.partyBtn()?.nativeElement) {
+            this.partyBtn()?.nativeElement?.focus();
+          } else {
+            this.backBtn()?.nativeElement?.focus();
+          }
           return;
         }
       }
     } else if (isDown) {
-      const active = document.activeElement as HTMLElement | null;
-      if (active === this.backBtn()?.nativeElement) {
+      if (isBackFocused || isPartyFocused) {
         event.preventDefault();
         this.focusPlayButton();
         return;

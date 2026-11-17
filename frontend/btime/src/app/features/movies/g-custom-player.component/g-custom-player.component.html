@@ -75,20 +75,24 @@
       <!-- Pulsante / Badge stato Watch Party -->
       @if (partyS.room(); as room) {
         <button
+          #partyBtn
           type="button"
           (click)="showPartyPanel.set(!showPartyPanel())"
           tabindex="0"
-          class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-purple-600/40 hover:bg-purple-600/60 border border-purple-400/40 text-xs font-semibold text-purple-100 shrink-0 cursor-pointer focus:outline-none focus:ring-2 focus:ring-purple-400">
+          aria-label="Pannello Watch Party"
+          class="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-purple-600/40 hover:bg-purple-600/60 border border-purple-400/40 text-xs font-semibold text-purple-100 shrink-0 cursor-pointer focus:outline-none focus:ring-1 focus:ring-purple-400 focus:bg-purple-600 focus:scale-105 transition-all">
           <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
           <span>Party: {{ room.roomCode }}</span>
           <span class="text-purple-200/80">· {{ room.participants.length }}</span>
         </button>
       } @else {
         <button
+          #partyBtn
           type="button"
           (click)="onStartParty()"
           tabindex="0"
-          class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 hover:bg-purple-600/60 border border-white/20 text-xs font-semibold text-white shrink-0 cursor-pointer focus:outline-none focus:ring-2 focus:ring-purple-400">
+          aria-label="Avvia Watch Party"
+          class="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 hover:bg-purple-600/60 border border-white/20 text-xs font-semibold text-white shrink-0 cursor-pointer focus:outline-none focus:ring-1 focus:ring-purple-400 focus:bg-purple-600 focus:scale-105 transition-all">
           <span class="pi pi-users text-xs"></span>
           <span>Start Party</span>
         </button>
