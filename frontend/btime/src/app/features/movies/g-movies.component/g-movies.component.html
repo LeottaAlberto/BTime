@@ -10,7 +10,7 @@
     <g-hero-banner/>
 
     <!-- Box Watch Party -->
-    <div class="flex flex-wrap items-center gap-3 px-4 py-3 rounded-xl bg-neutral-900/70 border border-neutral-800">
+    <div class="flex flex-wrap items-center gap-3 px-4 py-3 rounded-xl bg-neutral-900/70 border border-neutral-800 transition-colors focus-within:border-purple-500/80 focus-within:ring-1 focus-within:ring-purple-500/50">
       <span class="text-sm font-semibold text-white flex items-center gap-2">
         <i class="pi pi-users text-purple-400"></i>
         Join Party
@@ -18,14 +18,16 @@
       <input
         #partyCodeInput
         type="text"
+        tabindex="0"
         maxlength="10"
         placeholder="Room Code (es. AB12CD)"
         (keydown.enter)="joinWatchParty(partyCodeInput.value)"
-        class="px-3 py-1.5 rounded-lg bg-neutral-950 border border-neutral-700 text-sm text-white uppercase placeholder:normal-case focus:outline-none focus:border-purple-500" />
+        class="px-3 py-1.5 rounded-lg bg-neutral-950 border border-neutral-700 text-sm text-white uppercase placeholder:normal-case focus:outline-none focus:ring-1 focus:ring-purple-400 focus:border-purple-500 transition-all" />
       <button
         type="button"
+        tabindex="0"
         (click)="joinWatchParty(partyCodeInput.value)"
-        class="px-4 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-500 text-white text-sm font-semibold cursor-pointer">
+        class="px-4 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-400 focus:bg-purple-500 focus:scale-105 active:scale-95 text-white text-sm font-semibold cursor-pointer transition-all">
         Enter
       </button>
       @if (partyS.error(); as err) {
