@@ -1,4 +1,4 @@
-<aside class="flex flex-row md:flex-col items-center md:items-stretch justify-between w-full md:w-56 lg:w-64 2xl:w-72 md:min-w-56 lg:min-w-64 2xl:min-w-72 h-auto md:h-full border-b md:border-b-0 md:border-r border-neutral-800 p-2.5 sm:p-3 md:p-4 gap-2 md:gap-0 select-none shrink-0">
+<aside class="overflow-hidden flex flex-row md:flex-col items-center md:items-stretch justify-between w-full md:w-56 lg:w-64 2xl:w-72 md:min-w-56 lg:min-w-64 2xl:min-w-72 h-auto md:h-full border-b md:border-b-0 md:border-r border-neutral-800 p-2.5 sm:p-3 md:p-4 gap-2 md:gap-0 select-none shrink-0">
   <!-- Head: Brand & Logo -->
   <div
     tabindex="0"
@@ -26,9 +26,9 @@
   </div>
 
   <!-- Body: Navigation Items -->
-  <div class="flex-1 flex flex-row md:flex-col items-center md:items-stretch gap-1 overflow-x-auto md:overflow-x-visible md:overflow-y-auto py-1 md:py-3 px-1 md:px-0 min-w-0">
+  <div class="px-1 flex-1 flex flex-row md:flex-col items-center md:items-stretch gap-1 overflow-x-hidden md:overflow-x-hidden md:overflow-y-auto py-1 md:py-3 min-w-0">
     <div class="hidden md:block px-2 pb-1">
-      <span class="text-[10px] font-bold uppercase tracking-wider text-neutral-400">Navigazione</span>
+      <span class="text-[10px] font-bold uppercase tracking-wider text-neutral-400">Navigator</span>
     </div>
 
     @for (item of navItems(); track item.label) {
