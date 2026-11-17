@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.9.1](https://github.com/LeottaAlberto/BTime/compare/v1.9.0...v1.9.1) (2026-11-17)
+
+
+### Bug Fixes
+
+* enhance focus navigation for Watch Party button in custom player component ([5584d11](https://github.com/LeottaAlberto/BTime/commit/5584d11e323b1a7ab412e518a63d0e1edca89931))
+* enhance focus styles and accessibility for Watch Party input and button ([67cf822](https://github.com/LeottaAlberto/BTime/commit/67cf8220b92e7e22626d8124671e6e0bdf41603e))
+* improve focus handling for player and cards in dashboard component ([80e5de5](https://github.com/LeottaAlberto/BTime/commit/80e5de5463b28c07d3a6834074d4d1a21805b4b5))
+* update navbar styles and correct navigation label ([a522325](https://github.com/LeottaAlberto/BTime/commit/a522325504fab73681f91b9a4568cc29cd5a26b8))
+
 ## [1.9.0](https://github.com/LeottaAlberto/BTime/compare/v1.8.0...v1.9.0) (2026-11-12)
 
 
