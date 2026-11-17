@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.9.2](https://github.com/LeottaAlberto/BTime/compare/v1.9.1...v1.9.2) (2026-11-17)
+
+
+### Bug Fixes
+
+* update layout styles and improve scrolling behavior in dashboard component ([ac02d4e](https://github.com/LeottaAlberto/BTime/commit/ac02d4ef3efbb0cf5119d6f30ced46df6f374497))
+
 ## [1.9.1](https://github.com/LeottaAlberto/BTime/compare/v1.9.0...v1.9.1) (2026-11-17)
 
 
