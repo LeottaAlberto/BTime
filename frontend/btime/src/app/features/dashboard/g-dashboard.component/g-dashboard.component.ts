@@ -51,7 +51,7 @@ export class GDashboardComponent implements AfterViewInit, OnDestroy {
   private getFocusable(container: HTMLElement): HTMLElement[] {
     return Array.from(
       container.querySelectorAll<HTMLElement>(
-        'button:not([disabled]), [tabindex="0"], a[href], video[tabindex="0"]'
+        'button:not([disabled]), input:not([disabled]):not([type="hidden"]), select:not([disabled]), textarea:not([disabled]), [tabindex="0"], a[href], video[tabindex="0"]'
       )
     ).filter((el) => {
       const isVisible = el.offsetParent !== null || el.getClientRects().length > 0;
@@ -69,9 +69,16 @@ export class GDashboardComponent implements AfterViewInit, OnDestroy {
     const main = document.getElementById("app-main");
     if (!main) return;
 
-    // Preferisci focalizzare direttamente una card contenuto (film, serie, modulo, episodio, player) se presente
+    // Preferisci focalizzare direttamente il player (tasto Play/Pausa) o una card contenuto se presente
+    const preferredPlayer = main.querySelector<HTMLElement>('g-custom-player button[aria-label="Riproduci o metti in pausa"]');
+    if (preferredPlayer) {
+      this.pendingAutoFocus = false;
+      this.focusMainElement(preferredPlayer, main);
+      return;
+    }
+
     const preferredCard = main.querySelector<HTMLElement>(
-      'g-poster-card [tabindex="0"], g-resume-card [tabindex="0"], g-dash-card [tabindex="0"], g-media-detail [tabindex="0"][role="button"], g-watch-player button[tabindex="0"]'
+      'g-poster-card [tabindex="0"], g-resume-card [tabindex="0"], g-dash-card [tabindex="0"], g-media-detail [tabindex="0"][role="button"]'
     );
     if (preferredCard) {
       this.pendingAutoFocus = false;
@@ -130,15 +137,17 @@ export class GDashboardComponent implements AfterViewInit, OnDestroy {
 
     const active = document.activeElement as HTMLElement | null;
 
-    // Se l'utente sta digitando dentro l'input di ricerca:
+    // Se l'utente si trova dentro un input di testo (es. barra di ricerca o codice Watch Party):
     if (active instanceof HTMLInputElement) {
       if (isDown || isUp) {
+        // Freccia Su o Giù permette di uscire dall'input e navigare verso gli altri elementi
         active.blur();
-        const searchWrapper = active.closest<HTMLElement>('[tabindex="0"]');
-        if (searchWrapper) {
-          searchWrapper.focus();
+        const wrapper = active.closest<HTMLElement>('[tabindex="0"]');
+        if (wrapper && wrapper !== active) {
+          wrapper.focus();
         }
       } else {
+        // Freccia Sinistra / Destra all'interno dell'input sposta il cursore di testo (a meno che non sia all'estremità)
         return;
       }
     }
